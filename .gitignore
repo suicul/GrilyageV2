@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+build/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Uploads (runtime data)
+uploads/
+
+# Prisma
+apps/api/prisma/*.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Flutter (apps/mobile)
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins*
+apps/mobile/build/
+apps/mobile/ios/Pods/
+
+# Playwright
+playwright-report/
+test-results/
+
+# OMO internal
+.omo/drafts/

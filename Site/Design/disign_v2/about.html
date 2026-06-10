@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>О нас | Грильяж Gastro-House</title>
+  <style>
+    :root { --cream:#f6f1e7; --gold:#d6b06a; --text:#2f261f; --wood:#7b6147; --border:#eadfcf; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:radial-gradient(circle at top, #fbf6ee, #efe4d3 100%); color:var(--text); }
+    a { color:inherit; text-decoration:none; }
+    .page { width:min(100%,1500px); margin:0 auto; padding:12px 14px 24px; }
+    .header { position:sticky; top:10px; z-index:100; border-radius:28px; background:linear-gradient(180deg,rgba(24,17,12,.92),rgba(24,17,12,.78)); box-shadow:0 14px 30px rgba(0,0,0,.16); backdrop-filter:blur(14px); }
+    .header-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:8px 18px; color:#fff; }
+    .header-line { height:1px; background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.22), rgba(255,255,255,.04)); }
+    .brand { display:flex; align-items:center; gap:14px; min-width:200px; color:#fff; }
+    .brand img { width:78px; height:78px; object-fit:contain; }
+    .brand-title { font-size:17px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#e9d7a8; }
+    .brand-sub { margin-top:4px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+    .nav { display:flex; gap:34px; align-items:center; justify-content:center; flex:1; font-size:16px; font-weight:600; color:#fff; }
+    .nav a.active, .nav a:hover { color:var(--gold); }
+    .header-right { display:flex; align-items:center; gap:14px; color:#fff; min-width:250px; justify-content:flex-end; }
+    .divider { width:1px; height:34px; background:rgba(255,255,255,.2); }
+    .phone { font-size:17px; font-weight:600; white-space:nowrap; }
+    .circle-link { width:46px; height:46px; border-radius:999px; border:1.5px solid rgba(226,190,105,.86); background:rgba(22,15,10,.34); display:flex; align-items:center; justify-content:center; position:relative; }
+    .circle-link svg { width:22px; height:22px; stroke:#f0c975; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+    .cart-badge { position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 4px; font-size:10px; font-weight:700; background:var(--gold); color:var(--text); border-radius:999px; display:flex; align-items:center; justify-content:center; }
+    .hero { margin-top:18px; border-radius:30px; overflow:hidden; color:#fff; background:linear-gradient(125deg, rgba(18,12,8,.94), rgba(35,24,17,.74)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat; }
+    .hero-copy { padding:54px 34px 34px; max-width:760px; }
+    .hero-copy h1 { margin:10px 0 0; font-size:56px; line-height:1; }
+    .hero-copy p { margin:16px 0 0; font-size:18px; line-height:1.66; color:rgba(255,255,255,.82); }
+    .content { margin-top:24px; display:grid; gap:18px; }
+    .section { padding:24px; border-radius:28px; background:#fffdf8; border:1px solid var(--border); box-shadow:0 12px 30px rgba(47,38,31,.06); }
+    .section h2 { margin:0 0 12px; font-size:28px; }
+    .section p { margin:0; font-size:15px; line-height:1.7; color:var(--wood); }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .grid-2 { display:grid; grid-template-columns:1.05fr .95fr; gap:16px; }
+    .card { padding:18px; border-radius:22px; background:#fff; border:1px solid #efe2cf; }
+    .card h3 { margin:0 0 8px; font-size:18px; }
+    .card p, .card li { font-size:14px; line-height:1.6; color:var(--wood); }
+    .card ul { margin:0; padding-left:18px; }
+    .map { border-radius:22px; overflow:hidden; border:1px solid #eadcc8; min-height:320px; }
+    .map iframe { width:100%; height:100%; min-height:320px; border:0; display:block; }
+    .legal { display:grid; gap:12px; }
+    .legal .card { background:linear-gradient(180deg,#fffefb,#faf3e8); }
+    .note { margin-top:14px; padding:16px 18px; border-radius:20px; background:#fbf2e3; border:1px solid #eadbc4; font-size:13px; line-height:1.6; color:var(--wood); }
+    @media (max-width:1100px){ .grid-3,.grid-2{grid-template-columns:1fr 1fr;} .hero-copy h1{font-size:42px;} .nav{gap:18px;} }
+    @media (max-width:760px){ .page{padding:10px;} .header-inner{flex-direction:column; align-items:flex-start;} .nav{flex-wrap:wrap; gap:14px;} .header-right .phone,.divider{display:none;} .hero-copy{padding:32px 18px 24px;} .hero-copy h1{font-size:34px;} .hero-copy p{font-size:15px;} .grid-3,.grid-2{grid-template-columns:1fr;} .section{padding:18px;} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="grilyazh_mockup.html">
+          <img src="logo.png" srcset="logo.png 1x, logo@2x.png 2x" alt="Грильяж" />
+          <div><div class="brand-title">Грильяж</div><div class="brand-sub">Вкус Омска</div></div>
+        </a>
+        <nav class="nav">
+          <a href="menu.html">Меню</a>
+          <a class="active" href="about.html">О нас</a>
+          <a href="grilyazh_mockup.html#contacts">Контакты</a>
+          <a href="preorder.html">Предзаказ</a>
+        </nav>
+        <div class="header-right">
+          <div class="phone">+7 999 999 99 99</div>
+          <div class="divider"></div>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Поиск"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg></a>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Профиль"><svg viewBox="0 0 24 24"><path d="M20 21c0-3.3-3.6-6-8-6s-8 2.7-8 6"></path><circle cx="12" cy="8" r="4"></circle></svg></a>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Корзина"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 10h9l2-7H8"></path><circle cx="10" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle><circle cx="17" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle></svg><span class="cart-badge" id="cartBadge">0</span></a>
+        </div>
+      </div>
+      <div class="header-line"></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>О производстве Грильяж</h1>
+        <p>Грильяж Gastro-House — это кухня полного цикла, собственная пекарня и кондитерское направление. Мы делаем упор на понятный сервис, стабильное качество и удобный предзаказ с доставкой или самовывозом.</p>
+      </div>
+    </section>
+
+    <main class="content">
+      <section class="section">
+        <h2>Что важно о нас</h2>
+        <div class="grid-3">
+          <div class="card"><h3>Производство</h3><p>Ежедневная работа кухни, пекарни и кондитерского направления с контролем сборки и упаковки заказов.</p></div>
+          <div class="card"><h3>Сервис</h3><p>Самовывоз, доставка, предзаказ, понятные сроки готовности и быстрый контакт с гостем по каждому заказу.</p></div>
+          <div class="card"><h3>Фокус</h3><p>Блюда на каждый день, выпечка, десерты, бизнес-ланчи и позиции для регулярного заказа домой или в офис.</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Производство и вакансии</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Как организована работа</h3>
+            <ul>
+              <li>Кухня полного цикла с ежедневной подготовкой и сборкой блюд.</li>
+              <li>Отдельные процессы для горячего цеха, выпечки и десертов.</li>
+              <li>Контроль комплектности заказа перед выдачей и доставкой.</li>
+              <li>Соблюдение температурного режима и аккуратной упаковки.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Кого мы ищем</h3>
+            <ul>
+              <li>Повар горячего цеха</li>
+              <li>Пекарь / кондитер</li>
+              <li>Оператор заказов / администратор</li>
+            </ul>
+            <p>По вакансиям: <strong>+7 (3812) 90-00-00</strong>, <strong>info@grilyazh-omsk.ru</strong></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Доставка, оплата и карта</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Условия</h3>
+            <ul>
+              <li>Самовывоз доступен ежедневно в часы работы.</li>
+              <li>Доставка выполняется по зоне обслуживания в Омске.</li>
+              <li>Оплата: онлайн, картой при получении, наличными при доставке.</li>
+              <li>Адрес точки выдачи: Омск, Харьковская, 7.</li>
+              <li>Режим работы: Пн–Пт 08:00–21:00, Сб–Вс 09:00–21:00.</li>
+            </ul>
+          </div>
+          <div class="map">
+            <iframe title="Яндекс Карта: Грильяж" src="https://yandex.com/map-widget/v1/?ll=73.415716%2C54.946418&mode=poi&poi%5Bpoint%5D=73.414391%2C54.946248&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D19567134820&z=18" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Юридическая информация</h2>
+        <div class="legal">
+          <div class="card"><h3>Политика конфиденциальности</h3><p>При оформлении заказа могут обрабатываться имя, телефон, email, адрес доставки и комментарии, необходимые для исполнения заказа и обратной связи.</p></div>
+          <div class="card"><h3>Согласие на обработку персональных данных</h3><p>Отправляя формы на сайте, пользователь подтверждает согласие на обработку персональных данных в объёме, необходимом для приёма, подтверждения и сопровождения заказа.</p></div>
+          <div class="card"><h3>Условия заказа и возврата</h3><p>Состав заказа, стоимость, сроки готовности и формат получения уточняются при подтверждении. Для пищевой продукции действуют ограничения возврата по действующим нормам.</p></div>
+          <div class="card"><h3>Реквизиты</h3><p>В боевой версии сюда добавляются фактические реквизиты организации: наименование, ИНН, ОГРН/ОГРНИП, юридический адрес и email для официальных обращений.</p></div>
+        </div>
+        <div class="note">Юридический блок сейчас сделан как корректная структура для макета. Перед публикацией на реальном сайте его нужно заполнить фактическими реквизитами и утверждёнными текстами документов.</div>
+      </section>
+    </main>
+  </div>
+  <script>
+    try{
+      const cart = JSON.parse(localStorage.getItem('grilyazh-cart') || '[]');
+      document.getElementById('cartBadge').textContent = String(cart.reduce((sum,item)=>sum + item.qty,0));
+    }catch(error){}
+  </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+// Грильяж — Prisma schema
+// Денежные значения — INTEGER КОПЕЙКИ (никаких float).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enums ---
+
+enum DeliveryMode {
+  DELIVERY
+  PICKUP
+}
+
+enum PaymentMethod {
+  CASH
+  CARD_ON_DELIVERY
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  COOKING
+  DELIVERING
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+}
+
+enum StaffRole {
+  ADMIN
+  OPERATOR
+}
+
+enum EmailTokenType {
+  VERIFY
+  RESET
+}
+
+// --- Users (clients) ---
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  phone           String?
+  name            String
+  passwordHash    String
+  emailVerifiedAt DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  emailTokens   EmailToken[]
+  refreshTokens RefreshToken[]
+}
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String         @unique
+  type      EmailTokenType
+  expiresAt DateTime
+  createdAt DateTime       @default(now())
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id           String     @id @default(cuid())
+  userId       String?
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffUserId  String?
+  staffUser    StaffUser? @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+  tokenHash    String     @unique
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime   @default(now())
+
+  @@index([userId])
+  @@index([staffUserId])
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String?
+  street    String
+  house     String
+  apartment String?
+  comment   String?
+
+  @@index([userId])
+}
+
+// --- Staff (CRM) ---
+
+model StaffUser {
+  id           String    @id @default(cuid())
+  login        String    @unique
+  name         String
+  passwordHash String
+  role         StaffRole
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  refreshTokens RefreshToken[]
+  statusLogs    OrderStatusLog[]
+}
+
+// --- Catalog ---
+
+model Category {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  sortOrder Int     @default(0)
+  imageUrl  String?
+  active    Boolean @default(true)
+
+  subcategories Subcategory[]
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       String
+  slug       String
+  sortOrder  Int      @default(0)
+  active     Boolean  @default(true)
+
+  products Product[]
+
+  @@unique([categoryId, slug])
+}
+
+model Product {
+  id            String      @id @default(cuid())
+  subcategoryId String
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  name          String
+  slug          String      @unique
+  description   String      @default("")
+  price         Int
+  weightGrams   Int
+  kcal          Int
+  protein       Int
+  fat           Int
+  carbs         Int
+  imageUrl      String?
+  isNew         Boolean     @default(false)
+  active        Boolean     @default(true)
+  sortOrder     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([subcategoryId])
+}
+
+model Promotion {
+  id              String   @id @default(cuid())
+  title           String
+  description     String   @default("")
+  imageUrl        String?
+  discountPercent Int?
+  startsAt        DateTime
+  endsAt          DateTime
+  active          Boolean  @default(true)
+  productIds      String[]
+}
+
+// --- Orders ---
+
+model Order {
+  id             String        @id @default(cuid())
+  number         Int           @unique @default(autoincrement())
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status         OrderStatus   @default(NEW)
+  deliveryMode   DeliveryMode
+  paymentMethod  PaymentMethod
+  customerName   String
+  customerPhone  String
+  customerEmail  String?
+  address        String?
+  desiredTime    String?
+  comment        String?
+  itemsTotal     Int
+  deliveryCost   Int
+  total          Int
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  items      OrderItem[]
+  statusLogs OrderStatusLog[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id            String @id @default(cuid())
+  orderId       String
+  order         Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  nameSnapshot  String
+  priceSnapshot Int
+  qty           Int
+
+  @@index([orderId])
+}
+
+model OrderStatusLog {
+  id          String      @id @default(cuid())
+  orderId     String
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status      OrderStatus
+  staffUserId String?
+  staffUser   StaffUser?  @relation(fields: [staffUserId], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
+
+  @@index([orderId])
+}

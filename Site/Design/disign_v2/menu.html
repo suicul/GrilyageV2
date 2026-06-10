@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Меню | Грильяж Gastro-House</title>
+  <style>
+    :root { --cream:#f6f1e7; --gold:#d6b06a; --text:#2f261f; --wood:#7b6147; --border:#eadfcf; --dark:#20170f; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:radial-gradient(circle at top, #fbf5ea, #f0e5d3 100%); color:var(--text); }
+    a { color:inherit; text-decoration:none; }
+    .page { width:min(100%, 1500px); margin:0 auto; padding:12px 14px 24px; }
+    .hero { position:relative; min-height:300px; border-radius:30px; overflow:hidden; background:linear-gradient(120deg, rgba(20,14,10,.95), rgba(44,31,22,.72)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat; color:#fff; }
+    .header { position:sticky; top:10px; z-index:100; margin-bottom:18px; border-radius:28px; background:linear-gradient(180deg,rgba(24,17,12,.92),rgba(24,17,12,.78)); box-shadow:0 14px 30px rgba(0,0,0,.16); backdrop-filter:blur(14px); }
+    .header-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:8px 18px; }
+    .header-line { height:1px; background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.22), rgba(255,255,255,.04)); }
+    .brand { display:flex; align-items:center; gap:14px; min-width:200px; color:#fff; }
+    .brand img { width:78px; height:78px; object-fit:contain; }
+    .brand-title { font-size:17px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#e9d7a8; }
+    .brand-sub { margin-top:4px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+    .nav { display:flex; gap:34px; align-items:center; justify-content:center; flex:1; font-size:16px; font-weight:600; color:#fff; }
+    .nav a.active, .nav a:hover { color:var(--gold); }
+    .header-right { display:flex; align-items:center; gap:14px; color:#fff; min-width:250px; justify-content:flex-end; }
+    .divider { width:1px; height:34px; background:rgba(255,255,255,.2); }
+    .phone { font-size:17px; font-weight:600; white-space:nowrap; }
+    .circle-link { width:46px; height:46px; border-radius:999px; border:1.5px solid rgba(226,190,105,.86); background:rgba(22,15,10,.34); display:flex; align-items:center; justify-content:center; position:relative; }
+    .circle-link svg { width:22px; height:22px; stroke:#f0c975; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+    .cart-badge { position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 4px; font-size:10px; font-weight:700; background:var(--gold); color:var(--text); border-radius:999px; display:flex; align-items:center; justify-content:center; }
+    .hero-copy { padding:56px 32px 30px; max-width:760px; }
+    .hero-copy h1 { margin:10px 0 0; font-size:58px; line-height:1; }
+    .hero-copy p { margin:16px 0 0; font-size:18px; line-height:1.65; color:rgba(255,255,255,.82); }
+    .catalog { margin-top:26px; padding:28px; border-radius:30px; background:linear-gradient(180deg, #f8f1e5, #f5ebdc); box-shadow:0 16px 40px rgba(47,38,31,.08); }
+    .category-row, .subcategory-row { display:flex; flex-wrap:wrap; gap:12px; }
+    .subcategory-row { margin-top:14px; }
+    .category-btn, .subcategory-btn { border:1px solid #e7d7bf; background:#fffaf2; color:var(--wood); border-radius:999px; padding:12px 18px; font-size:14px; font-weight:700; cursor:pointer; }
+    .category-btn.active, .subcategory-btn.active { background:var(--text); color:#fff; border-color:var(--text); }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:16px; margin-top:22px; }
+    .section-title { font-size:34px; font-weight:700; }
+    .section-note { font-size:14px; color:var(--wood); }
+    .grid { margin-top:20px; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:18px; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:26px; overflow:hidden; box-shadow:0 12px 28px rgba(47,38,31,.08); }
+    .card img { width:100%; height:210px; object-fit:cover; display:block; }
+    .card-body { padding:16px; }
+    .card-top { display:flex; justify-content:space-between; gap:14px; align-items:start; }
+    .card-title { font-size:18px; font-weight:700; }
+    .price { font-size:18px; font-weight:800; white-space:nowrap; }
+    .meta { margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
+    .pill { padding:5px 9px; border-radius:999px; background:#faf5ea; border:1px solid #efe1ca; font-size:12px; color:var(--wood); }
+    .desc { margin-top:10px; font-size:14px; line-height:1.55; color:var(--wood); }
+    .card-bottom { margin-top:14px; display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .subcat-tag { font-size:12px; color:#9b7d56; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .buy-btn { border:0; border-radius:999px; background:var(--text); color:#fff; padding:10px 16px; font-size:14px; font-weight:700; cursor:pointer; }
+    .buy-btn:hover { background:#3d332b; }
+    .empty { margin-top:24px; padding:24px; border-radius:22px; background:#fffaf2; border:1px dashed #dcc9a8; text-align:center; color:var(--wood); }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(14px); background:rgba(47,38,31,.96); color:#fff; padding:12px 16px; border-radius:999px; opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; box-shadow:0 12px 26px rgba(0,0,0,.2); }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    @media (max-width:1100px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr));} .hero-copy h1{font-size:44px;} .nav{gap:18px;} }
+    @media (max-width:760px){ .page{padding:10px;} .header-inner{flex-direction:column; align-items:flex-start;} .nav{flex-wrap:wrap; gap:14px;} .header-right .phone,.divider{display:none;} .grid{grid-template-columns:1fr;} .catalog{padding:18px;} .hero-copy{padding:32px 18px 24px;} .hero-copy h1{font-size:36px;} .hero-copy p{font-size:15px;} .section-head{flex-direction:column; align-items:flex-start;} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header-inner">
+        <a class="brand" href="grilyazh_mockup.html">
+          <img src="logo.png" srcset="logo.png 1x, logo@2x.png 2x" alt="Грильяж" />
+          <div><div class="brand-title">Грильяж</div><div class="brand-sub">Вкус Омска</div></div>
+        </a>
+        <nav class="nav">
+          <a class="active" href="menu.html">Меню</a>
+          <a href="about.html">О нас</a>
+          <a href="grilyazh_mockup.html#contacts">Контакты</a>
+          <a href="preorder.html">Предзаказ</a>
+        </nav>
+        <div class="header-right">
+          <div class="phone">+7 999 999 99 99</div>
+          <div class="divider"></div>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Поиск"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg></a>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Профиль"><svg viewBox="0 0 24 24"><path d="M20 21c0-3.3-3.6-6-8-6s-8 2.7-8 6"></path><circle cx="12" cy="8" r="4"></circle></svg></a>
+          <a class="circle-link" href="grilyazh_mockup.html" aria-label="Корзина"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 10h9l2-7H8"></path><circle cx="10" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle><circle cx="17" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle></svg><span class="cart-badge" id="cartBadge">0</span></a>
+        </div>
+      </div>
+      <div class="header-line"></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Расширенное меню</h1>
+        <p>На этой странице каталог глубже, чем на главной: больше подкатегорий, больше блюд и отдельные сеты по дням для бизнес-ланча. Добавление в корзину работает так же, как и на главной странице.</p>
+      </div>
+    </section>
+
+    <main class="catalog">
+      <div class="category-row" id="categoryRow"></div>
+      <div class="subcategory-row" id="subcategoryRow"></div>
+      <div class="section-head">
+        <div>
+          <div class="section-title" id="sectionTitle">Новинки</div>
+          <div class="section-note" id="sectionNote">Новые блюда из разных категорий</div>
+        </div>
+      </div>
+      <div class="grid" id="menuGrid"></div>
+      <div class="empty" id="emptyState" hidden>В этой подкатегории пока нет позиций.</div>
+    </main>
+  </div>
+  <div class="toast" id="toast">Добавлено</div>
+  <script>
+    const CART_STORAGE_KEY = 'grilyazh-cart';
+    const catalog = {
+      'Новинки': {
+        note: 'Новые блюда из разных категорий',
+        subcategories: {
+          'Все новинки': [
+            {category:'Кулинария',name:'Паста с курицей',price:'410 ₽',weight:'290 г',kcal:'360',protein:'21',fat:'11',carbs:'34',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?auto=format&fit=crop&w=900&q=80'},
+            {category:'Пекарня',name:'Пирог с мясом',price:'420 ₽',weight:'320 г',kcal:'430',protein:'18',fat:'24',carbs:'35',desc:'Румяная выпечка',image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Торт медовый',price:'980 ₽',weight:'980 г',kcal:'426',protein:'6',fat:'25',carbs:'46',desc:'Свежий торт дня',image:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=900&q=80'},
+            {category:'Бизнес-ланч',name:'Ланч среды',price:'460 ₽',weight:'440 г',kcal:'488',protein:'24',fat:'16',carbs:'58',desc:'Комплекс дня',image:'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80'}
+          ]
+        }
+      },
+      'Кулинария': {
+        note: 'Кухня полного цикла на каждый день',
+        subcategories: {
+          'Горячая кухня': [
+            {category:'Кулинария',name:'Курица с овощами',price:'390 ₽',weight:'280 г',kcal:'320',protein:'24',fat:'14',carbs:'18',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Запечённое мясо',price:'450 ₽',weight:'300 г',kcal:'410',protein:'28',fat:'22',carbs:'16',desc:'Сытное блюдо',image:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Жаркое по-домашнему',price:'440 ₽',weight:'310 г',kcal:'398',protein:'25',fat:'19',carbs:'31',desc:'Тёплое блюдо',image:'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Холодная кухня': [
+            {category:'Кулинария',name:'Салат с курицей',price:'280 ₽',weight:'180 г',kcal:'210',protein:'15',fat:'9',carbs:'16',desc:'Холодная позиция',image:'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Оливье домашний',price:'240 ₽',weight:'200 г',kcal:'260',protein:'8',fat:'16',carbs:'20',desc:'Классический салат',image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Закуски': [
+            {category:'Кулинария',name:'Брускетта с томатами',price:'210 ₽',weight:'140 г',kcal:'190',protein:'5',fat:'8',carbs:'24',desc:'Лёгкая закуска',image:'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Куриные наггетсы',price:'260 ₽',weight:'170 г',kcal:'280',protein:'14',fat:'17',carbs:'18',desc:'Хрустящая закуска',image:'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Полуфабрикаты': [
+            {category:'Кулинария',name:'Котлеты домашние',price:'390 ₽',weight:'500 г',kcal:'420',protein:'23',fat:'28',carbs:'12',desc:'Полуфабрикат для дома',image:'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Пельмени ручной лепки',price:'480 ₽',weight:'700 г',kcal:'340',protein:'16',fat:'10',carbs:'42',desc:'Замороженная позиция',image:'https://images.unsplash.com/photo-1603150232550-0716b2dce248?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Напитки': [
+            {category:'Кулинария',name:'Морс ягодный',price:'120 ₽',weight:'330 мл',kcal:'90',protein:'0',fat:'0',carbs:'22',desc:'Домашний напиток',image:'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кулинария',name:'Лимонад цитрус',price:'150 ₽',weight:'400 мл',kcal:'110',protein:'0',fat:'0',carbs:'26',desc:'Освежающий напиток',image:'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=80'}
+          ]
+        }
+      },
+      'Пекарня': {
+        note: 'Пироги, хлеб и свежая выпечка',
+        subcategories: {
+          'Сдобные пироги': [
+            {category:'Пекарня',name:'Пирог с вишней',price:'340 ₽',weight:'420 г',kcal:'360',protein:'5',fat:'14',carbs:'53',desc:'Сдобный пирог',image:'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?auto=format&fit=crop&w=900&q=80'},
+            {category:'Пекарня',name:'Пирог с яблоком',price:'320 ₽',weight:'420 г',kcal:'348',protein:'4',fat:'13',carbs:'52',desc:'Сдобный пирог',image:'https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Слоёные пироги': [
+            {category:'Пекарня',name:'Слоёный пирог с мясом',price:'420 ₽',weight:'320 г',kcal:'430',protein:'18',fat:'24',carbs:'35',desc:'Румяная выпечка',image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Пирожки': [
+            {category:'Пекарня',name:'Пирожок с картофелем',price:'120 ₽',weight:'90 г',kcal:'220',protein:'4',fat:'8',carbs:'32',desc:'Домашняя выпечка',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80'},
+            {category:'Пекарня',name:'Пирожок с капустой',price:'120 ₽',weight:'92 г',kcal:'214',protein:'4',fat:'7',carbs:'31',desc:'Печь ежедневно',image:'https://images.unsplash.com/photo-1587241321921-91a834d6d191?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Слойка': [
+            {category:'Пекарня',name:'Слойка с вишней',price:'160 ₽',weight:'110 г',kcal:'290',protein:'4',fat:'14',carbs:'37',desc:'Свежая выпечка',image:'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=900&q=80'},
+            {category:'Пекарня',name:'Слойка с сыром',price:'170 ₽',weight:'115 г',kcal:'305',protein:'8',fat:'15',carbs:'34',desc:'Слоёная выпечка',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Булочки': [
+            {category:'Пекарня',name:'Булочка с корицей',price:'140 ₽',weight:'95 г',kcal:'265',protein:'5',fat:'9',carbs:'41',desc:'Сладкая выпечка',image:'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Хлеб': [
+            {category:'Пекарня',name:'Хлеб деревенский',price:'95 ₽',weight:'380 г',kcal:'230',protein:'7',fat:'2',carbs:'44',desc:'Свежий хлеб',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80'},
+            {category:'Пекарня',name:'Багет',price:'110 ₽',weight:'280 г',kcal:'240',protein:'8',fat:'2',carbs:'47',desc:'Хрустящая корочка',image:'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Тесто': [
+            {category:'Пекарня',name:'Тесто дрожжевое',price:'160 ₽',weight:'500 г',kcal:'250',protein:'7',fat:'5',carbs:'42',desc:'Для домашней выпечки',image:'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=900&q=80'}
+          ]
+        }
+      },
+      'Кондитерская': {
+        note: 'Торты, пирожные и десерты',
+        subcategories: {
+          'Торты': [
+            {category:'Кондитерская',name:'Торт медовый',price:'980 ₽',weight:'980 г',kcal:'426',protein:'6',fat:'25',carbs:'46',desc:'Фирменный торт',image:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Торт шоколадный',price:'1040 ₽',weight:'1000 г',kcal:'442',protein:'7',fat:'26',carbs:'48',desc:'Насыщенный шоколад',image:'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Пирожные': [
+            {category:'Кондитерская',name:'Эклер',price:'170 ₽',weight:'90 г',kcal:'280',protein:'5',fat:'16',carbs:'29',desc:'Заварное пирожное',image:'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Пирожное картошка',price:'150 ₽',weight:'85 г',kcal:'265',protein:'4',fat:'13',carbs:'30',desc:'Классический десерт',image:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Печенье': [
+            {category:'Кондитерская',name:'Печенье овсяное',price:'120 ₽',weight:'120 г',kcal:'240',protein:'5',fat:'8',carbs:'36',desc:'Домашнее печенье',image:'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Печенье с шоколадом',price:'140 ₽',weight:'120 г',kcal:'290',protein:'4',fat:'12',carbs:'39',desc:'Хрустящее печенье',image:'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=80'}
+          ],
+          'Десерты': [
+            {category:'Кондитерская',name:'Чизкейк',price:'280 ₽',weight:'140 г',kcal:'330',protein:'6',fat:'20',carbs:'31',desc:'Нежный десерт',image:'https://images.unsplash.com/photo-1567171466295-4afa63d45416?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Макарон',price:'160 ₽',weight:'70 г',kcal:'240',protein:'4',fat:'10',carbs:'33',desc:'Французский десерт',image:'https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=900&q=80'},
+            {category:'Кондитерская',name:'Тарталетка с ягодами',price:'220 ₽',weight:'115 г',kcal:'265',protein:'3',fat:'12',carbs:'35',desc:'Ягодный десерт',image:'https://images.unsplash.com/photo-1464306076886-debede6f9bb8?auto=format&fit=crop&w=900&q=80'}
+          ]
+        }
+      },
+      'Бизнес-ланч': {
+        note: 'Сеты дня с понедельника по воскресенье',
+        subcategories: {
+          'Понедельник': [{category:'Бизнес-ланч',name:'Ланч понедельника',price:'420 ₽',weight:'430 г',kcal:'450',protein:'22',fat:'14',carbs:'58',desc:'Суп, горячее и напиток',image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80'}],
+          'Вторник': [{category:'Бизнес-ланч',name:'Ланч вторника',price:'430 ₽',weight:'430 г',kcal:'458',protein:'23',fat:'14',carbs:'59',desc:'Салат, горячее и гарнир',image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80'}],
+          'Среда': [{category:'Бизнес-ланч',name:'Ланч среды',price:'460 ₽',weight:'440 г',kcal:'488',protein:'24',fat:'16',carbs:'58',desc:'Комплекс дня',image:'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80'}],
+          'Четверг': [{category:'Бизнес-ланч',name:'Ланч четверга',price:'470 ₽',weight:'450 г',kcal:'500',protein:'25',fat:'17',carbs:'60',desc:'Полный обед',image:'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80'}],
+          'Пятница': [{category:'Бизнес-ланч',name:'Ланч пятницы',price:'450 ₽',weight:'430 г',kcal:'470',protein:'23',fat:'15',carbs:'59',desc:'Горячее + салат',image:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80'}],
+          'Суббота': [{category:'Бизнес-ланч',name:'Ланч субботы',price:'480 ₽',weight:'450 г',kcal:'510',protein:'25',fat:'18',carbs:'61',desc:'Сет выходного дня',image:'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80'}],
+          'Воскресенье': [{category:'Бизнес-ланч',name:'Ланч воскресенья',price:'490 ₽',weight:'460 г',kcal:'520',protein:'26',fat:'18',carbs:'63',desc:'Семейный обед',image:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80'}]
+        }
+      }
+    };
+
+    let activeCategory = 'Новинки';
+    let activeSubcategory = 'Все новинки';
+    const categoryRow = document.getElementById('categoryRow');
+    const subcategoryRow = document.getElementById('subcategoryRow');
+    const sectionTitle = document.getElementById('sectionTitle');
+    const sectionNote = document.getElementById('sectionNote');
+    const menuGrid = document.getElementById('menuGrid');
+    const emptyState = document.getElementById('emptyState');
+    const toast = document.getElementById('toast');
+    const cartBadge = document.getElementById('cartBadge');
+    let toastTimer = null;
+
+    function loadCart(){
+      try{ return JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]'); }catch(error){ return []; }
+    }
+    function saveCart(cart){ try{ localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); }catch(error){} }
+    function updateCartBadge(){
+      const cart = loadCart();
+      cartBadge.textContent = String(cart.reduce((sum,item)=>sum + item.qty,0));
+    }
+    function addToCart(item){
+      const cart = loadCart();
+      const existing = cart.find(function(cartItem){ return cartItem.name === item.name; });
+      if(existing) existing.qty += 1;
+      else cart.push(Object.assign({}, item, { qty: 1 }));
+      saveCart(cart);
+      updateCartBadge();
+      showToast('Добавлено: ' + item.name);
+    }
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 1500);
+    }
+    function renderCategories(){
+      categoryRow.innerHTML = Object.keys(catalog).map(function(name){
+        return '<button class="category-btn ' + (name === activeCategory ? 'active' : '') + '" type="button" data-category="' + name + '">' + name + '</button>';
+      }).join('');
+    }
+    function renderSubcategories(){
+      const subcategories = Object.keys(catalog[activeCategory].subcategories);
+      if(!subcategories.includes(activeSubcategory)) activeSubcategory = subcategories[0];
+      subcategoryRow.innerHTML = subcategories.map(function(name){
+        return '<button class="subcategory-btn ' + (name === activeSubcategory ? 'active' : '') + '" type="button" data-subcategory="' + name + '">' + name + '</button>';
+      }).join('');
+    }
+    function cardHTML(item){
+      return '<article class="card"><img src="' + item.image + '" alt="' + item.name + '"><div class="card-body"><div class="card-top"><div class="card-title">' + item.name + '</div><div class="price">' + item.price + '</div></div><div class="meta"><span class="pill">' + item.weight + '</span><span class="pill">К ' + item.kcal + '</span><span class="pill">Б ' + item.protein + '</span><span class="pill">Ж ' + item.fat + '</span><span class="pill">У ' + item.carbs + '</span></div><div class="desc">' + item.desc + '</div><div class="card-bottom"><span class="subcat-tag">' + item.category + '</span><button class="buy-btn" type="button" data-buy="' + item.name + '">В корзину</button></div></div></article>';
+    }
+    function getActiveItems(){ return catalog[activeCategory].subcategories[activeSubcategory] || []; }
+    function renderGrid(){
+      const items = getActiveItems();
+      sectionTitle.textContent = activeCategory;
+      sectionNote.textContent = activeSubcategory + ' — ' + catalog[activeCategory].note;
+      menuGrid.innerHTML = items.map(cardHTML).join('');
+      menuGrid.hidden = items.length === 0;
+      emptyState.hidden = items.length > 0;
+    }
+    function renderAll(){ renderCategories(); renderSubcategories(); renderGrid(); updateCartBadge(); }
+    document.addEventListener('click', function(event){
+      const categoryBtn = event.target.closest('[data-category]');
+      if(categoryBtn){ activeCategory = categoryBtn.getAttribute('data-category'); activeSubcategory = Object.keys(catalog[activeCategory].subcategories)[0]; renderAll(); return; }
+      const subcategoryBtn = event.target.closest('[data-subcategory]');
+      if(subcategoryBtn){ activeSubcategory = subcategoryBtn.getAttribute('data-subcategory'); renderAll(); return; }
+      const buyBtn = event.target.closest('[data-buy]');
+      if(buyBtn){
+        const item = getActiveItems().find(function(product){ return product.name === buyBtn.getAttribute('data-buy'); });
+        if(item) addToCart(item);
+      }
+    });
+    renderAll();
+  </script>
+</body>
+</html>

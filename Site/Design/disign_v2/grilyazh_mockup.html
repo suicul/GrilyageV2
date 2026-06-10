@@ -1,0 +1,1171 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grilyazh Gastro-House</title>
+  <style>
+    :root { --cream:#f6f1e7; --gold:#d6b06a; --wood:#7b6147; --text:#2f261f; --border:#eadfcf; --footer:#2f261f; --vk:#4c75a3; --tg:#229ed9; --max:#8e8e93; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; overflow-x:hidden; }
+    body { margin:0; overflow-x:hidden; font-family:Inter,Arial,sans-serif; background:var(--cream); color:var(--text); }
+    a { color:inherit; text-decoration:none; }
+    .page { position:relative; width:min(100vw, 1500px); max-width:1500px; margin:0 auto; padding:10px 14px 0; }
+    .hero { position:relative; z-index:20; min-height:calc(100vh - 20px); border-radius:28px; overflow:hidden; background:#20170f; isolation:isolate; }
+    .hero-media { position:absolute; inset:0; z-index:0; }
+    .hero-slide { position:absolute; inset:0; opacity:0; transform:scale(1.16); transition: opacity .7s ease, transform 1.2s ease; background-position:center center; background-size:cover; background-repeat:no-repeat; }
+    .hero-slide::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(18,12,8,.7) 0%,rgba(18,12,8,.38) 42%,rgba(18,12,8,.18) 100%), linear-gradient(180deg,rgba(0,0,0,.14),rgba(0,0,0,.08)); }
+    .hero-slide.active { opacity:1; transform:scale(1.09); }
+    .hero-controls { position:absolute; right:22px; bottom:24px; z-index:4; display:flex; align-items:center; gap:12px; }
+    .hero-nav { width:48px; height:48px; border:1px solid rgba(255,237,200,.32); border-radius:999px; background:rgba(28,20,14,.34); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease; }
+    .hero-nav:hover { transform:translateY(-2px); background:rgba(52,37,24,.52); border-color:rgba(255,223,153,.65); box-shadow:0 12px 24px rgba(0,0,0,.2), 0 0 18px rgba(214,176,106,.16); }
+    .hero-nav:active { transform:translateY(0) scale(.98); }
+    .hero-dots { display:flex; align-items:center; gap:8px; padding:0 4px; }
+    .hero-dot { width:10px; height:10px; border-radius:999px; border:0; background:rgba(255,255,255,.36); cursor:pointer; transition: width .24s ease, background .24s ease, transform .24s ease; }
+    .hero-dot.active { width:28px; background:var(--gold); }
+    .hero-dot:hover { transform:scale(1.08); background:rgba(255,255,255,.72); }
+    .header { position:fixed; top:10px; left:50%; transform:translateX(-50%); width:calc(100% - 28px); max-width:1472px; z-index:1000; padding:2px 18px 2px; color:#fff; border-radius:28px; background:linear-gradient(180deg,rgba(20,14,10,.08),rgba(20,14,10,.02)); backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); transition: background .28s ease, box-shadow .28s ease, backdrop-filter .28s ease, border-color .28s ease; }
+    .header.is-sticky { background:linear-gradient(180deg,rgba(24,17,12,.9),rgba(24,17,12,.76)); box-shadow:0 14px 28px rgba(0,0,0,.18); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .header-line { height:1px; margin-top:2px; background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.24), rgba(255,255,255,.04)); }
+    .header-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .brand { display:flex; align-items:center; gap:14px; min-width:180px; perspective:1600px; cursor:pointer; user-select:none; }
+    .brand:hover .brand-badge { transform: translateY(-2px) scale(1.04); filter: drop-shadow(0 14px 28px rgba(0,0,0,.2)) drop-shadow(0 0 24px rgba(238,192,88,.24)) drop-shadow(0 0 42px rgba(255,220,138,.14)); }
+    .brand:hover .brand-badge img { transform: scale(1.02); filter: brightness(1.075) saturate(1.05); }
+    .brand-badge { position:relative; width:88px; height:88px; padding:0; overflow:visible; border-radius:999px; border:0; background:transparent; color:#e4c97c; display:flex; align-items:center; justify-content:center; font-size:11px; transform-style:preserve-3d; transform-origin:50% 50%; will-change:transform,filter; transition: transform .38s ease, filter .38s ease; animation: logoFloat 3.6s ease-in-out infinite; }
+    .brand-badge img { width:100%; height:100%; object-fit:contain; object-position:center; display:block; image-rendering:auto; filter:none; transform: translateY(4px); transition: transform .28s ease, filter .28s ease; }
+    .brand-badge::before { content:''; position:absolute; inset:7px; border-radius:50%; background:radial-gradient(circle at 28% 26%, rgba(255,248,227,.28), rgba(255,240,205,0) 34%, rgba(255,240,205,0) 62%, rgba(201,154,75,.16)); opacity:.38; pointer-events:none; transition: opacity .36s ease, transform .36s ease; }
+    .brand-badge::after { content:''; position:absolute; inset:10px; border-radius:50%; background:linear-gradient(130deg, rgba(255,255,255,.34), rgba(255,255,255,0) 28%, rgba(255,255,255,0) 68%, rgba(255,226,150,.22)); mix-blend-mode:screen; opacity:.4; pointer-events:none; transition: opacity .36s ease, transform .36s ease; }
+    .brand:hover .brand-badge::before { opacity:.56; transform: scale(1.018); }
+    .brand:hover .brand-badge::after { opacity:.74; transform: translateX(4px); }
+    .brand:hover .brand-badge img { transform: translateY(4px) scale(1.02); filter: brightness(1.075) saturate(1.05); }
+    .brand.is-pressed .brand-badge { transform: translateY(-1px) scale(1.045); filter: drop-shadow(0 16px 30px rgba(0,0,0,.22)) drop-shadow(0 0 28px rgba(255,211,112,.34)) drop-shadow(0 0 52px rgba(255,229,160,.2)); }
+    .brand.is-pressed .brand-badge::before { opacity:.68; transform: scale(1.03); }
+    .brand.is-pressed .brand-badge::after { opacity:.92; transform: translateX(6px) scale(1.03); }
+    .brand.is-pressed .brand-badge img { transform: translateY(4px) scale(1.025); filter: brightness(1.14) saturate(1.08); }
+    @keyframes logoFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.01); } }
+    .brand-title { font-size:17px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#e9d7a8; }
+    .brand-sub { margin-top:4px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+    .nav { display:flex; gap:38px; padding-top:0; font-size:16px; font-weight:600; align-items:center; justify-content:center; flex:1; }
+    .nav a, .phone { transition: color .2s ease, text-shadow .2s ease, opacity .2s ease; }
+    .nav a:hover, .phone:hover { color: var(--gold); text-shadow: 0 0 14px rgba(214,176,106,.45); }
+    .header-right { display:flex; align-items:center; justify-content:flex-end; gap:14px; min-width:320px; font-size:16px; }
+    .divider { width:1px; height:34px; background:rgba(255,255,255,.2); } .phone { white-space: nowrap; font-size: 17px; font-weight: 600; letter-spacing: .01em; }
+    .circle-btn { width:46px; height:46px; border-radius:999px; border:1.5px solid rgba(226,190,105,.86); color:var(--gold); background:rgba(22,15,10,.34); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; box-shadow:0 8px 20px rgba(0,0,0,.18), inset 0 0 0 1px rgba(255,243,212,.06); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease, filter .22s ease; }
+    .circle-btn:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 0 1px rgba(214,176,106,.45), 0 12px 26px rgba(0,0,0,.3), 0 0 22px rgba(214,176,106,.34); border-color: rgba(241,205,121,.98); background: rgba(36,25,16,.52); filter: brightness(1.1); }
+    .circle-btn:active { transform: translateY(0) scale(.98); }
+    .circle-btn svg { width:22px; height:22px; stroke: #f0c975; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px rgba(240,201,117,.18)); }
+    .circle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.24); border-color: var(--gold); background: rgba(255,255,255,.1); }
+    .circle-btn svg { width:22px; height:22px; stroke: #f0c975; fill: none; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 10px rgba(240,201,117,.18)); }
+    .search-wrap { position: absolute; top: calc(100% + 10px); right: 18px; width: min(420px, calc(100vw - 28px)); opacity: 0; transform: translateY(-10px) scale(.98); pointer-events: none; transition: opacity .22s ease, transform .22s ease; z-index: 1002; }
+    .search-wrap.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .search-panel { border-radius: 24px; border: 1px solid rgba(228,201,124,.28); background: rgba(23,16,12,.92); box-shadow: 0 18px 42px rgba(0,0,0,.3), 0 0 0 1px rgba(255,246,220,.04) inset; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); overflow: hidden; }
+    .search-head { position: relative; padding: 14px 14px 10px; }
+    .search-input { width: 100%; border: 1px solid rgba(228,201,124,.24); border-radius: 16px; background: rgba(255,255,255,.05); color: #fff; padding: 14px 16px 14px 46px; font-size: 15px; outline: none; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+    .search-input::placeholder { color: rgba(255,255,255,.5); }
+    .search-input:focus { border-color: rgba(228,201,124,.62); background: rgba(255,255,255,.07); box-shadow: 0 0 0 4px rgba(214,176,106,.12); }
+    .search-icon { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; stroke: #f0c975; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+    .search-results { max-height: 360px; overflow-y: auto; padding: 0 8px 10px; }
+    .search-result { width: 100%; border: 0; background: transparent; color: #fff; text-align: left; display: grid; grid-template-columns: 64px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 10px; border-radius: 18px; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+    .search-result:hover { background: rgba(255,255,255,.08); transform: translateY(-1px); }
+    .search-result.is-active { background: rgba(255,255,255,.1); box-shadow: 0 0 0 1px rgba(228,201,124,.26) inset; }
+    .search-result img { width: 64px; height: 64px; object-fit: cover; border-radius: 14px; }
+    .search-result-body { min-width: 0; }
+    .search-result-name { font-size: 15px; font-weight: 600; }
+    .search-result-name mark { background: rgba(214,176,106,.24); color: #fff2cb; padding: 0 .12em; border-radius: .35em; }
+    .search-result-meta { margin-top: 5px; font-size: 12px; color: rgba(255,255,255,.58); }
+    .search-result-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 8px; flex-shrink: 0; }
+    .search-result-price { font-size: 14px; font-weight: 700; color: var(--gold); white-space: nowrap; }
+    .search-result-add { border: 1px solid rgba(228,201,124,.34); background: rgba(255,255,255,.06); color: #fff; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+    .search-result-add:hover { background: rgba(228,201,124,.16); border-color: rgba(228,201,124,.75); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.16); }
+    .search-result-add:active { transform: translateY(0) scale(.98); }
+    .search-result-add.added { background: rgba(214,176,106,.24); border-color: rgba(214,176,106,.8); color: #f8e7bf; }
+    .search-section-label { padding: 4px 12px 10px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.42); }
+    .search-empty { padding: 18px 16px 20px; text-align: center; color: rgba(255,255,255,.58); font-size: 14px; }
+    .search-tip { padding: 0 16px 16px; color: rgba(255,255,255,.42); font-size: 12px; }
+    .account-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .24s ease; z-index: 95; }
+    .account-overlay.open { opacity: 1; pointer-events: auto; }
+    .account-modal { position: fixed; top: 50%; left: 50%; width: min(540px, calc(100vw - 28px)); max-height: min(88vh, 760px); overflow: auto; transform: translate(-50%, -46%) scale(.96); opacity: 0; pointer-events: none; z-index: 110; border-radius: 30px; background: linear-gradient(180deg, rgba(34,24,18,.97), rgba(25,18,14,.98)); color: #fff; border: 1px solid rgba(228,201,124,.24); box-shadow: 0 28px 56px rgba(0,0,0,.34), 0 0 0 1px rgba(255,243,212,.04) inset; transition: transform .24s ease, opacity .24s ease; }
+    .account-modal.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+    .account-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:24px 24px 12px; }
+    .account-kicker { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.46); }
+    .account-title { margin-top: 8px; font-size: 30px; font-weight: 650; color: #f4e1b3; }
+    .account-close { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: #fff; font-size: 22px; cursor: pointer; }
+    .account-tabs { display:flex; gap:8px; padding: 0 24px 18px; }
+    .account-tab { border:1px solid rgba(228,201,124,.22); background: rgba(255,255,255,.05); color: rgba(255,255,255,.74); padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .2s ease, color .2s ease, border-color .2s ease; }
+    .account-tab.active { background: rgba(214,176,106,.18); color: #fff5d6; border-color: rgba(228,201,124,.62); }
+    .account-body { padding: 0 24px 24px; }
+    .account-pane { display: none; }
+    .account-pane.active { display: block; }
+    .account-copy { margin: 0 0 18px; color: rgba(255,255,255,.62); font-size: 14px; line-height: 1.55; }
+    .auth-grid { display:grid; gap:12px; }
+    .auth-row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .auth-field { display:grid; gap:7px; }
+    .auth-field label { font-size: 13px; color: rgba(255,255,255,.68); }
+    .auth-field input { width:100%; border:1px solid rgba(228,201,124,.2); border-radius: 16px; background: rgba(255,255,255,.05); color:#fff; padding: 14px 15px; font-size: 15px; outline: none; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+    .auth-field input::placeholder { color: rgba(255,255,255,.34); }
+    .auth-field input:focus { border-color: rgba(228,201,124,.6); background: rgba(255,255,255,.07); box-shadow: 0 0 0 4px rgba(214,176,106,.1); }
+    .auth-meta { margin-top: 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .auth-check { display:flex; align-items:flex-start; gap:10px; font-size: 12px; color: rgba(255,255,255,.62); line-height: 1.45; }
+    .auth-check input { margin-top: 2px; accent-color: #d6b06a; }
+    .auth-check a, .forgot-link { color: #f0cf86; }
+    .forgot-link { font-size: 12px; white-space: nowrap; }
+    .auth-submit { margin-top: 16px; width: 100%; border: 0; border-radius: 999px; background: linear-gradient(135deg, #d6b06a, #f0cf86); color: #24180f; padding: 14px 18px; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 16px 26px rgba(214,176,106,.2); }
+    .auth-separator { position: relative; margin: 18px 0 14px; text-align: center; font-size: 12px; color: rgba(255,255,255,.36); }
+    .auth-separator::before { content:''; position:absolute; left:0; right:0; top:50%; height:1px; background: rgba(255,255,255,.08); }
+    .auth-separator span { position: relative; padding: 0 12px; background: linear-gradient(180deg, rgba(34,24,18,.97), rgba(25,18,14,.98)); }
+    .social-auth { display:grid; gap:10px; }
+    .social-auth-btn { width:100%; display:flex; align-items:center; gap:12px; border:1px solid rgba(255,255,255,.1); border-radius: 18px; background: rgba(255,255,255,.05); color:#fff; padding: 12px 14px; cursor:pointer; transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+    .social-auth-btn:hover { transform: translateY(-1px); border-color: rgba(228,201,124,.28); box-shadow: 0 10px 20px rgba(0,0,0,.14); }
+    .social-auth-btn.vk-brand { background: linear-gradient(180deg, rgba(39,135,245,.16), rgba(255,255,255,.05)); }
+    .social-auth-btn.yandex-brand { background: linear-gradient(180deg, rgba(252,63,29,.14), rgba(255,255,255,.05)); }
+    .social-auth-btn.google-brand { background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05)); }
+    .social-auth-icon { width: 38px; height: 38px; border-radius: 12px; display:flex; align-items:center; justify-content:center; color:#fff; font-size: 15px; font-weight: 800; flex-shrink: 0; background: #fff; overflow: hidden; }
+    .social-auth-icon svg { width: 22px; height: 22px; display:block; }
+    .social-auth-icon.vk svg { fill: #2787f5; }
+    .social-auth-icon.yandex { font-size: 22px; font-weight: 900; color: #fc3f1d; }
+    .social-auth-icon.google svg { width: 24px; height: 24px; }
+    .social-auth-text { display:grid; gap:2px; text-align:left; }
+    .social-auth-text strong { font-size: 14px; }
+    .social-auth-text span { font-size: 12px; color: rgba(255,255,255,.52); }
+    .cart-badge { position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 4px; font-size:10px; font-weight:700; background:var(--gold); color:var(--text); border-radius:999px; display:flex; align-items:center; justify-content:center; }
+    .hero-content { position:relative; z-index:2; min-height:calc(100vh - 20px); display:flex; align-items:center; padding:140px 24px 110px; color:white; }
+    .hero-copy { max-width:620px; text-align:left; }
+    .hero-copy h1 { margin:0; font-size:72px; line-height:1; font-weight:650; letter-spacing:.01em; }
+    .hero-copy .subbrand { margin-top:12px; font-size:34px; text-transform:uppercase; letter-spacing:.08em; color:#e4c97c; }
+    .hero-copy p { margin:20px 0 0; max-width:430px; font-size:18px; line-height:1.7; color:rgba(255,255,255,.82); text-wrap:balance; }
+    .cta { margin-top:32px; display:inline-flex; align-items:center; overflow:hidden; border-radius:999px; border:1px solid rgba(228,201,124,.58); color:#fff; box-shadow:0 12px 28px rgba(0,0,0,.18); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, filter .22s ease; animation: ctaFloat 2.8s ease-in-out infinite; }
+    .cta:hover { transform: translateY(-2px) scale(1.02); border-color: rgba(228,201,124,.95); box-shadow: 0 0 0 1px rgba(228,201,124,.35), 0 14px 30px rgba(0,0,0,.24), 0 0 20px rgba(214,176,106,.25); filter: brightness(1.04); }
+    .cta:active { transform: translateY(0) scale(.99); }
+    @keyframes ctaFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+    @keyframes searchPulse { 0% { transform: scale(1); box-shadow: 0 10px 26px rgba(51,37,22,.08); } 35% { transform: scale(1.018); box-shadow: 0 18px 38px rgba(51,37,22,.14), 0 0 0 3px rgba(214,176,106,.24); } 100% { transform: scale(1); box-shadow: 0 10px 26px rgba(51,37,22,.08); } }
+    .cta span:first-child { padding:12px 20px; }
+    .cta span:last-child { width:46px; height:46px; display:flex; align-items:center; justify-content:center; background:#e4c97c; color:var(--text); transition: background .22s ease, box-shadow .22s ease; }
+    .cta:hover span:last-child { background:#edd48d; box-shadow: inset 0 0 18px rgba(255,255,255,.28); }
+    .categories-wrap { margin-top:64px; position:relative; z-index:1; }
+    .menu-sections, .footer { position:relative; z-index:1; }
+    .section-title { margin-bottom:24px; text-align:center; font-size:20px; font-weight:600; }
+    .categories { display:flex; gap:24px; overflow-x:auto; padding:8px 8px 16px; justify-content:center; scrollbar-width:none; }
+    .categories::-webkit-scrollbar { display:none; }
+    .category { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; padding-top:8px; transition: transform .2s ease; }
+    .category:hover { transform: translateY(-3px); }
+    .category-circle { width:140px; height:140px; border-radius:999px; overflow:hidden; background:#f1e5cd; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; border:4px solid transparent; }
+    .category:hover .category-circle { box-shadow: 0 10px 24px rgba(47,38,31,.18), 0 0 18px rgba(214,176,106,.18); border-color: rgba(214,176,106,.55); }
+    .category.active .category-circle { transform:scale(1.05); border-color:var(--gold); }
+    .category-circle img { width:100%; height:100%; object-fit:cover; }
+    .category-label { font-size:16px; font-weight:500; color:var(--wood); transition: color .2s ease, text-shadow .2s ease; }
+    .category:hover .category-label { color: var(--text); text-shadow: 0 0 12px rgba(214,176,106,.18); }
+    .category.active .category-label { color:var(--text); }
+    .menu-sections { margin-top:32px; }
+    .menu-block { margin-top:32px; }
+    .menu-block h2 { margin:0 0 16px; font-size:24px; font-weight:600; }
+    .row-shell { position:relative; }
+    .row { display:flex; gap:16px; overflow-x:auto; padding-bottom:8px; scrollbar-width:none; scroll-behavior:smooth; cursor:grab; user-select:none; }
+    .row.dragging { cursor:grabbing; }
+    .row::-webkit-scrollbar { display:none; }
+    .row-card { min-width:285px; flex:0 0 285px; }
+    .row-card.pulse .card { animation: searchPulse 1.05s ease; }
+    .arrow { position:absolute; top:50%; transform:translateY(-50%); z-index:10; width:44px; height:44px; border-radius:999px; border:1px solid #e4d7c8; background:rgba(255,255,255,.95); color:var(--text); box-shadow:0 6px 18px rgba(47,38,31,.12); display:none; align-items:center; justify-content:center; cursor:pointer; }
+    .arrow.show { display:flex; }
+    .arrow.left { left:0; }
+    .arrow.right { right:0; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:24px; padding:16px; }
+    .card img { width:100%; height:160px; object-fit:cover; border-radius:16px; pointer-events:none; }
+    .card-title { margin-top:12px; font-weight:600; }
+    .card-meta { margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-weight { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; background: #f5ecdc; color: var(--text); font-size: 12px; font-weight: 600; letter-spacing: .01em; }
+    .card-kbju { display: grid; grid-template-columns: repeat(4, auto); gap: 6px; }
+    .kbju-item { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 999px; background: #faf6ef; border: 1px solid #efe4d2; font-size: 11px; color: var(--wood); }
+    .kbju-item b { color: var(--text); font-weight: 600; }
+    .card-desc { margin-top: 8px; font-size:14px; color:var(--wood); }
+    .card-bottom { margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .price { font-weight:600; }
+    .buy-btn { position: relative; z-index: 3; border:0; border-radius:999px; background:var(--text); color:#fff; padding:10px 16px; font-size:14px; cursor:pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, filter .2s ease; }
+    .buy-btn:hover { transform: translateY(-2px); background:#3d332b; box-shadow: 0 10px 22px rgba(47,38,31,.22), 0 0 16px rgba(214,176,106,.18); filter: brightness(1.03); }
+    .buy-btn:active { transform: translateY(0) scale(.98); }
+    .buy-btn.added { background: var(--gold); color: var(--text); box-shadow: 0 10px 22px rgba(214,176,106,.28), 0 0 18px rgba(214,176,106,.18); }
+    .buy-btn.added::before { content: '✔'; margin-right: 6px; }
+    .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.34); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .24s ease; z-index: 90; }
+    .cart-overlay.open { opacity: 1; pointer-events: auto; }
+    .cart-panel { position: fixed; top: 0; right: 0; width: 420px; max-width: 100%; height: 100vh; background: #fff; color: var(--text); box-shadow: -14px 0 40px rgba(0,0,0,.18); transform: translateX(100%); transition: transform .28s cubic-bezier(.22,.8,.2,1); z-index: 100; display: flex; flex-direction: column; overflow: hidden; }
+    .cart-panel.open { transform: translateX(0); }
+    .cart-panel.checkout-mode .cart-list,
+    .cart-panel.checkout-mode .cart-foot { display: none; }
+    .cart-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, #fff, #fdf8ef); }
+    .cart-head h3 { margin: 0; font-size: 22px; }
+    .cart-head-copy { display:grid; gap:4px; }
+    .cart-head-meta { font-size: 12px; color: var(--wood); }
+    .cart-close { border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--text); }
+    .cart-list { flex: 1; overflow: auto; padding: 14px 18px; display: grid; gap: 10px; }
+    .cart-empty { display:grid; gap:10px; place-items:start; padding: 18px; border:1px dashed #dfd0b7; border-radius: 20px; background: linear-gradient(180deg,#fffdf8,#faf2e5); color: var(--wood); font-size: 14px; }
+    .cart-empty strong { color: var(--text); font-size: 18px; }
+    .cart-item { display: grid; grid-template-columns: 74px 1fr; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 18px; background: linear-gradient(180deg, #fffefb, #fcf6ec); box-shadow: 0 8px 18px rgba(47,38,31,.05); }
+    .cart-item-thumb { width: 74px; height: 74px; border-radius: 16px; object-fit: cover; display: block; }
+    .cart-item-main { display:grid; gap:8px; }
+    .cart-item-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .cart-item-title { font-weight: 700; font-size: 15px; }
+    .cart-remove { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #e6d6bf; background: #fff; color: #8a7155; cursor: pointer; font-size: 16px; line-height: 1; }
+    .cart-item-meta { font-size: 12px; color: var(--wood); }
+    .cart-item-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; padding: 4px; border-radius: 999px; background: #fff; border:1px solid #eadfcf; }
+    .qty-btn { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #dcc8ab; background: #fff; cursor: pointer; font-size: 16px; }
+    .cart-item-total { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .cart-foot { padding: 14px 18px 18px; border-top: 1px solid var(--border); background: linear-gradient(180deg,#fff,#fbf3e8); box-shadow: 0 -10px 24px rgba(47,38,31,.06); }
+    .cart-summary { display:grid; gap:10px; margin-bottom: 14px; padding: 14px; border-radius: 18px; background: #fffdf8; border:1px solid #efe2cf; }
+    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size: 14px; }
+    .summary-row.total { font-size: 16px; font-weight: 800; color: var(--text); padding-top: 6px; border-top: 1px dashed #e8dac4; }
+    .delivery-progress { display:grid; gap:8px; }
+    .delivery-progress span { font-size: 12px; color: var(--wood); }
+    .delivery-bar { height: 8px; border-radius: 999px; background: #efe4d2; overflow: hidden; }
+    .delivery-bar-fill { height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #d6b06a, #efd89c); transition: width .24s ease; }
+    .checkout-btn { width: 100%; border: 0; border-radius: 999px; background: var(--gold); color: var(--text); padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(214,176,106,.28); transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+    .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(214,176,106,.34), 0 0 18px rgba(214,176,106,.18); filter: brightness(1.03); }
+    .checkout-btn:active { transform: translateY(0) scale(.99); }
+    .checkout-form { display: none; flex: 1; min-height: 0; border-top: 1px solid var(--border); background: #fff; }
+    .checkout-form.open { display: block; }
+    .checkout-form-scroll { height: 100%; overflow-y: auto; padding: 0 18px 20px; }
+    .checkout-form-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 14px 0 10px; }
+    .checkout-form-title { margin: 0; font-size: 16px; font-weight: 700; }
+    .checkout-form-tools { display:flex; align-items:center; gap:8px; }
+    .checkout-back-link { border:0; background:transparent; color: var(--wood); font-size: 13px; font-weight: 700; cursor:pointer; padding: 6px 0; }
+    .checkout-dismiss { width: 34px; height: 34px; border-radius: 999px; border:1px solid #e4d4ba; background:#fff; color: var(--text); cursor:pointer; font-size: 18px; line-height: 1; }
+    .checkout-grid { display: grid; gap: 10px; }
+    .checkout-toggle { display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom: 10px; }
+    .checkout-toggle-btn { border:1px solid #e4d4ba; border-radius: 16px; background:#fffaf2; color: var(--wood); padding: 12px 14px; font-size: 13px; font-weight: 700; cursor:pointer; transition: all .2s ease; }
+    .checkout-toggle-btn.active { background: #2f261f; color: #fff; border-color:#2f261f; box-shadow: 0 10px 22px rgba(47,38,31,.18); }
+    .checkout-field { display: grid; gap: 6px; }
+    .checkout-field label { font-size: 12px; color: var(--wood); }
+    .checkout-field input, .checkout-field textarea { width: 100%; border: 1px solid #e7dac6; border-radius: 12px; padding: 10px 12px; font: inherit; color: var(--text); background: #fffdf9; }
+    .checkout-field textarea { min-height: 78px; resize: vertical; }
+    .checkout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .payment-group { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+    .payment-option { display:grid; gap:8px; align-content:start; min-height: 88px; padding: 10px 10px 12px; border:1px solid #eadcc7; border-radius: 14px; background:#fffdf9; cursor:pointer; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; }
+    .payment-option:hover { border-color:#d6b06a; box-shadow: 0 8px 18px rgba(47,38,31,.08); }
+    .payment-option input { accent-color: #2f261f; margin: 0; }
+    .payment-option-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .payment-option-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.25; }
+    .payment-option-desc { font-size: 11px; color: var(--wood); line-height: 1.35; }
+    .checkout-note { font-size: 12px; color: var(--wood); margin-top: 2px; }
+    .checkout-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .ghost-btn { flex: 1; border: 1px solid #dcc8ab; border-radius: 999px; background: #fff; color: var(--text); padding: 11px 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .submit-btn { flex: 1.2; border: 0; border-radius: 999px; background: var(--text); color: #fff; padding: 11px 14px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(47,38,31,.18); }
+    .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(16px) scale(.96); background: rgba(47,38,31,.96); color: #fff; padding: 12px 16px; border-radius: 999px; box-shadow: 0 12px 26px rgba(0,0,0,.22), 0 0 18px rgba(214,176,106,.16); opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease; z-index: 120; font-size: 14px; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    .toast strong { color: var(--gold); font-weight: 700; }
+    .footer { width:auto; margin: 18px calc(50% - 50vw) 0; overflow: hidden; border-radius: 0; background: #1e1512; color: #fff; }
+    .footer-grid { display: grid; grid-template-columns: .78fr 1.22fr; align-items: stretch; min-height: 320px; }
+    .footer-left { display: flex; flex-direction: column; justify-content: flex-start; padding: 18px 18px 20px; }
+    .footer-eyebrow { text-align: left; font-size: 12px; margin: 0 0 12px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.56); }
+    .footer-brand { margin: 0 0 12px; display:flex; align-items:center; justify-content:flex-start; gap:14px; font-size: 24px; font-weight: 600; line-height: 1; }
+    .footer-brand-logo { width:40px; height:40px; object-fit:contain; display:block; margin-top:-1px; }
+    .footer-brand > div { padding-left:2px; }
+    .footer-brand small { display:none; }
+    .contact-list { margin: 0; display: grid; gap: 20px; max-width: 420px; width: 100%; }
+    .contact-label { font-size: 14px; color: rgba(255,255,255,.45); margin-bottom: 8px; }
+    .contact-box { min-height: auto; display: block; padding: 0; border: 0; background: transparent; color: #fff; text-align: left; font-size: 19px; line-height: 1.35; }
+    .contact-box:hover { background: transparent; border-color: transparent; transform: none; }
+    .contact-icon { display:none; }
+    .contact-box.work { font-size: 15px; line-height: 1.45; }
+    .work-row { display: flex; justify-content: space-between; gap: 10px; max-width: 220px; }
+    .socials { margin: 18px 0 0; display: flex; justify-content: flex-start; gap: 12px; }
+    .social { width: 40px; height: 40px; border-radius: 999px; overflow: hidden; display: flex; align-items: center; justify-content: center; color: white; transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+    .social:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.22); filter: brightness(1.05); }
+    .social svg { width: 19px; height: 19px; display:block; fill: currentColor; }
+    .social.vk { background: #2787f5; }
+    .social.tg { background: #27a7e7; }
+    .social.max { background:
+      radial-gradient(circle at 28% 76%, rgba(37, 204, 255, .95), rgba(37, 204, 255, 0) 42%),
+      radial-gradient(circle at 76% 28%, rgba(175, 74, 255, .92), rgba(175, 74, 255, 0) 46%),
+      linear-gradient(145deg, #07101f 14%, #0f1640 56%, #111a5a 100%);
+    }
+    .social.max .max-glyph {
+      width: 76%;
+      height: 76%;
+      display: block;
+      background: url('max-glyph.svg') center / contain no-repeat;
+      filter: saturate(1.04) contrast(1.03) brightness(1.02);
+    }
+    .footer-map-wrap { display: flex; align-items: stretch; justify-content: center; padding: 14px 14px 0 0; }
+    .footer-map { position: relative; width: 100%; height: 100%; min-height: 306px; overflow: hidden; border-radius: 28px; background: #ece8e1; }
+    .footer-map iframe,
+    .footer-map img { width: 100%; height: 100%; object-fit: cover; display: block; border: 0; }
+    .footer-map .map-embed-links { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
+    .footer-map::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(123,97,71,.12), rgba(47,38,31,.06)), radial-gradient(circle at 28% 18%, rgba(214,176,106,.18), rgba(214,176,106,0) 42%), radial-gradient(circle at 78% 72%, rgba(123,97,71,.16), rgba(123,97,71,0) 44%); mix-blend-mode:multiply; pointer-events:none; z-index:2; }
+    .footer-map::after { content:''; position:absolute; inset:0; box-shadow: inset 0 0 0 1px rgba(214,176,106,.14); pointer-events:none; z-index:4; }
+    .map-tag { display:none; }
+    .map-link { display:none; }
+    .footer-bottom { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 18px 10px; border-top:1px solid rgba(255,255,255,.08); font-size:12px; color:rgba(255,255,255,.34); }
+    .footer-bottom a { color:rgba(255,255,255,.78); transition: color .2s ease; }
+    .footer-bottom a:hover { color:#f0c975; }
+    @media (max-width:900px){ .page{width:100%;padding:8px 10px 0} .nav,.divider,.header-right .phone{display:none} .header{top:8px;width:calc(100% - 20px);padding:2px 10px 2px;border-radius:22px} .brand-badge{width:74px;height:74px} .search-wrap{right:10px;width:min(420px,calc(100vw - 20px))} .account-modal{width:calc(100vw - 20px);border-radius:24px} .account-head,.account-tabs,.account-body{padding-left:16px;padding-right:16px} .auth-row{grid-template-columns:1fr} .hero,.hero-content{min-height:calc(100vh - 16px)} .hero{border-radius:22px} .hero-content{align-items:center;padding:126px 18px 96px} .hero-copy{max-width:100%} .hero-copy h1{font-size:46px;line-height:1.02} .hero-copy .subbrand{font-size:24px} .hero-copy p{max-width:360px;font-size:16px;line-height:1.65} .row-card{min-width:260px;flex-basis:260px} .arrow.show{display:none} .footer{width:auto;margin:18px calc(50% - 50vw) 0} .footer-grid{grid-template-columns:1fr;min-height:auto} .footer-left{padding:16px 14px 10px} .footer-brand{margin-bottom:24px} .contact-list{gap:18px;max-width:none} .contact-box{font-size:17px} .socials{margin-top:16px} .footer-map-wrap{padding:0 14px 0} .footer-map{min-height:240px;border-radius:22px} .footer-bottom{flex-direction:column;align-items:flex-start;padding:0 14px 10px} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-media" id="heroMedia"></div>
+      <header class="header">
+        <div class="header-inner">
+          <div class="brand" id="brandSpinTrigger" role="button" tabindex="0" aria-label="Логотип Грильяж, нажмите для анимации"><div class="brand-badge" style="margin-right:6px;"><img src="logo.png" srcset="logo.png 1x, logo@2x.png 2x" alt="Грильяж" /></div><div><div class="brand-title">Грильяж</div><div class="brand-sub">Вкус Омска</div></div></div>
+          <nav class="nav"><a href="menu.html">Меню</a><a href="about.html">О нас</a><a href="#contacts">Контакты</a><a href="preorder.html">Предзаказ</a></nav>
+          <div class="header-right"><div class="phone">+7 999 999 99 99</div><div class="divider"></div><button class="circle-btn" id="searchToggleBtn" type="button" aria-label="Поиск" aria-expanded="false" aria-controls="searchWrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg></button><button class="circle-btn" id="accountOpenBtn" type="button" aria-label="Профиль" aria-expanded="false" aria-controls="accountModal"><svg viewBox="0 0 24 24"><path d="M20 21c0-3.3-3.6-6-8-6s-8 2.7-8 6"></path><circle cx="12" cy="8" r="4"></circle></svg></button><button class="circle-btn" id="cartOpenBtn" type="button" aria-label="Корзина" style="position:relative"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 10h9l2-7H8"></path><circle cx="10" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle><circle cx="17" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle></svg><span class="cart-badge" id="cartBadge">0</span></button></div>
+        </div>
+        <div class="header-line"></div>
+        <div class="search-wrap" id="searchWrap" aria-hidden="true">
+          <div class="search-panel">
+            <div class="search-head">
+              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg>
+              <input class="search-input" id="searchInput" type="search" placeholder="Найдите блюдо, десерт или выпечку" autocomplete="off" />
+            </div>
+            <div class="search-results" id="searchResults"></div>
+            <div class="search-tip">Поиск по всем категориям меню</div>
+          </div>
+        </div>
+      </header>
+      <div class="hero-content"><div class="hero-copy"><h1>Грильяж</h1><div class="subbrand">Gastro-House</div><p>Оформляйте предзаказ блюд, выпечки и десертов с доставкой и самовывозом.</p><a href="#menu" class="cta"><span>Перейти к меню</span><span>→</span></a></div></div>
+      <div class="hero-controls">
+        <button class="hero-nav" id="heroPrevBtn" type="button" aria-label="Предыдущий слайд">←</button>
+        <div class="hero-dots" id="heroDots" aria-label="Навигация по фону шапки"></div>
+        <button class="hero-nav" id="heroNextBtn" type="button" aria-label="Следующий слайд">→</button>
+      </div>
+    </section>
+    <section class="categories-wrap" id="menu"><div class="section-title">Категории</div><div class="categories" id="categories"></div></section>
+    <div class="menu-sections"><section class="menu-block"><h2 id="activeTitle">Кулинария</h2><div class="row-shell"><button class="arrow left" id="activeLeft">←</button><div class="row" id="activeRow"></div><button class="arrow right show" id="activeRight">→</button></div></section><div id="otherSections"></div></div>
+    <footer class="footer" id="contacts"><div class="footer-grid"><div class="footer-left"><div class="footer-eyebrow">Контакты</div><div class="footer-brand"><img class="footer-brand-logo" src="logo.png" srcset="logo.png 1x, logo@2x.png 2x" alt=""><div><span>Грильяж</span></div></div><div class="contact-list"><div><div class="contact-label">Режим работы</div><div class="contact-box">Пн–Пт: 08:00–21:00<br>Сб–Вс: 09:00–21:00</div></div><div><div class="contact-label">Телефон</div><div class="contact-box"><a href="tel:+73812900000">+7 (3812) 90-00-00</a></div></div><div><div class="contact-label">Почта</div><div class="contact-box"><a href="mailto:info@grilyazh-omsk.ru">info@grilyazh-omsk.ru</a></div></div><div><div class="contact-label">Адрес</div><div class="contact-box">Омск, Харьковская, 7</div></div></div><div class="socials"><a class="social vk" href="https://vk.com/" target="_blank" rel="noopener noreferrer" aria-label="VK"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.05 7.56c.13 6.29 3.27 10.07 8.78 10.07h.31v-3.6c2.03.2 3.56 1.67 4.18 3.6h2.86c-.8-2.91-2.92-4.51-4.24-5.12 1.32-.76 3.18-2.61 3.62-4.95h-2.6c-.57 1.9-2.29 3.75-3.82 3.91V7.56h-2.6v6.86c-1.55-.39-3.5-2.38-3.59-6.86H3.05z"/></svg></a><a class="social tg" href="https://t.me/" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.6c.3-1.4-.5-1.9-1.6-1.5L2.8 9.8c-1.2.5-1.2 1.1-.2 1.4l4.5 1.4 10.4-6.6c.5-.3 1-.1.6.2l-8.4 7.6-.3 4.4c.4 0 .6-.2.8-.4l2.2-2.1 4.5 3.3c.8.4 1.4.2 1.6-.8L21.9 4.6z"/></svg></a><a class="social max" href="#" aria-label="Max"><span class="max-glyph" aria-hidden="true"></span></a></div></div><div class="footer-map-wrap"><div class="footer-map"><div class="map-embed-links"><a href="https://yandex.com/maps/org/grilyazh/19567134820/?utm_medium=mapframe&utm_source=maps">Грильяж</a><a href="https://yandex.com/maps/66/omsk/category/confectionary/184108017/?utm_medium=mapframe&utm_source=maps">Кондитерская в Омске</a><a href="https://yandex.com/maps/66/omsk/category/banquet_hall/184108315/?utm_medium=mapframe&utm_source=maps">Банкетный зал в Омске</a></div><iframe title="Яндекс Карта: Грильяж" src="https://yandex.com/map-widget/v1/?ll=73.415716%2C54.946418&mode=poi&poi%5Bpoint%5D=73.414391%2C54.946248&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D19567134820&z=18" frameborder="1" allowfullscreen="true" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="position:relative;"></iframe><div class="map-tag">улица Харьковская, 7</div></div></div></div><div class="footer-bottom"><span>© Грильяж Gastro-House</span><a href="#privacy">Политика конфиденциальности</a></div></footer>
+    <div class="account-overlay" id="accountOverlay"></div>
+    <section class="account-modal" id="accountModal" aria-hidden="true">
+      <div class="account-head">
+        <div>
+          <div class="account-kicker">Личный кабинет</div>
+          <div class="account-title">Вход и регистрация</div>
+        </div>
+        <button class="account-close" id="accountCloseBtn" type="button" aria-label="Закрыть">×</button>
+      </div>
+      <div class="account-tabs">
+        <button class="account-tab active" type="button" data-account-tab="login">Вход</button>
+        <button class="account-tab" type="button" data-account-tab="signup">Регистрация</button>
+      </div>
+      <div class="account-body">
+        <div class="account-pane active" data-account-pane="login">
+          <p class="account-copy">Войдите в аккаунт, чтобы сохранять заказы, историю покупок и любимые блюда.</p>
+          <div class="auth-grid">
+            <div class="auth-field">
+              <label for="loginEmail">Email или телефон</label>
+              <input id="loginEmail" type="text" placeholder="mail@example.com" />
+            </div>
+            <div class="auth-field">
+              <label for="loginPassword">Пароль</label>
+              <input id="loginPassword" type="password" placeholder="Введите пароль" />
+            </div>
+          </div>
+          <div class="auth-meta">
+            <label class="auth-check"><input id="loginPolicy" type="checkbox" /><span>Я согласен с <a href="#privacy">политикой конфиденциальности</a> и условиями обработки данных.</span></label>
+            <a class="forgot-link" href="#forgot" id="forgotPasswordLink">Забыли пароль?</a>
+          </div>
+          <button class="auth-submit" id="loginSubmitBtn" type="button">Войти в аккаунт</button>
+          <div class="auth-separator"><span>или через соцсети</span></div>
+          <div class="social-auth">
+            <button class="social-auth-btn vk-brand" type="button" data-social-auth="VK"><span class="social-auth-icon vk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.05 7.56c.13 6.29 3.27 10.07 8.78 10.07h.31v-3.6c2.03.2 3.56 1.67 4.18 3.6h2.86c-.8-2.91-2.92-4.51-4.24-5.12 1.32-.76 3.18-2.61 3.62-4.95h-2.6c-.57 1.9-2.29 3.75-3.82 3.91V7.56h-2.6v6.86c-1.55-.39-3.5-2.38-3.59-6.86H3.05z"/></svg></span><span class="social-auth-text"><strong>Войти через VK</strong><span>Быстрый вход по профилю ВКонтакте</span></span></button>
+            <button class="social-auth-btn yandex-brand" type="button" data-social-auth="Яндекс"><span class="social-auth-icon yandex">Я</span><span class="social-auth-text"><strong>Войти через Яндекс</strong><span>Используйте аккаунт Яндекс ID</span></span></button>
+            <button class="social-auth-btn google-brand" type="button" data-social-auth="Google"><span class="social-auth-icon google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.654 32.657 29.205 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.825 1.154 7.939 3.039l5.657-5.657C34.066 6.053 29.27 4 24 4 12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 5.103A11.96 11.96 0 0 1 24 12c3.059 0 5.825 1.154 7.939 3.039l5.657-5.657C34.066 6.053 29.27 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.135 0 9.86-1.966 13.409-5.166l-6.19-5.238C29.147 35.091 26.715 36 24 36c-5.176 0-9.625-3.318-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.05 12.05 0 0 1-4.084 5.596l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg></span><span class="social-auth-text"><strong>Войти через Google</strong><span>Один клик для входа и синхронизации</span></span></button>
+          </div>
+        </div>
+        <div class="account-pane" data-account-pane="signup">
+          <p class="account-copy">Создайте аккаунт, чтобы отслеживать доставки, получать бонусы и быстрее оформлять заказ.</p>
+          <div class="auth-grid">
+            <div class="auth-row">
+              <div class="auth-field">
+                <label for="signupName">Имя</label>
+                <input id="signupName" type="text" placeholder="Ваше имя" />
+              </div>
+              <div class="auth-field">
+                <label for="signupPhone">Телефон</label>
+                <input id="signupPhone" type="tel" placeholder="+7 (___) ___-__-__" />
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="signupEmail">Email</label>
+              <input id="signupEmail" type="email" placeholder="mail@example.com" />
+            </div>
+            <div class="auth-row">
+              <div class="auth-field">
+                <label for="signupPassword">Пароль</label>
+                <input id="signupPassword" type="password" placeholder="Придумайте пароль" />
+              </div>
+              <div class="auth-field">
+                <label for="signupPasswordRepeat">Повтор пароля</label>
+                <input id="signupPasswordRepeat" type="password" placeholder="Повторите пароль" />
+              </div>
+            </div>
+          </div>
+          <div class="auth-meta">
+            <label class="auth-check"><input id="signupPolicy" type="checkbox" /><span>Я принимаю <a href="#privacy">политику конфиденциальности</a> и соглашаюсь на обработку персональных данных.</span></label>
+          </div>
+          <button class="auth-submit" id="signupSubmitBtn" type="button">Создать аккаунт</button>
+          <div class="auth-separator"><span>или зарегистрироваться через</span></div>
+          <div class="social-auth">
+            <button class="social-auth-btn vk-brand" type="button" data-social-auth="VK"><span class="social-auth-icon vk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.05 7.56c.13 6.29 3.27 10.07 8.78 10.07h.31v-3.6c2.03.2 3.56 1.67 4.18 3.6h2.86c-.8-2.91-2.92-4.51-4.24-5.12 1.32-.76 3.18-2.61 3.62-4.95h-2.6c-.57 1.9-2.29 3.75-3.82 3.91V7.56h-2.6v6.86c-1.55-.39-3.5-2.38-3.59-6.86H3.05z"/></svg></span><span class="social-auth-text"><strong>VK</strong><span>Регистрация через ВКонтакте</span></span></button>
+            <button class="social-auth-btn yandex-brand" type="button" data-social-auth="Яндекс"><span class="social-auth-icon yandex">Я</span><span class="social-auth-text"><strong>Яндекс</strong><span>Регистрация через Яндекс ID</span></span></button>
+            <button class="social-auth-btn google-brand" type="button" data-social-auth="Google"><span class="social-auth-icon google"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.654 32.657 29.205 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.825 1.154 7.939 3.039l5.657-5.657C34.066 6.053 29.27 4 24 4 12.954 4 4 12.954 4 24s8.954 20 20 20 20-8.954 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 5.103A11.96 11.96 0 0 1 24 12c3.059 0 5.825 1.154 7.939 3.039l5.657-5.657C34.066 6.053 29.27 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.135 0 9.86-1.966 13.409-5.166l-6.19-5.238C29.147 35.091 26.715 36 24 36c-5.176 0-9.625-3.318-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.05 12.05 0 0 1-4.084 5.596l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg></span><span class="social-auth-text"><strong>Google</strong><span>Регистрация через Google аккаунт</span></span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-panel" id="cartPanel" aria-hidden="true">
+      <div class="cart-head">
+        <div class="cart-head-copy">
+          <h3>Корзина</h3>
+          <div class="cart-head-meta" id="cartHeadMeta">0 позиций</div>
+        </div>
+        <button class="cart-close" id="cartCloseBtn" aria-label="Закрыть">×</button>
+      </div>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-foot">
+        <div class="cart-summary">
+          <div class="summary-row"><span>Сумма заказа</span><strong id="cartSubtotal">0 ₽</strong></div>
+          <div class="summary-row"><span>Доставка</span><strong id="cartDeliveryCost">0 ₽</strong></div>
+          <div class="delivery-progress">
+            <span id="deliveryHint">Добавьте блюда для бесплатной доставки от 1500 ₽</span>
+            <div class="delivery-bar"><div class="delivery-bar-fill" id="deliveryBarFill"></div></div>
+          </div>
+          <div class="summary-row total"><span>Итого</span><strong id="cartTotal">0 ₽</strong></div>
+        </div>
+        <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+      </div>
+      <div class="checkout-form" id="checkoutForm">
+        <div class="checkout-form-scroll">
+          <div class="checkout-form-head">
+            <div class="checkout-form-title">Оформление заказа</div>
+            <div class="checkout-form-tools">
+              <button class="checkout-back-link" id="checkoutBackLink" type="button">← Назад к корзине</button>
+              <button class="checkout-dismiss" id="checkoutDismissBtn" type="button" aria-label="Закрыть форму">×</button>
+            </div>
+          </div>
+          <div class="checkout-toggle">
+            <button class="checkout-toggle-btn active" type="button" data-delivery-mode="pickup">Самовывоз</button>
+            <button class="checkout-toggle-btn" type="button" data-delivery-mode="delivery">Доставка</button>
+          </div>
+          <div class="checkout-grid">
+            <div class="checkout-field">
+              <label for="orderName">Имя</label>
+              <input id="orderName" type="text" placeholder="Ваше имя" />
+            </div>
+            <div class="checkout-row">
+              <div class="checkout-field">
+                <label for="orderPhone">Телефон</label>
+                <input id="orderPhone" type="tel" placeholder="+7 (___) ___-__-__" />
+              </div>
+              <div class="checkout-field">
+                <label for="orderTime">Время</label>
+                <input id="orderTime" type="text" placeholder="Например, 18:30" />
+              </div>
+            </div>
+            <div class="checkout-field">
+              <label for="orderAddress" id="orderAddressLabel">Адрес доставки</label>
+              <input id="orderAddress" type="text" placeholder="Улица, дом, квартира" />
+            </div>
+            <div class="checkout-field">
+              <label>Способ оплаты</label>
+              <div class="payment-group">
+                <label class="payment-option">
+                  <div class="payment-option-top"><span class="payment-option-title">Онлайн</span><input type="radio" name="paymentMethod" value="card" checked /></div>
+                  <div class="payment-option-desc">Оплата картой сразу на сайте</div>
+                </label>
+                <label class="payment-option">
+                  <div class="payment-option-top"><span class="payment-option-title">Наличными</span><input type="radio" name="paymentMethod" value="cash" /></div>
+                  <div class="payment-option-desc">Курьеру при получении заказа</div>
+                </label>
+                <label class="payment-option">
+                  <div class="payment-option-top"><span class="payment-option-title">Картой</span><input type="radio" name="paymentMethod" value="pickup-card" /></div>
+                  <div class="payment-option-desc">Оплата при получении на месте или курьеру</div>
+                </label>
+              </div>
+              <div class="checkout-note">Выберите удобный способ оплаты перед подтверждением заказа.</div>
+            </div>
+            <div class="checkout-field">
+              <label for="orderComment">Комментарий</label>
+              <textarea id="orderComment" placeholder="Подъезд, этаж, пожелания к заказу"></textarea>
+            </div>
+          </div>
+          <div class="checkout-actions">
+            <button class="ghost-btn" id="checkoutBackBtn" type="button">Вернуться</button>
+            <button class="submit-btn" id="submitOrderBtn" type="button">Подтвердить</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="toast" id="cartToast">Блюдо добавлено в корзину</div>
+  </div>
+  <script>
+    const heroSlides=[
+      {image:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80',alt:'Большой стол с красиво поданными блюдами'},
+      {image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1800&q=80',alt:'Сервировка с горячими блюдами и зеленью'},
+      {image:'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1800&q=80',alt:'Аппетитная подача обеда в ресторане'},
+      {image:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80',alt:'Уютный гастро-интерьер с едой на столе'}
+    ];
+    const categories=[{title:'Новинки',image:'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=300&q=80'},{title:'Кулинария',image:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80'},{title:'Пекарня',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80'},{title:'Кондитерская',image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=300&q=80'},{title:'Бизнес-ланч',image:'https://images.unsplash.com/photo-1546069901-5ec6a79120b0?auto=format&fit=crop&w=300&q=80'}];
+    const products=[
+      {category:'Кулинария',name:'Курица с овощами',price:'390 ₽',weight:'280 г',kcal:'320',protein:'24',fat:'14',carbs:'18',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кулинария',name:'Запечённое мясо',price:'450 ₽',weight:'300 г',kcal:'410',protein:'28',fat:'22',carbs:'16',desc:'Сытное блюдо',image:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Котлета с пюре',price:'320 ₽',weight:'260 г',kcal:'295',protein:'17',fat:'13',carbs:'27',desc:'Домашнее блюдо',image:'https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Паста с курицей',price:'410 ₽',weight:'290 г',kcal:'360',protein:'21',fat:'11',carbs:'34',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кулинария',name:'Рыба с рисом',price:'430 ₽',weight:'270 г',kcal:'300',protein:'23',fat:'9',carbs:'29',desc:'Обеденное блюдо',image:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Жаркое по-домашнему',price:'440 ₽',weight:'310 г',kcal:'398',protein:'25',fat:'19',carbs:'31',desc:'Тёплое блюдо',image:'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Слойка с вишней',price:'160 ₽',weight:'110 г',kcal:'290',protein:'4',fat:'14',carbs:'37',desc:'Свежая выпечка',image:'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Пирог с мясом',price:'420 ₽',weight:'320 г',kcal:'430',protein:'18',fat:'24',carbs:'35',desc:'Румяная выпечка',image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Пекарня',name:'Булочка с корицей',price:'140 ₽',weight:'95 г',kcal:'265',protein:'5',fat:'9',carbs:'41',desc:'Сладкая выпечка',image:'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Круассан',price:'180 ₽',weight:'85 г',kcal:'240',protein:'6',fat:'12',carbs:'26',desc:'Французская выпечка',image:'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Пирожок с картофелем',price:'120 ₽',weight:'90 г',kcal:'220',protein:'4',fat:'8',carbs:'32',desc:'Домашняя выпечка',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Улитка с изюмом',price:'150 ₽',weight:'105 г',kcal:'276',protein:'5',fat:'10',carbs:'39',desc:'Сдобная выпечка',image:'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Пирожное',price:'190 ₽',weight:'120 г',kcal:'315',protein:'4',fat:'18',carbs:'34',desc:'Десерт',image:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Торт',price:'950 ₽',weight:'950 г',kcal:'420',protein:'6',fat:'24',carbs:'45',desc:'Торт',image:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кондитерская',name:'Эклер',price:'170 ₽',weight:'90 г',kcal:'280',protein:'5',fat:'16',carbs:'29',desc:'Заварное пирожное',image:'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Чизкейк',price:'280 ₽',weight:'140 г',kcal:'330',protein:'6',fat:'20',carbs:'31',desc:'Нежный десерт',image:'https://images.unsplash.com/photo-1567171466295-4afa63d45416?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Макарон',price:'160 ₽',weight:'70 г',kcal:'240',protein:'4',fat:'10',carbs:'33',desc:'Французский десерт',image:'https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Тарталетка с ягодами',price:'220 ₽',weight:'115 г',kcal:'265',protein:'3',fat:'12',carbs:'35',desc:'Ягодный десерт',image:'https://images.unsplash.com/photo-1464306076886-debede6f9bb8?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 1',price:'390 ₽',weight:'420 г',kcal:'460',protein:'23',fat:'15',carbs:'56',desc:'Суп + горячее',image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 2',price:'420 ₽',weight:'400 г',kcal:'430',protein:'19',fat:'14',carbs:'58',desc:'Салат + гарнир',image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 3',price:'450 ₽',weight:'450 г',kcal:'495',protein:'24',fat:'17',carbs:'61',desc:'Комплексный обед',image:'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Бизнес-ланч',name:'Ланч 4',price:'480 ₽',weight:'470 г',kcal:'520',protein:'26',fat:'18',carbs:'63',desc:'Полный обед',image:'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 5',price:'430 ₽',weight:'390 г',kcal:'440',protein:'22',fat:'14',carbs:'55',desc:'Горячее + салат',image:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 6',price:'460 ₽',weight:'430 г',kcal:'470',protein:'23',fat:'16',carbs:'59',desc:'Обеденный сет',image:'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80'}];
+    let activeCategory='Кулинария'; const categoriesEl=document.getElementById('categories'),activeTitleEl=document.getElementById('activeTitle'),activeRowEl=document.getElementById('activeRow'),otherSectionsEl=document.getElementById('otherSections');
+    const cardHTML=item=>'<div class="row-card"><div class="card"><img src="'+item.image+'" alt="'+item.name+'"><div class="card-title">'+item.name+'</div><div class="card-meta"><div class="card-weight">'+item.weight+'</div><div class="card-kbju"><span class="kbju-item"><b>К</b>'+item.kcal+'</span><span class="kbju-item"><b>Б</b>'+item.protein+'</span><span class="kbju-item"><b>Ж</b>'+item.fat+'</span><span class="kbju-item"><b>У</b>'+item.carbs+'</span></div></div><div class="card-desc">'+item.desc+'</div><div class="card-bottom"><div class="price">'+item.price+'</div><button class="buy-btn" type="button" data-add="'+item.name+'">В корзину</button></div></div></div>';
+    const getCategoryItems=name=>name==='Новинки'?products.filter(p=>p.isNew):products.filter(p=>p.category===name);
+    function renderCategories(){categoriesEl.innerHTML=categories.map(cat=>`<div class="category ${activeCategory===cat.title?'active':''}" data-category="${cat.title}"><div class="category-circle"><img src="${cat.image}" alt="${cat.title}"></div><div class="category-label">${cat.title}</div></div>`).join(''); categoriesEl.querySelectorAll('.category').forEach(el=>el.addEventListener('click',()=>{activeCategory=el.dataset.category;renderAll();}));}
+    function attachRowBehavior(rowEl,leftBtn,rightBtn){let hasScrolledRight=false,isDown=false,startX=0,startScrollLeft=0,velocity=0,lastX=0,lastTime=0,rafId=null; const cancelMomentum=()=>{if(rafId){cancelAnimationFrame(rafId);rafId=null;}}; const updateButtons=()=>{const canLeft=rowEl.scrollLeft>8,canRight=rowEl.scrollLeft+rowEl.clientWidth<rowEl.scrollWidth-8; leftBtn.classList.toggle('show',hasScrolledRight&&canLeft&&window.innerWidth>900); rightBtn.classList.toggle('show',canRight&&window.innerWidth>900);}; const runMomentum=()=>{velocity*=0.94; if(Math.abs(velocity)<0.12){rafId=null;updateButtons();return;} rowEl.scrollLeft-=velocity*18; updateButtons(); rafId=requestAnimationFrame(runMomentum);}; rowEl.addEventListener('scroll',()=>{if(rowEl.scrollLeft>8)hasScrolledRight=true; updateButtons();},{passive:true}); rowEl.addEventListener('pointerdown',e=>{ if(e.target.closest('.buy-btn')) return; if(e.pointerType==='mouse'&&e.button!==0)return; cancelMomentum(); isDown=true; rowEl.classList.add('dragging'); startX=e.clientX; startScrollLeft=rowEl.scrollLeft; lastX=e.clientX; lastTime=performance.now(); velocity=0; rowEl.setPointerCapture?.(e.pointerId); }); rowEl.addEventListener('pointermove',e=>{ if(!isDown) return; const dx=e.clientX-startX; if(Math.abs(dx) > 4) e.preventDefault(); rowEl.scrollLeft=startScrollLeft-dx; const now=performance.now(),dt=now-lastTime; if(dt>0)velocity=(e.clientX-lastX)/dt; lastX=e.clientX; lastTime=now; if(rowEl.scrollLeft>8)hasScrolledRight=true; updateButtons(); }); const endDrag=e=>{if(!isDown)return; isDown=false; rowEl.classList.remove('dragging'); rowEl.releasePointerCapture?.(e.pointerId); if(Math.abs(velocity)>0.08)rafId=requestAnimationFrame(runMomentum);}; rowEl.addEventListener('pointerup',endDrag); rowEl.addEventListener('pointercancel',endDrag); rowEl.addEventListener('pointerleave',endDrag); leftBtn.addEventListener('click',()=>{cancelMomentum(); rowEl.scrollBy({left:-360,behavior:'smooth'});}); rightBtn.addEventListener('click',()=>{cancelMomentum(); hasScrolledRight=true; rowEl.scrollBy({left:360,behavior:'smooth'});}); updateButtons(); window.addEventListener('resize',updateButtons); }
+    function renderActive(){const items=getCategoryItems(activeCategory); activeTitleEl.textContent=activeCategory; activeRowEl.innerHTML=items.map(cardHTML).join(''); attachRowBehavior(activeRowEl,document.getElementById('activeLeft'),document.getElementById('activeRight'));}
+    function renderOtherSections(){const baseCategories=['Кулинария','Пекарня','Кондитерская','Бизнес-ланч']; otherSectionsEl.innerHTML=baseCategories.filter(cat=>cat!==activeCategory).map(cat=>{const id=`row-${cat}`; return `<section class="menu-block"><h2>${cat}</h2><div class="row-shell"><button class="arrow left">←</button><div class="row" id="${id}">${products.filter(p=>p.category===cat).map(cardHTML).join('')}</div><button class="arrow right show">→</button></div></section>`;}).join(''); otherSectionsEl.querySelectorAll('.row-shell').forEach(shell=>attachRowBehavior(shell.querySelector('.row'),shell.querySelector('.arrow.left'),shell.querySelector('.arrow.right'))); }
+    const heroMedia = document.getElementById('heroMedia');
+    const heroDots = document.getElementById('heroDots');
+    const heroPrevBtn = document.getElementById('heroPrevBtn');
+    const heroNextBtn = document.getElementById('heroNextBtn');
+    const headerEl = document.querySelector('.header');
+    let activeHeroSlide = 0;
+    let heroTimer = null;
+    let heroInitialized = false;
+    const CART_STORAGE_KEY = 'grilyazh-cart';
+    const cart = loadCart();
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    const searchWrap = document.getElementById('searchWrap');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const accountOpenBtn = document.getElementById('accountOpenBtn');
+    const accountOverlay = document.getElementById('accountOverlay');
+    const accountModal = document.getElementById('accountModal');
+    const accountCloseBtn = document.getElementById('accountCloseBtn');
+    const accountTabs = Array.from(document.querySelectorAll('[data-account-tab]'));
+    const accountPanes = Array.from(document.querySelectorAll('[data-account-pane]'));
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+    const signupSubmitBtn = document.getElementById('signupSubmitBtn');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const cartOverlay = document.getElementById('cartOverlay');
+    const cartPanel = document.getElementById('cartPanel');
+    const cartList = document.getElementById('cartList');
+    const cartHeadMeta = document.getElementById('cartHeadMeta');
+    const cartSubtotal = document.getElementById('cartSubtotal');
+    const cartDeliveryCost = document.getElementById('cartDeliveryCost');
+    const cartTotal = document.getElementById('cartTotal');
+    const deliveryHint = document.getElementById('deliveryHint');
+    const deliveryBarFill = document.getElementById('deliveryBarFill');
+    const cartBadge = document.getElementById('cartBadge');
+    const cartOpenBtn = document.getElementById('cartOpenBtn');
+    const cartCloseBtn = document.getElementById('cartCloseBtn');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const checkoutBackBtn = document.getElementById('checkoutBackBtn');
+    const checkoutBackLink = document.getElementById('checkoutBackLink');
+    const checkoutDismissBtn = document.getElementById('checkoutDismissBtn');
+    const submitOrderBtn = document.getElementById('submitOrderBtn');
+    const deliveryModeButtons = Array.from(document.querySelectorAll('[data-delivery-mode]'));
+    const orderAddressLabel = document.getElementById('orderAddressLabel');
+    const orderAddressInput = document.getElementById('orderAddress');
+    const orderPhoneInput = document.getElementById('orderPhone');
+    const cartToast = document.getElementById('cartToast');
+    const brandSpinTrigger = document.getElementById('brandSpinTrigger');
+    let toastTimer = null;
+    let searchOpen = false;
+    let accountOpen = false;
+    let deliveryMode = 'pickup';
+    const FREE_DELIVERY_THRESHOLD = 1500;
+    const BASE_DELIVERY_COST = 199;
+    let activeSearchIndex = -1;
+    let latestSearchMatches = [];
+    const SEARCH_HISTORY_KEY = 'grilyazh-search-history';
+    const popularProducts = products.filter(function(item){ return item.isNew; }).slice(0, 4);
+
+    function normalizeText(value){
+      return String(value || '').toLowerCase().replace(/ё/g, 'е').trim();
+    }
+    function loadCart(){
+      try{
+        const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+        const parsed = stored ? JSON.parse(stored) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      }catch(error){
+        return [];
+      }
+    }
+    function saveCart(){
+      try{
+        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+      }catch(error){}
+    }
+
+    function escapeHtml(value){
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getSearchHistory(){
+      try{
+        const stored = window.localStorage.getItem(SEARCH_HISTORY_KEY);
+        const parsed = stored ? JSON.parse(stored) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      }catch(error){
+        return [];
+      }
+    }
+
+    function saveSearchHistory(names){
+      try{
+        window.localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(names.slice(0, 5)));
+      }catch(error){}
+    }
+
+    function pushSearchHistory(name){
+      const next = [name].concat(getSearchHistory().filter(function(item){ return item !== name; }));
+      saveSearchHistory(next);
+    }
+
+    function getHistoryProducts(){
+      const history = getSearchHistory();
+      return history.map(function(name){
+        return products.find(function(item){ return item.name === name; });
+      }).filter(Boolean);
+    }
+
+    function productMatchesQuery(product, query){
+      const haystack = [
+        product.name,
+        product.category,
+        product.desc,
+        product.weight,
+        product.price
+      ].map(normalizeText).join(' ');
+      return haystack.includes(query);
+    }
+
+    function highlightMatch(value, query){
+      const text = String(value || '');
+      const normalizedValue = normalizeText(text);
+      const normalizedQuery = normalizeText(query);
+      if(!normalizedQuery) return escapeHtml(text);
+      const matchIndex = normalizedValue.indexOf(normalizedQuery);
+      if(matchIndex === -1) return escapeHtml(text);
+      const before = escapeHtml(text.slice(0, matchIndex));
+      const match = escapeHtml(text.slice(matchIndex, matchIndex + normalizedQuery.length));
+      const after = escapeHtml(text.slice(matchIndex + normalizedQuery.length));
+      return before + '<mark>' + match + '</mark>' + after;
+    }
+
+    function createSearchResultHTML(item){
+      const highlightedName = highlightMatch(item.name, searchInput ? searchInput.value : '');
+      return '<div class="search-result" role="button" tabindex="0" data-search-open="' + item.name + '"><img src="' + item.image + '" alt="' + item.name + '"><div class="search-result-body"><div class="search-result-name">' + highlightedName + '</div><div class="search-result-meta">' + item.category + ' · ' + item.weight + '</div></div><div class="search-result-side"><div class="search-result-price">' + item.price + '</div><button class="search-result-add" type="button" data-search-add="' + item.name + '">В корзину</button></div></div>';
+    }
+
+    function setActiveSearchResult(index){
+      const resultEls = searchResults ? Array.from(searchResults.querySelectorAll('.search-result[data-search-open]')) : [];
+      activeSearchIndex = resultEls.length ? Math.max(0, Math.min(index, resultEls.length - 1)) : -1;
+      resultEls.forEach(function(el, elIndex){
+        el.classList.toggle('is-active', elIndex === activeSearchIndex);
+      });
+      const activeEl = resultEls[activeSearchIndex];
+      activeEl?.scrollIntoView({ block: 'nearest' });
+    }
+
+    function renderSuggestedSearchState(){
+      const historyItems = getHistoryProducts();
+      const sections = [];
+      if(historyItems.length){
+        sections.push('<div class="search-section-label">Недавние запросы</div>' + historyItems.map(createSearchResultHTML).join(''));
+      }
+      sections.push('<div class="search-section-label">Популярное</div>' + popularProducts.map(createSearchResultHTML).join(''));
+      latestSearchMatches = historyItems.length ? historyItems.concat(popularProducts.filter(function(item){ return !historyItems.some(function(historyItem){ return historyItem.name === item.name; }); })) : popularProducts.slice();
+      searchResults.innerHTML = sections.join('');
+      setActiveSearchResult(0);
+    }
+
+    function renderSearchResults(query){
+      const normalizedQuery = normalizeText(query);
+      if(!normalizedQuery){
+        renderSuggestedSearchState();
+        return;
+      }
+      const matches = products.filter(function(product){ return productMatchesQuery(product, normalizedQuery); }).slice(0, 8);
+      latestSearchMatches = matches.slice();
+      if(!matches.length){
+        searchResults.innerHTML = '<div class="search-empty">Ничего не найдено. Попробуйте другое название блюда.</div>';
+        activeSearchIndex = -1;
+        return;
+      }
+      searchResults.innerHTML = matches.map(function(item){
+        return createSearchResultHTML(item);
+      }).join('');
+      setActiveSearchResult(0);
+    }
+
+    function openSearch(){
+      if(!searchWrap) return;
+      closeAccount();
+      searchOpen = true;
+      searchWrap.classList.add('open');
+      searchWrap.setAttribute('aria-hidden', 'false');
+      if(searchToggleBtn) searchToggleBtn.setAttribute('aria-expanded', 'true');
+      renderSearchResults(searchInput.value);
+      window.setTimeout(function(){ searchInput.focus(); }, 20);
+    }
+
+    function closeSearch(){
+      if(!searchWrap) return;
+      searchOpen = false;
+      searchWrap.classList.remove('open');
+      searchWrap.setAttribute('aria-hidden', 'true');
+      if(searchToggleBtn) searchToggleBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleSearch(){
+      if(searchOpen) closeSearch();
+      else openSearch();
+    }
+
+    function setAccountTab(name){
+      accountTabs.forEach(function(tab){
+        tab.classList.toggle('active', tab.getAttribute('data-account-tab') === name);
+      });
+      accountPanes.forEach(function(pane){
+        pane.classList.toggle('active', pane.getAttribute('data-account-pane') === name);
+      });
+    }
+
+    function openAccount(){
+      if(!accountModal) return;
+      closeSearch();
+      accountOpen = true;
+      accountOverlay.classList.add('open');
+      accountModal.classList.add('open');
+      accountModal.setAttribute('aria-hidden', 'false');
+      accountOpenBtn?.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeAccount(){
+      if(!accountModal) return;
+      accountOpen = false;
+      accountOverlay.classList.remove('open');
+      accountModal.classList.remove('open');
+      accountModal.setAttribute('aria-hidden', 'true');
+      accountOpenBtn?.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleAccount(){
+      if(accountOpen) closeAccount();
+      else openAccount();
+    }
+
+    function revealProduct(name){
+      const item = products.find(function(product){ return product.name === name; });
+      if(!item) return;
+      pushSearchHistory(name);
+      activeCategory = item.category;
+      renderAll();
+      closeSearch();
+      const targetButton = document.querySelector('.buy-btn[data-add="' + name.replace(/"/g, '\\"') + '"]');
+      if(targetButton){
+        const card = targetButton.closest('.row-card');
+        card?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        card?.classList.add('pulse');
+        window.setTimeout(function(){ card?.classList.remove('pulse'); }, 1200);
+      }
+    }
+
+    function animateSearchAddFeedback(btn){
+      if(!btn) return;
+      const initial = btn.textContent;
+      btn.classList.add('added');
+      btn.textContent = 'Добавлено';
+      window.setTimeout(function(){
+        btn.classList.remove('added');
+        btn.textContent = initial;
+      }, 950);
+    }
+
+    function openCart(){ cartOverlay.classList.add('open'); cartPanel.classList.add('open'); }
+    function closeCart(){ cartOverlay.classList.remove('open'); cartPanel.classList.remove('open'); cartPanel.classList.remove('checkout-mode'); }
+    function showToast(text){
+      cartToast.innerHTML = text;
+      cartToast.classList.add('show');
+      if(toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ cartToast.classList.remove('show'); }, 1800);
+    }
+    function parsePrice(value){ return Number(String(value).replace(/[^0-9]/g,'')) || 0; }
+    function formatPrice(value){ return String(value) + ' ₽'; }
+    function updateCartBadge(){ cartBadge.textContent = String(cart.reduce((sum,item)=>sum + item.qty,0)); }
+    function getDeliveryCost(subtotal){
+      if(deliveryMode === 'pickup' || subtotal <= 0) return 0;
+      return subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : BASE_DELIVERY_COST;
+    }
+    function updateDeliveryModeUI(){
+      deliveryModeButtons.forEach(function(btn){
+        btn.classList.toggle('active', btn.getAttribute('data-delivery-mode') === deliveryMode);
+      });
+      if(orderAddressLabel) orderAddressLabel.textContent = deliveryMode === 'pickup' ? 'Адрес / точка самовывоза' : 'Адрес доставки';
+      if(orderAddressInput){
+        orderAddressInput.placeholder = deliveryMode === 'pickup' ? 'Например, самовывоз с Харьковской, 7' : 'Улица, дом, квартира';
+      }
+      renderCart();
+    }
+    function formatCartHeadMeta(count){
+      if(count % 10 === 1 && count % 100 !== 11) return count + ' позиция';
+      if([2,3,4].includes(count % 10) && ![12,13,14].includes(count % 100)) return count + ' позиции';
+      return count + ' позиций';
+    }
+    function restartHeroTimer(){
+      if(heroTimer) clearInterval(heroTimer);
+      heroTimer = setInterval(function(){ setHeroSlide(activeHeroSlide + 1); }, 4800);
+    }
+    function setHeroSlide(index){
+      activeHeroSlide = (index + heroSlides.length) % heroSlides.length;
+      heroMedia.querySelectorAll('.hero-slide').forEach(function(slide, slideIndex){
+        slide.classList.toggle('active', slideIndex === activeHeroSlide);
+      });
+      heroDots.querySelectorAll('.hero-dot').forEach(function(dot, dotIndex){
+        dot.classList.toggle('active', dotIndex === activeHeroSlide);
+      });
+    }
+    function renderHeroSlides(){
+      if(heroInitialized) return setHeroSlide(activeHeroSlide);
+      heroMedia.innerHTML = heroSlides.map(function(slide, index){
+        return '<div class="hero-slide ' + (index===0 ? 'active' : '') + '" role="img" aria-label="' + slide.alt + '" style="background-image:url(\'' + slide.image + '\')"></div>';
+      }).join('');
+      heroDots.innerHTML = heroSlides.map(function(_, index){
+        return '<button class="hero-dot ' + (index===0 ? 'active' : '') + '" type="button" aria-label="Слайд ' + (index + 1) + '" data-hero-dot="' + index + '"></button>';
+      }).join('');
+      heroDots.querySelectorAll('[data-hero-dot]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          setHeroSlide(Number(btn.getAttribute('data-hero-dot')));
+          restartHeroTimer();
+        });
+      });
+      heroPrevBtn.addEventListener('click', function(){
+        setHeroSlide(activeHeroSlide - 1);
+        restartHeroTimer();
+      });
+      heroNextBtn.addEventListener('click', function(){
+        setHeroSlide(activeHeroSlide + 1);
+        restartHeroTimer();
+      });
+      heroInitialized = true;
+      restartHeroTimer();
+    }
+    function syncHeaderState(){
+      if(!headerEl) return;
+      headerEl.classList.toggle('is-sticky', window.scrollY > 20);
+    }
+    function triggerBrandSpin(){
+      if(!brandSpinTrigger) return;
+      brandSpinTrigger.classList.remove('is-pressed');
+      void brandSpinTrigger.offsetWidth;
+      brandSpinTrigger.classList.add('is-pressed');
+      window.setTimeout(function(){
+        brandSpinTrigger.classList.remove('is-pressed');
+      }, 220);
+    }
+
+    function renderCart(){
+      const itemCount = cart.reduce(function(sum,item){ return sum + item.qty; }, 0);
+      if(cartHeadMeta) cartHeadMeta.textContent = formatCartHeadMeta(itemCount);
+      if(!cart.length){
+        cartList.innerHTML = '<div class="cart-empty"><strong>Корзина пока пустая</strong><span>Добавьте блюда из меню, и здесь появится быстрый расчёт заказа, доставки и оплаты.</span></div>';
+        cartSubtotal.textContent = '0 ₽';
+        cartDeliveryCost.textContent = '0 ₽';
+        cartTotal.textContent = '0 ₽';
+        deliveryHint.textContent = 'Добавьте блюда для бесплатной доставки от 1500 ₽';
+        deliveryBarFill.style.width = '0%';
+        updateCartBadge();
+        saveCart();
+        return;
+      }
+      cartList.innerHTML = cart.map(function(item){
+        const lineTotal = parsePrice(item.price) * item.qty;
+        return '<div class="cart-item"><img class="cart-item-thumb" src="'+item.image+'" alt="'+item.name+'"><div class="cart-item-main"><div class="cart-item-top"><div><div class="cart-item-title">'+item.name+'</div><div class="cart-item-meta">'+item.weight+' · '+item.price+'</div></div><button class="cart-remove" type="button" data-remove="'+item.name+'" aria-label="Удалить позицию">×</button></div><div class="cart-item-bottom"><div class="cart-item-controls"><button class="qty-btn" data-qty="minus" data-name="'+item.name+'">−</button><strong>'+item.qty+'</strong><button class="qty-btn" data-qty="plus" data-name="'+item.name+'">+</button></div><div class="cart-item-total">'+formatPrice(lineTotal)+'</div></div></div></div>';
+      }).join('');
+      const subtotal = cart.reduce(function(sum,item){ return sum + parsePrice(item.price) * item.qty; }, 0);
+      const deliveryCost = getDeliveryCost(subtotal);
+      const total = subtotal + deliveryCost;
+      cartSubtotal.textContent = formatPrice(subtotal);
+      cartDeliveryCost.textContent = deliveryMode === 'pickup' ? 'Самовывоз' : formatPrice(deliveryCost);
+      if(deliveryMode === 'pickup'){
+        deliveryHint.textContent = 'Самовывоз доступен бесплатно с Харьковской, 7';
+        deliveryBarFill.style.width = '100%';
+      } else if(subtotal >= FREE_DELIVERY_THRESHOLD){
+        deliveryHint.textContent = 'Бесплатная доставка уже доступна для этого заказа';
+        deliveryBarFill.style.width = '100%';
+      } else {
+        const progress = Math.max(0, Math.min(100, subtotal / FREE_DELIVERY_THRESHOLD * 100));
+        deliveryHint.textContent = 'До бесплатной доставки осталось ' + formatPrice(FREE_DELIVERY_THRESHOLD - subtotal);
+        deliveryBarFill.style.width = progress + '%';
+      }
+      cartTotal.textContent = formatPrice(total);
+      updateCartBadge();
+      saveCart();
+    }
+
+    function animateAddFeedback(btn){
+      if(!btn) return;
+      const initial = btn.textContent;
+      btn.classList.add('added');
+      btn.textContent = 'Добавлено';
+      setTimeout(function(){
+        btn.classList.remove('added');
+        btn.textContent = initial;
+      }, 1100);
+    }
+
+    function bindAddButtons(){
+      document.querySelectorAll('.buy-btn[data-add]').forEach(function(btn){
+        btn.onclick = function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          addToCart(btn.getAttribute('data-add'));
+          animateAddFeedback(btn);
+          return false;
+        };
+        btn.addEventListener('pointerdown', function(event){
+          event.stopPropagation();
+        });
+      });
+    }
+
+    function addToCart(name){
+      const item = products.find(function(p){ return p.name === name; });
+      if(!item) return;
+      const existing = cart.find(function(p){ return p.name === name; });
+      if(existing){ existing.qty += 1; }
+      else { cart.push(Object.assign({}, item, { qty: 1 })); }
+      renderCart();
+      openCart();
+      showToast('Добавлено: <strong>' + name + '</strong>');
+    }
+
+    function changeQty(name, delta){
+      const item = cart.find(function(p){ return p.name === name; });
+      if(!item) return;
+      item.qty += delta;
+      if(item.qty <= 0){
+        const index = cart.findIndex(function(p){ return p.name === name; });
+        if(index >= 0) cart.splice(index,1);
+      }
+      renderCart();
+    }
+    function removeFromCart(name){
+      const index = cart.findIndex(function(item){ return item.name === name; });
+      if(index >= 0){
+        cart.splice(index, 1);
+        renderCart();
+        showToast('Удалено из корзины: <strong>' + name + '</strong>');
+      }
+    }
+    function maskPhoneValue(value){
+      const digits = String(value).replace(/\D/g, '').replace(/^8/, '7').slice(0, 11);
+      let normalized = digits;
+      if(normalized && normalized[0] !== '7') normalized = '7' + normalized.slice(1);
+      const parts = normalized.split('');
+      let result = '+7';
+      if(parts.length > 1) result += ' (' + parts.slice(1, 4).join('');
+      if(parts.length >= 4) result += ')';
+      if(parts.length > 4) result += ' ' + parts.slice(4, 7).join('');
+      if(parts.length > 7) result += '-' + parts.slice(7, 9).join('');
+      if(parts.length > 9) result += '-' + parts.slice(9, 11).join('');
+      return result;
+    }
+
+    document.addEventListener('click', function(event){
+      if(searchToggleBtn && event.target.closest('#searchToggleBtn')){
+        event.preventDefault();
+        toggleSearch();
+        return;
+      }
+      if(accountOpenBtn && event.target.closest('#accountOpenBtn')){
+        event.preventDefault();
+        toggleAccount();
+        return;
+      }
+      const accountTabBtn = event.target.closest('[data-account-tab]');
+      if(accountTabBtn){
+        setAccountTab(accountTabBtn.getAttribute('data-account-tab'));
+        return;
+      }
+      const searchResult = event.target.closest('[data-search-open]');
+      const searchAddBtn = event.target.closest('[data-search-add]');
+      if(searchAddBtn){
+        event.preventDefault();
+        event.stopPropagation();
+        addToCart(searchAddBtn.getAttribute('data-search-add'));
+        animateSearchAddFeedback(searchAddBtn);
+        return;
+      }
+      if(searchResult){
+        revealProduct(searchResult.getAttribute('data-search-open'));
+        return;
+      }
+      if(searchOpen && searchWrap && !event.target.closest('#searchWrap')){
+        closeSearch();
+      }
+      if(accountOpen && accountModal && !event.target.closest('#accountModal')){
+        closeAccount();
+      }
+      const qtyBtn = event.target.closest('[data-qty]');
+      if(qtyBtn){ changeQty(qtyBtn.getAttribute('data-name'), qtyBtn.getAttribute('data-qty') === 'plus' ? 1 : -1); }
+      const removeBtn = event.target.closest('[data-remove]');
+      if(removeBtn){ removeFromCart(removeBtn.getAttribute('data-remove')); }
+    });
+
+    cartOpenBtn.addEventListener('click', openCart);
+    cartCloseBtn.addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', closeCart);
+    accountCloseBtn?.addEventListener('click', closeAccount);
+    accountOverlay?.addEventListener('click', closeAccount);
+    if(brandSpinTrigger){
+      brandSpinTrigger.addEventListener('click', triggerBrandSpin);
+      brandSpinTrigger.addEventListener('keydown', function(event){
+        if(event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          triggerBrandSpin();
+        }
+      });
+    }
+    window.addEventListener('scroll', syncHeaderState, { passive: true });
+    deliveryModeButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        deliveryMode = btn.getAttribute('data-delivery-mode');
+        updateDeliveryModeUI();
+      });
+    });
+    orderPhoneInput?.addEventListener('input', function(){
+      orderPhoneInput.value = maskPhoneValue(orderPhoneInput.value);
+    });
+      if(searchInput){
+        searchInput.addEventListener('input', function(){
+          renderSearchResults(searchInput.value);
+        });
+      searchInput.addEventListener('keydown', function(event){
+        const resultEls = Array.from(searchResults.querySelectorAll('.search-result[data-search-open]'));
+        if(event.key === 'ArrowDown' && resultEls.length){
+          event.preventDefault();
+          setActiveSearchResult(activeSearchIndex < resultEls.length - 1 ? activeSearchIndex + 1 : 0);
+          return;
+        }
+        if(event.key === 'ArrowUp' && resultEls.length){
+          event.preventDefault();
+          setActiveSearchResult(activeSearchIndex > 0 ? activeSearchIndex - 1 : resultEls.length - 1);
+          return;
+        }
+        if(event.key === 'Enter' && resultEls.length && activeSearchIndex >= 0){
+          event.preventDefault();
+          revealProduct(resultEls[activeSearchIndex].getAttribute('data-search-open'));
+          return;
+        }
+        if(event.key === 'Escape'){
+          closeSearch();
+          searchToggleBtn?.focus();
+        }
+      });
+    }
+    document.addEventListener('keydown', function(event){
+      if(event.key === 'Escape' && searchOpen) closeSearch();
+    });
+    document.addEventListener('keydown', function(event){
+      if(event.key === 'Escape' && accountOpen){
+        closeAccount();
+        accountOpenBtn?.focus();
+      }
+    });
+    document.addEventListener('keydown', function(event){
+      const searchResult = event.target.closest('.search-result[data-search-open]');
+      if(searchResult && (event.key === 'Enter' || event.key === ' ')){
+        event.preventDefault();
+        revealProduct(searchResult.getAttribute('data-search-open'));
+      }
+    });
+    loginSubmitBtn?.addEventListener('click', function(){
+      const loginValue = document.getElementById('loginEmail').value.trim();
+      const passwordValue = document.getElementById('loginPassword').value.trim();
+      const loginPolicy = document.getElementById('loginPolicy').checked;
+      if(!loginValue || !passwordValue){
+        showToast('Заполните логин и пароль');
+        return;
+      }
+      if(!loginPolicy){
+        showToast('Подтвердите согласие с политикой');
+        return;
+      }
+      closeAccount();
+      showToast('Вход выполнен. Добро пожаловать в <strong>Грильяж</strong>');
+    });
+    signupSubmitBtn?.addEventListener('click', function(){
+      const nameValue = document.getElementById('signupName').value.trim();
+      const phoneValue = document.getElementById('signupPhone').value.trim();
+      const emailValue = document.getElementById('signupEmail').value.trim();
+      const passwordValue = document.getElementById('signupPassword').value.trim();
+      const repeatValue = document.getElementById('signupPasswordRepeat').value.trim();
+      const signupPolicy = document.getElementById('signupPolicy').checked;
+      if(!nameValue || !phoneValue || !emailValue || !passwordValue || !repeatValue){
+        showToast('Заполните все поля регистрации');
+        return;
+      }
+      if(!signupPolicy){
+        showToast('Нужно согласие с политикой конфиденциальности');
+        return;
+      }
+      if(passwordValue !== repeatValue){
+        showToast('Пароли не совпадают');
+        return;
+      }
+      closeAccount();
+      showToast('Аккаунт создан. Добро пожаловать в <strong>Грильяж</strong>');
+    });
+    forgotPasswordLink?.addEventListener('click', function(event){
+      event.preventDefault();
+      showToast('Ссылка для восстановления пароля будет отправлена после интеграции email-сервиса');
+    });
+    document.querySelectorAll('[data-social-auth]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        showToast('Вход через <strong>' + btn.getAttribute('data-social-auth') + '</strong> подготовлен для интеграции');
+      });
+    });
+    checkoutBtn.addEventListener('click', function(){
+      if(!cart.length) return;
+      cartPanel.classList.add('checkout-mode');
+      checkoutForm.classList.add('open');
+    });
+    checkoutBackBtn.addEventListener('click', function(){
+      checkoutForm.classList.remove('open');
+      cartPanel.classList.remove('checkout-mode');
+    });
+    checkoutBackLink?.addEventListener('click', function(){
+      checkoutForm.classList.remove('open');
+      cartPanel.classList.remove('checkout-mode');
+    });
+    checkoutDismissBtn?.addEventListener('click', function(){
+      checkoutForm.classList.remove('open');
+      cartPanel.classList.remove('checkout-mode');
+    });
+    submitOrderBtn.addEventListener('click', function(){
+      if(!cart.length) return;
+      const name = document.getElementById('orderName').value.trim();
+      const phone = document.getElementById('orderPhone').value.trim();
+      const address = document.getElementById('orderAddress').value.trim();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+      if(!name || !phone){
+        showToast('Заполните имя и телефон');
+        return;
+      }
+      if(deliveryMode === 'delivery' && !address){
+        showToast('Укажите адрес доставки');
+        return;
+      }
+      if(!paymentMethod){
+        showToast('Выберите способ оплаты');
+        return;
+      }
+      checkoutForm.classList.remove('open');
+      closeCart();
+      showToast((deliveryMode === 'pickup' ? 'Заказ на самовывоз принят.' : 'Заказ принят.') + ' Мы скоро свяжемся с вами');
+    });
+
+    function renderAll(){renderHeroSlides(); renderCategories(); renderActive(); renderOtherSections(); bindAddButtons(); renderCart(); syncHeaderState(); updateDeliveryModeUI();}
+    renderAll();
+  </script>
+</body>
+</html>
