@@ -1,0 +1,63 @@
+{
+  "schema_version": 2,
+  "active_work_id": "grilyage-delivery-009e3b85",
+  "works": {
+    "grilyage-delivery-75bc7988": {
+      "work_id": "grilyage-delivery-75bc7988",
+      "active_plan": "C:\\DEV\\GrilyageV2-main\\.omo\\plans\\grilyage-delivery.md",
+      "plan_name": "grilyage-delivery",
+      "status": "active",
+      "started_at": "2026-06-11T19:34:23.883Z",
+      "updated_at": "2026-06-11T19:34:23.883Z",
+      "session_ids": [
+        "opencode:ses_14812b19bffeDg4Ao3Rq7634pI"
+      ],
+      "session_origins": {
+        "opencode:ses_14812b19bffeDg4Ao3Rq7634pI": "direct"
+      },
+      "agent": "atlas",
+      "task_sessions": {}
+    },
+    "grilyage-delivery-009e3b85": {
+      "work_id": "grilyage-delivery-009e3b85",
+      "active_plan": "C:\\DEV\\GrilyageV2-main\\.omo\\plans\\grilyage-delivery.md",
+      "plan_name": "grilyage-delivery",
+      "status": "active",
+      "started_at": "2026-06-11T19:34:23.894Z",
+      "updated_at": "2026-06-12T08:04:40.964Z",
+      "session_ids": [
+        "opencode:ses_14812b19bffeDg4Ao3Rq7634pI",
+        "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK",
+        "opencode:ses_1452a3185ffel2TPkQoWFBcqeS",
+        "opencode:ses_14523631affegRxrQj9mRL8Qlh"
+      ],
+      "session_origins": {
+        "opencode:ses_14812b19bffeDg4Ao3Rq7634pI": "direct",
+        "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK": "appended",
+        "opencode:ses_1452a3185ffel2TPkQoWFBcqeS": "appended",
+        "opencode:ses_14523631affegRxrQj9mRL8Qlh": "appended"
+      },
+      "agent": "atlas",
+      "task_sessions": {}
+    }
+  },
+  "active_plan": "C:\\DEV\\GrilyageV2-main\\.omo\\plans\\grilyage-delivery.md",
+  "started_at": "2026-06-11T19:34:23.894Z",
+  "status": "active",
+  "updated_at": "2026-06-12T08:04:40.964Z",
+  "session_ids": [
+    "opencode:ses_14812b19bffeDg4Ao3Rq7634pI",
+    "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK",
+    "opencode:ses_1452a3185ffel2TPkQoWFBcqeS",
+    "opencode:ses_14523631affegRxrQj9mRL8Qlh"
+  ],
+  "session_origins": {
+    "opencode:ses_14812b19bffeDg4Ao3Rq7634pI": "direct",
+    "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK": "appended",
+    "opencode:ses_1452a3185ffel2TPkQoWFBcqeS": "appended",
+    "opencode:ses_14523631affegRxrQj9mRL8Qlh": "appended"
+  },
+  "plan_name": "grilyage-delivery",
+  "task_sessions": {},
+  "agent": "atlas"
+}

@@ -1,0 +1,23 @@
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { CatalogService } from './catalog.service';
+import { ProductsQueryDto } from './dto/products-query.dto';
+
+@Controller()
+export class CatalogController {
+  constructor(private readonly catalogService: CatalogService) {}
+
+  @Get('categories')
+  async findAllCategories() {
+    return this.catalogService.findAllCategories();
+  }
+
+  @Get('products')
+  async findProducts(@Query() query: ProductsQueryDto) {
+    return this.catalogService.findProducts(query);
+  }
+
+  @Get('products/:slug')
+  async findProductBySlug(@Param('slug') slug: string) {
+    return this.catalogService.findProductBySlug(slug);
+  }
+}

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grilyazh Gastro-House</title>
+  <style>
+    :root { --cream:#f6f1e7; --gold:#d6b06a; --wood:#7b6147; --text:#2f261f; --border:#eadfcf; --footer:#2f261f; --vk:#4c75a3; --tg:#229ed9; --max:#8e8e93; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; font-family:Inter,Arial,sans-serif; background:var(--cream); color:var(--text); }
+    a { color:inherit; text-decoration:none; }
+    .page { max-width:1440px; margin:0 auto; padding:16px; }
+    .hero { position:relative; min-height:560px; border-radius:34px; overflow:hidden; background:linear-gradient(90deg,rgba(0,0,0,.62) 0%,rgba(0,0,0,.34) 42%,rgba(0,0,0,.18) 100%), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; }
+    .header { position:absolute; inset:0 0 auto 0; z-index:20; padding:20px 24px; color:#fff; }
+    .header-line { position:absolute; left:0; right:0; top:92px; height:1px; background:rgba(255,255,255,.2); }
+    .header-inner { display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .brand { display:flex; align-items:center; gap:12px; min-width:180px; }
+    .brand:hover .brand-badge { transform: translateY(-3px) scale(1.12); filter: drop-shadow(0 0 14px rgba(214,176,106,.34)) drop-shadow(0 0 34px rgba(214,176,106,.26)) drop-shadow(0 0 52px rgba(214,176,106,.16)); }
+    .brand:hover .brand-badge img { transform: scale(1.08); filter: brightness(1.08) saturate(1.06); }
+    .brand-badge { width:96px; height:96px; border-radius:999px; border:1px solid rgba(228,201,124,.16); background:transparent; color:#e4c97c; display:flex; align-items:center; justify-content:center; font-size:11px; transition: transform .32s ease, filter .32s ease, border-color .32s ease, box-shadow .32s ease; animation: logoFloat 3.2s ease-in-out infinite; }
+    .brand-badge img { width:100%; height:100%; object-fit:contain; display:block; transition: transform .28s ease, filter .28s ease; }
+    @keyframes logoFloat { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.01); } }
+    .brand-title { font-size:18px; font-weight:600; letter-spacing:.24em; text-transform:uppercase; color:#e9d7a8; }
+    .brand-sub { margin-top:4px; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.7); }
+    .nav { display:flex; gap:36px; padding-top:0; font-size:14px; font-weight:600; align-items:center; }
+    .nav a, .phone { transition: color .2s ease, text-shadow .2s ease, opacity .2s ease; }
+    .nav a:hover, .phone:hover { color: var(--gold); text-shadow: 0 0 14px rgba(214,176,106,.45); }
+    .header-right { display:flex; align-items:center; gap:16px; min-width:320px; font-size:16px; }
+    .divider { width:1px; height:40px; background:rgba(255,255,255,.2); } .phone { white-space: nowrap; font-size: 16px; font-weight: 600; letter-spacing: .01em; }
+    .circle-btn { width:42px; height:42px; border-radius:999px; border:1px solid rgba(214,176,106,.65); color:var(--gold); background:rgba(255,255,255,.05); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease, filter .22s ease; }
+    .circle-btn:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 0 0 1px rgba(214,176,106,.45), 0 10px 24px rgba(0,0,0,.28), 0 0 18px rgba(214,176,106,.28); border-color: rgba(214,176,106,.95); background: rgba(255,255,255,.12); filter: brightness(1.08); }
+    .circle-btn:active { transform: translateY(0) scale(.98); }
+    .circle-btn svg { width:20px; height:20px; stroke: var(--gold); fill: none; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+    .circle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.24); border-color: var(--gold); background: rgba(255,255,255,.1); }
+    .circle-btn svg { width:18px; height:18px; stroke: var(--gold); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .cart-badge { position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 4px; font-size:10px; font-weight:700; background:var(--gold); color:var(--text); border-radius:999px; display:flex; align-items:center; justify-content:center; }
+    .hero-content { position:relative; z-index:2; min-height:560px; display:flex; align-items:center; padding:120px 24px 96px; color:white; }
+    .hero-copy { max-width:520px; }
+    .hero-copy h1 { margin:0; font-size:56px; line-height:1.05; font-weight:600; }
+    .hero-copy .subbrand { margin-top:8px; font-size:28px; text-transform:uppercase; letter-spacing:.06em; color:#e4c97c; }
+    .hero-copy p { margin:16px 0 0; font-size:16px; line-height:1.6; color:rgba(255,255,255,.75); }
+    .cta { margin-top:32px; display:inline-flex; align-items:center; overflow:hidden; border-radius:999px; border:1px solid rgba(228,201,124,.58); color:#fff; box-shadow:0 12px 28px rgba(0,0,0,.18); transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, filter .22s ease; animation: ctaFloat 2.8s ease-in-out infinite; }
+    .cta:hover { transform: translateY(-2px) scale(1.02); border-color: rgba(228,201,124,.95); box-shadow: 0 0 0 1px rgba(228,201,124,.35), 0 14px 30px rgba(0,0,0,.24), 0 0 20px rgba(214,176,106,.25); filter: brightness(1.04); }
+    .cta:active { transform: translateY(0) scale(.99); }
+    @keyframes ctaFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+    .cta span:first-child { padding:12px 20px; }
+    .cta span:last-child { width:46px; height:46px; display:flex; align-items:center; justify-content:center; background:#e4c97c; color:var(--text); transition: background .22s ease, box-shadow .22s ease; }
+    .cta:hover span:last-child { background:#edd48d; box-shadow: inset 0 0 18px rgba(255,255,255,.28); }
+    .categories-wrap { margin-top:64px; }
+    .section-title { margin-bottom:24px; text-align:center; font-size:20px; font-weight:600; }
+    .categories { display:flex; gap:24px; overflow-x:auto; padding:8px 8px 16px; justify-content:center; scrollbar-width:none; }
+    .categories::-webkit-scrollbar { display:none; }
+    .category { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; padding-top:8px; transition: transform .2s ease; }
+    .category:hover { transform: translateY(-3px); }
+    .category-circle { width:140px; height:140px; border-radius:999px; overflow:hidden; background:#f1e5cd; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; border:4px solid transparent; }
+    .category:hover .category-circle { box-shadow: 0 10px 24px rgba(47,38,31,.18), 0 0 18px rgba(214,176,106,.18); border-color: rgba(214,176,106,.55); }
+    .category.active .category-circle { transform:scale(1.05); border-color:var(--gold); }
+    .category-circle img { width:100%; height:100%; object-fit:cover; }
+    .category-label { font-size:16px; font-weight:500; color:var(--wood); transition: color .2s ease, text-shadow .2s ease; }
+    .category:hover .category-label { color: var(--text); text-shadow: 0 0 12px rgba(214,176,106,.18); }
+    .category.active .category-label { color:var(--text); }
+    .menu-sections { margin-top:32px; }
+    .menu-block { margin-top:32px; }
+    .menu-block h2 { margin:0 0 16px; font-size:24px; font-weight:600; }
+    .row-shell { position:relative; }
+    .row { display:flex; gap:16px; overflow-x:auto; padding-bottom:8px; scrollbar-width:none; scroll-behavior:smooth; cursor:grab; user-select:none; }
+    .row.dragging { cursor:grabbing; }
+    .row::-webkit-scrollbar { display:none; }
+    .row-card { min-width:285px; flex:0 0 285px; }
+    .arrow { position:absolute; top:50%; transform:translateY(-50%); z-index:10; width:44px; height:44px; border-radius:999px; border:1px solid #e4d7c8; background:rgba(255,255,255,.95); color:var(--text); box-shadow:0 6px 18px rgba(47,38,31,.12); display:none; align-items:center; justify-content:center; cursor:pointer; }
+    .arrow.show { display:flex; }
+    .arrow.left { left:0; }
+    .arrow.right { right:0; }
+    .card { background:#fff; border:1px solid var(--border); border-radius:24px; padding:16px; }
+    .card img { width:100%; height:160px; object-fit:cover; border-radius:16px; pointer-events:none; }
+    .card-title { margin-top:12px; font-weight:600; }
+    .card-meta { margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-weight { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; background: #f5ecdc; color: var(--text); font-size: 12px; font-weight: 600; letter-spacing: .01em; }
+    .card-kbju { display: grid; grid-template-columns: repeat(4, auto); gap: 6px; }
+    .kbju-item { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 999px; background: #faf6ef; border: 1px solid #efe4d2; font-size: 11px; color: var(--wood); }
+    .kbju-item b { color: var(--text); font-weight: 600; }
+    .card-desc { margin-top: 8px; font-size:14px; color:var(--wood); }
+    .card-bottom { margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .price { font-weight:600; }
+    .buy-btn { position: relative; z-index: 3; border:0; border-radius:999px; background:var(--text); color:#fff; padding:10px 16px; font-size:14px; cursor:pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, filter .2s ease; }
+    .buy-btn:hover { transform: translateY(-2px); background:#3d332b; box-shadow: 0 10px 22px rgba(47,38,31,.22), 0 0 16px rgba(214,176,106,.18); filter: brightness(1.03); }
+    .buy-btn:active { transform: translateY(0) scale(.98); }
+    .buy-btn.added { background: var(--gold); color: var(--text); box-shadow: 0 10px 22px rgba(214,176,106,.28), 0 0 18px rgba(214,176,106,.18); }
+    .buy-btn.added::before { content: '✔'; margin-right: 6px; }
+    .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.34); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .24s ease; z-index: 90; }
+    .cart-overlay.open { opacity: 1; pointer-events: auto; }
+    .cart-panel { position: fixed; top: 0; right: 0; width: 360px; max-width: 100%; height: 100vh; background: #fff; color: var(--text); box-shadow: -14px 0 40px rgba(0,0,0,.18); transform: translateX(100%); transition: transform .28s cubic-bezier(.22,.8,.2,1); z-index: 100; display: flex; flex-direction: column; }
+    .cart-panel.open { transform: translateX(0); }
+    .cart-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 18px 14px; border-bottom: 1px solid var(--border); }
+    .cart-head h3 { margin: 0; font-size: 22px; }
+    .cart-close { border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--text); }
+    .cart-list { flex: 1; overflow: auto; padding: 14px 18px; display: grid; gap: 10px; }
+    .cart-empty { color: var(--wood); font-size: 14px; }
+    .cart-item { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: #fffdf9; }
+    .cart-item-title { font-weight: 600; }
+    .cart-item-meta { margin-top: 4px; font-size: 12px; color: var(--wood); }
+    .cart-item-controls { display: flex; align-items: center; gap: 8px; }
+    .qty-btn { width: 24px; height: 24px; border-radius: 999px; border: 1px solid #dcc8ab; background: #fff; cursor: pointer; }
+    .cart-foot { padding: 14px 18px 18px; border-top: 1px solid var(--border); background: #fff; }
+    .cart-total { display: flex; align-items: center; justify-content: space-between; font-weight: 700; margin-bottom: 12px; }
+    .checkout-btn { width: 100%; border: 0; border-radius: 999px; background: var(--gold); color: var(--text); padding: 12px 16px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(214,176,106,.28); transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+    .checkout-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(214,176,106,.34), 0 0 18px rgba(214,176,106,.18); filter: brightness(1.03); }
+    .checkout-btn:active { transform: translateY(0) scale(.99); }
+    .checkout-form { display: none; padding: 0 18px 18px; border-top: 1px solid var(--border); background: #fff; }
+    .checkout-form.open { display: block; }
+    .checkout-form-title { margin: 14px 0 10px; font-size: 16px; font-weight: 700; }
+    .checkout-grid { display: grid; gap: 10px; }
+    .checkout-field { display: grid; gap: 6px; }
+    .checkout-field label { font-size: 12px; color: var(--wood); }
+    .checkout-field input, .checkout-field textarea { width: 100%; border: 1px solid #e7dac6; border-radius: 12px; padding: 10px 12px; font: inherit; color: var(--text); background: #fffdf9; }
+    .checkout-field textarea { min-height: 78px; resize: vertical; }
+    .checkout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .checkout-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .ghost-btn { flex: 1; border: 1px solid #dcc8ab; border-radius: 999px; background: #fff; color: var(--text); padding: 11px 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .submit-btn { flex: 1.2; border: 0; border-radius: 999px; background: var(--text); color: #fff; padding: 11px 14px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 22px rgba(47,38,31,.18); }
+    .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(16px) scale(.96); background: rgba(47,38,31,.96); color: #fff; padding: 12px 16px; border-radius: 999px; box-shadow: 0 12px 26px rgba(0,0,0,.22), 0 0 18px rgba(214,176,106,.16); opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease; z-index: 120; font-size: 14px; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    .toast strong { color: var(--gold); font-weight: 700; }
+    .footer { margin-top: 16px; overflow: hidden; border-radius: 20px; background: var(--footer); color: #fff; }
+    .footer-grid { display: grid; grid-template-columns: .8fr 1.2fr; align-items: stretch; min-height: 190px; }
+    .footer-left { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 12px 16px; }
+    .footer-eyebrow { text-align: center; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+    .footer-brand { margin-top: 6px; text-align: center; font-size: 28px; font-weight: 700; }
+    .contact-list { margin: 8px auto 0; display: grid; gap: 8px; max-width: 260px; width: 100%; }
+    .contact-label { font-size: 13px; color: rgba(255,255,255,.75); }
+    .contact-box { margin-top: 4px; min-height: 46px; display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: #fff; text-align: left; font-size: 15px; transition: all .2s ease; }
+    .contact-box:hover { background: rgba(255,255,255,.12); border-color: var(--gold); transform: translateY(-1px); }
+    .contact-icon { width:18px; height:18px; flex:0 0 18px; opacity:.9; }
+    .contact-box.work { min-height: 60px; display: flex; align-items: center; gap: 10px; font-size: 14px; line-height: 1.2; }
+    .work-row { display: flex; justify-content: space-between; gap: 10px; }
+    .socials { margin: 2px auto 0; display: flex; justify-content: center; gap: 8px; max-width: 260px; width: 100%; }
+    .social { width: 38px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; transition: all .2s ease; }
+    .social:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.25); filter: brightness(1.1); }
+    .social.vk { background: var(--vk); }
+    .social.tg { background: var(--tg); }
+    .social.max { background: var(--max); }
+    .footer-map-wrap { display: flex; align-items: stretch; justify-content: center; padding: 8px 8px 8px 0; }
+    .footer-map { position: relative; width: 100%; height: 100%; min-height: 0; overflow: hidden; border-radius: 14px; background: #ece8e1; }
+    .footer-map img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .map-tag { position: absolute; left: 10px; bottom: 10px; padding: 6px 12px; border-radius: 10px; background: rgba(255,255,255,.95); color: var(--text); font-size: 12px; box-shadow: 0 8px 18px rgba(47,38,31,.10); }
+    @media (max-width:900px){ .nav,.divider,.header-right .phone{display:none} .hero,.hero-content{min-height:500px} .hero-copy h1{font-size:40px} .hero-copy .subbrand{font-size:22px} .row-card{min-width:260px;flex-basis:260px} .arrow.show{display:none} .footer-grid{grid-template-columns:1fr;min-height:auto} .footer-left{padding:14px;gap:12px} .footer-map-wrap{padding:0 14px 14px} .footer-map{min-height:220px} }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <header class="header">
+        <div class="header-inner">
+          <div class="brand"><div class="brand-badge" style="padding:0; overflow:visible; margin-right:6px;"><img src="logo.png" alt="Грильяж" /></div><div><div class="brand-title">Грильяж</div><div class="brand-sub">Вкус Омска</div></div></div>
+          <nav class="nav"><a href="#menu">Меню</a><a href="#about">О нас</a><a href="#contacts">Контакты</a><a href="#delivery">Доставка и оплата</a></nav>
+          <div class="header-right"><div class="phone">+7 999 999 99 99</div><div class="divider"></div><button class="circle-btn" type="button" aria-label="Поиск"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.2-4.2"></path></svg></button><button class="circle-btn" type="button" aria-label="Профиль"><svg viewBox="0 0 24 24"><path d="M20 21c0-3.3-3.6-6-8-6s-8 2.7-8 6"></path><circle cx="12" cy="8" r="4"></circle></svg></button><button class="circle-btn" id="cartOpenBtn" type="button" aria-label="Корзина" style="position:relative"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 10h9l2-7H8"></path><circle cx="10" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle><circle cx="17" cy="19" r="1.2" fill="var(--gold)" stroke="none"></circle></svg><span class="cart-badge" id="cartBadge">0</span></button></div>
+        </div>
+        <div class="header-line"></div>
+      </header>
+      <div class="hero-content"><div class="hero-copy"><h1>Грильяж</h1><div class="subbrand">Gastro-House</div><p>Оформляйте предзаказ блюд, выпечки и десертов с доставкой и самовывозом.</p><a href="#menu" class="cta"><span>Перейти к меню</span><span>→</span></a></div></div>
+    </section>
+    <section class="categories-wrap" id="menu"><div class="section-title">Категории</div><div class="categories" id="categories"></div></section>
+    <div class="menu-sections"><section class="menu-block"><h2 id="activeTitle">Кулинария</h2><div class="row-shell"><button class="arrow left" id="activeLeft">←</button><div class="row" id="activeRow"></div><button class="arrow right show" id="activeRight">→</button></div></section><div id="otherSections"></div></div>
+    <footer class="footer" id="contacts"><div class="footer-grid"><div class="footer-left"><div><div class="footer-eyebrow">Контакты</div><div class="footer-brand">Грильяж</div><div class="contact-list"><div><div class="contact-label">Режим работы</div><div class="contact-box work"><svg class="contact-icon" viewBox="0 0 24 24" fill="white"><path d="M7 2v2H5a2 2 0 0 0-2 2v2h18V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm14 8H3v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V10z"/></svg><div style="width:100%"><div class="work-row"><span>Пн–Пт</span><strong>08:00–21:00</strong></div><div class="work-row"><span>Сб–Вс</span><strong>09:00–21:00</strong></div></div></div></div><div><div class="contact-label">Телефон</div><div class="contact-box"><svg class="contact-icon" viewBox="0 0 24 24" fill="white"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.36 2.3.55 3.5.55a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.3a1 1 0 0 1 1 1c0 1.2.2 2.4.55 3.5a1 1 0 0 1-.24 1l-2.04 2.3z"/></svg><a href="tel:+73812900000">+7 (3812) 90-00-00</a></div></div><div><div class="contact-label">Почта</div><div class="contact-box"><svg class="contact-icon" viewBox="0 0 24 24" fill="white"><path d="M20 4H4a2 2 0 0 0-2 2v.01l10 6.25L22 6.01V6a2 2 0 0 0-2-2zm0 4.24-7.4 4.63a2 2 0 0 1-2.2 0L4 8.24V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.24z"/></svg><a href="mailto:info@grilyazh-omsk.ru">info@grilyazh-omsk.ru</a></div></div><div><div class="contact-label">Адрес</div><div class="contact-box"><svg class="contact-icon" viewBox="0 0 24 24" fill="white"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg><span>Омск, Харьковская, 7</span></div></div></div></div><div class="socials"><div class="social vk">VK</div><div class="social tg"><svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M9.04 15.34l-.38 5.32c.54 0 .77-.23 1.05-.5l2.52-2.4 5.22 3.82c.96.53 1.64.25 1.9-.89l3.45-16.2c.33-1.53-.55-2.13-1.48-1.79L1.6 9.17c-1.5.58-1.48 1.42-.26 1.8l4.84 1.5L18.46 5.1c.58-.37 1.1-.17.66.2"/></svg></div><div class="social max">MAX</div></div></div><div class="footer-map-wrap"><div class="footer-map"><img src="https://static-maps.yandex.ru/1.x/?lang=ru_RU&ll=73.414421,54.946136&z=17&l=map&size=650,450&pt=73.414421,54.946136,pm2rdm" alt="Карта Омск Харьковская 7"/><div class="map-tag">Омск, Харьковская, 7</div></div></div></div></footer>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-panel" id="cartPanel" aria-hidden="true">
+      <div class="cart-head">
+        <h3>Корзина</h3>
+        <button class="cart-close" id="cartCloseBtn" aria-label="Закрыть">×</button>
+      </div>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-foot">
+        <div class="cart-total"><span>Итого</span><span id="cartTotal">0 ₽</span></div>
+        <button class="checkout-btn" id="checkoutBtn">Оформить заказ</button>
+      </div>
+      <div class="checkout-form" id="checkoutForm">
+        <div class="checkout-form-title">Оформление заказа</div>
+        <div class="checkout-grid">
+          <div class="checkout-field">
+            <label for="orderName">Имя</label>
+            <input id="orderName" type="text" placeholder="Ваше имя" />
+          </div>
+          <div class="checkout-row">
+            <div class="checkout-field">
+              <label for="orderPhone">Телефон</label>
+              <input id="orderPhone" type="tel" placeholder="+7 (___) ___-__-__" />
+            </div>
+            <div class="checkout-field">
+              <label for="orderTime">Время</label>
+              <input id="orderTime" type="text" placeholder="Например, 18:30" />
+            </div>
+          </div>
+          <div class="checkout-field">
+            <label for="orderAddress">Адрес / самовывоз</label>
+            <input id="orderAddress" type="text" placeholder="Адрес доставки или Самовывоз" />
+          </div>
+          <div class="checkout-field">
+            <label for="orderComment">Комментарий</label>
+            <textarea id="orderComment" placeholder="Подъезд, этаж, пожелания к заказу"></textarea>
+          </div>
+        </div>
+        <div class="checkout-actions">
+          <button class="ghost-btn" id="checkoutBackBtn" type="button">Назад</button>
+          <button class="submit-btn" id="submitOrderBtn" type="button">Подтвердить</button>
+        </div>
+      </div>
+    </aside>
+    <div class="toast" id="cartToast">Блюдо добавлено в корзину</div>
+  </div>
+  <script>
+    const categories=[{title:'Новинки',image:'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=300&q=80'},{title:'Кулинария',image:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80'},{title:'Пекарня',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=300&q=80'},{title:'Кондитерская',image:'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=300&q=80'},{title:'Бизнес-ланч',image:'https://images.unsplash.com/photo-1546069901-5ec6a79120b0?auto=format&fit=crop&w=300&q=80'}];
+    const products=[
+      {category:'Кулинария',name:'Курица с овощами',price:'390 ₽',weight:'280 г',kcal:'320',protein:'24',fat:'14',carbs:'18',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кулинария',name:'Запечённое мясо',price:'450 ₽',weight:'300 г',kcal:'410',protein:'28',fat:'22',carbs:'16',desc:'Сытное блюдо',image:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Котлета с пюре',price:'320 ₽',weight:'260 г',kcal:'295',protein:'17',fat:'13',carbs:'27',desc:'Домашнее блюдо',image:'https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Паста с курицей',price:'410 ₽',weight:'290 г',kcal:'360',protein:'21',fat:'11',carbs:'34',desc:'Горячее блюдо',image:'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кулинария',name:'Рыба с рисом',price:'430 ₽',weight:'270 г',kcal:'300',protein:'23',fat:'9',carbs:'29',desc:'Обеденное блюдо',image:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80'},{category:'Кулинария',name:'Жаркое по-домашнему',price:'440 ₽',weight:'310 г',kcal:'398',protein:'25',fat:'19',carbs:'31',desc:'Тёплое блюдо',image:'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Слойка с вишней',price:'160 ₽',weight:'110 г',kcal:'290',protein:'4',fat:'14',carbs:'37',desc:'Свежая выпечка',image:'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Пирог с мясом',price:'420 ₽',weight:'320 г',kcal:'430',protein:'18',fat:'24',carbs:'35',desc:'Румяная выпечка',image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Пекарня',name:'Булочка с корицей',price:'140 ₽',weight:'95 г',kcal:'265',protein:'5',fat:'9',carbs:'41',desc:'Сладкая выпечка',image:'https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Круассан',price:'180 ₽',weight:'85 г',kcal:'240',protein:'6',fat:'12',carbs:'26',desc:'Французская выпечка',image:'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Пирожок с картофелем',price:'120 ₽',weight:'90 г',kcal:'220',protein:'4',fat:'8',carbs:'32',desc:'Домашняя выпечка',image:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80'},{category:'Пекарня',name:'Улитка с изюмом',price:'150 ₽',weight:'105 г',kcal:'276',protein:'5',fat:'10',carbs:'39',desc:'Сдобная выпечка',image:'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Пирожное',price:'190 ₽',weight:'120 г',kcal:'315',protein:'4',fat:'18',carbs:'34',desc:'Десерт',image:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Торт',price:'950 ₽',weight:'950 г',kcal:'420',protein:'6',fat:'24',carbs:'45',desc:'Торт',image:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Кондитерская',name:'Эклер',price:'170 ₽',weight:'90 г',kcal:'280',protein:'5',fat:'16',carbs:'29',desc:'Заварное пирожное',image:'https://images.unsplash.com/photo-1621303837174-89787a7d4729?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Чизкейк',price:'280 ₽',weight:'140 г',kcal:'330',protein:'6',fat:'20',carbs:'31',desc:'Нежный десерт',image:'https://images.unsplash.com/photo-1567171466295-4afa63d45416?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Макарон',price:'160 ₽',weight:'70 г',kcal:'240',protein:'4',fat:'10',carbs:'33',desc:'Французский десерт',image:'https://images.unsplash.com/photo-1558326567-98ae2405596b?auto=format&fit=crop&w=900&q=80'},{category:'Кондитерская',name:'Тарталетка с ягодами',price:'220 ₽',weight:'115 г',kcal:'265',protein:'3',fat:'12',carbs:'35',desc:'Ягодный десерт',image:'https://images.unsplash.com/photo-1464306076886-debede6f9bb8?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 1',price:'390 ₽',weight:'420 г',kcal:'460',protein:'23',fat:'15',carbs:'56',desc:'Суп + горячее',image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 2',price:'420 ₽',weight:'400 г',kcal:'430',protein:'19',fat:'14',carbs:'58',desc:'Салат + гарнир',image:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 3',price:'450 ₽',weight:'450 г',kcal:'495',protein:'24',fat:'17',carbs:'61',desc:'Комплексный обед',image:'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80',isNew:true},{category:'Бизнес-ланч',name:'Ланч 4',price:'480 ₽',weight:'470 г',kcal:'520',protein:'26',fat:'18',carbs:'63',desc:'Полный обед',image:'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 5',price:'430 ₽',weight:'390 г',kcal:'440',protein:'22',fat:'14',carbs:'55',desc:'Горячее + салат',image:'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80'},{category:'Бизнес-ланч',name:'Ланч 6',price:'460 ₽',weight:'430 г',kcal:'470',protein:'23',fat:'16',carbs:'59',desc:'Обеденный сет',image:'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80'}];
+    let activeCategory='Кулинария'; const categoriesEl=document.getElementById('categories'),activeTitleEl=document.getElementById('activeTitle'),activeRowEl=document.getElementById('activeRow'),otherSectionsEl=document.getElementById('otherSections');
+    const cardHTML=item=>'<div class="row-card"><div class="card"><img src="'+item.image+'" alt="'+item.name+'"><div class="card-title">'+item.name+'</div><div class="card-meta"><div class="card-weight">'+item.weight+'</div><div class="card-kbju"><span class="kbju-item"><b>К</b>'+item.kcal+'</span><span class="kbju-item"><b>Б</b>'+item.protein+'</span><span class="kbju-item"><b>Ж</b>'+item.fat+'</span><span class="kbju-item"><b>У</b>'+item.carbs+'</span></div></div><div class="card-desc">'+item.desc+'</div><div class="card-bottom"><div class="price">'+item.price+'</div><button class="buy-btn" type="button" data-add="'+item.name+'">В корзину</button></div></div></div>';
+    const getCategoryItems=name=>name==='Новинки'?products.filter(p=>p.isNew):products.filter(p=>p.category===name);
+    function renderCategories(){categoriesEl.innerHTML=categories.map(cat=>`<div class="category ${activeCategory===cat.title?'active':''}" data-category="${cat.title}"><div class="category-circle"><img src="${cat.image}" alt="${cat.title}"></div><div class="category-label">${cat.title}</div></div>`).join(''); categoriesEl.querySelectorAll('.category').forEach(el=>el.addEventListener('click',()=>{activeCategory=el.dataset.category;renderAll();}));}
+    function attachRowBehavior(rowEl,leftBtn,rightBtn){let hasScrolledRight=false,isDown=false,startX=0,startScrollLeft=0,velocity=0,lastX=0,lastTime=0,rafId=null; const cancelMomentum=()=>{if(rafId){cancelAnimationFrame(rafId);rafId=null;}}; const updateButtons=()=>{const canLeft=rowEl.scrollLeft>8,canRight=rowEl.scrollLeft+rowEl.clientWidth<rowEl.scrollWidth-8; leftBtn.classList.toggle('show',hasScrolledRight&&canLeft&&window.innerWidth>900); rightBtn.classList.toggle('show',canRight&&window.innerWidth>900);}; const runMomentum=()=>{velocity*=0.94; if(Math.abs(velocity)<0.12){rafId=null;updateButtons();return;} rowEl.scrollLeft-=velocity*18; updateButtons(); rafId=requestAnimationFrame(runMomentum);}; rowEl.addEventListener('scroll',()=>{if(rowEl.scrollLeft>8)hasScrolledRight=true; updateButtons();},{passive:true}); rowEl.addEventListener('pointerdown',e=>{ if(e.target.closest('.buy-btn')) return; if(e.pointerType==='mouse'&&e.button!==0)return; cancelMomentum(); isDown=true; rowEl.classList.add('dragging'); startX=e.clientX; startScrollLeft=rowEl.scrollLeft; lastX=e.clientX; lastTime=performance.now(); velocity=0; rowEl.setPointerCapture?.(e.pointerId); }); rowEl.addEventListener('pointermove',e=>{ if(!isDown) return; const dx=e.clientX-startX; if(Math.abs(dx) > 4) e.preventDefault(); rowEl.scrollLeft=startScrollLeft-dx; const now=performance.now(),dt=now-lastTime; if(dt>0)velocity=(e.clientX-lastX)/dt; lastX=e.clientX; lastTime=now; if(rowEl.scrollLeft>8)hasScrolledRight=true; updateButtons(); }); const endDrag=e=>{if(!isDown)return; isDown=false; rowEl.classList.remove('dragging'); rowEl.releasePointerCapture?.(e.pointerId); if(Math.abs(velocity)>0.08)rafId=requestAnimationFrame(runMomentum);}; rowEl.addEventListener('pointerup',endDrag); rowEl.addEventListener('pointercancel',endDrag); rowEl.addEventListener('pointerleave',endDrag); leftBtn.addEventListener('click',()=>{cancelMomentum(); rowEl.scrollBy({left:-360,behavior:'smooth'});}); rightBtn.addEventListener('click',()=>{cancelMomentum(); hasScrolledRight=true; rowEl.scrollBy({left:360,behavior:'smooth'});}); updateButtons(); window.addEventListener('resize',updateButtons); }
+    function renderActive(){const items=getCategoryItems(activeCategory); activeTitleEl.textContent=activeCategory; activeRowEl.innerHTML=items.map(cardHTML).join(''); attachRowBehavior(activeRowEl,document.getElementById('activeLeft'),document.getElementById('activeRight'));}
+    function renderOtherSections(){const baseCategories=['Кулинария','Пекарня','Кондитерская','Бизнес-ланч']; otherSectionsEl.innerHTML=baseCategories.filter(cat=>cat!==activeCategory).map(cat=>{const id=`row-${cat}`; return `<section class="menu-block"><h2>${cat}</h2><div class="row-shell"><button class="arrow left">←</button><div class="row" id="${id}">${products.filter(p=>p.category===cat).map(cardHTML).join('')}</div><button class="arrow right show">→</button></div></section>`;}).join(''); otherSectionsEl.querySelectorAll('.row-shell').forEach(shell=>attachRowBehavior(shell.querySelector('.row'),shell.querySelector('.arrow.left'),shell.querySelector('.arrow.right'))); }
+    const cart = [];
+    const cartOverlay = document.getElementById('cartOverlay');
+    const cartPanel = document.getElementById('cartPanel');
+    const cartList = document.getElementById('cartList');
+    const cartTotal = document.getElementById('cartTotal');
+    const cartBadge = document.getElementById('cartBadge');
+    const cartOpenBtn = document.getElementById('cartOpenBtn');
+    const cartCloseBtn = document.getElementById('cartCloseBtn');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const checkoutForm = document.getElementById('checkoutForm');
+    const checkoutBackBtn = document.getElementById('checkoutBackBtn');
+    const submitOrderBtn = document.getElementById('submitOrderBtn');
+    const cartToast = document.getElementById('cartToast');
+    let toastTimer = null;
+
+    function openCart(){ cartOverlay.classList.add('open'); cartPanel.classList.add('open'); }
+    function closeCart(){ cartOverlay.classList.remove('open'); cartPanel.classList.remove('open'); checkoutForm.classList.remove('open'); }
+    function showToast(text){
+      cartToast.innerHTML = text;
+      cartToast.classList.add('show');
+      if(toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ cartToast.classList.remove('show'); }, 1800);
+    }
+    function parsePrice(value){ return Number(String(value).replace(/[^0-9]/g,'')) || 0; }
+    function formatPrice(value){ return String(value) + ' ₽'; }
+    function updateCartBadge(){ cartBadge.textContent = String(cart.reduce((sum,item)=>sum + item.qty,0)); }
+
+    function renderCart(){
+      if(!cart.length){
+        cartList.innerHTML = '<div class="cart-empty">Добавьте блюда в корзину для оформления заказа.</div>';
+        cartTotal.textContent = '0 ₽';
+        updateCartBadge();
+        return;
+      }
+      cartList.innerHTML = cart.map(function(item){
+        return '<div class="cart-item"><div><div class="cart-item-title">'+item.name+'</div><div class="cart-item-meta">'+item.weight+' · '+item.price+'</div></div><div><div class="cart-item-controls"><button class="qty-btn" data-qty="minus" data-name="'+item.name+'">−</button><strong>'+item.qty+'</strong><button class="qty-btn" data-qty="plus" data-name="'+item.name+'">+</button></div></div></div>';
+      }).join('');
+      const total = cart.reduce(function(sum,item){ return sum + parsePrice(item.price) * item.qty; }, 0);
+      cartTotal.textContent = formatPrice(total);
+      updateCartBadge();
+    }
+
+    function animateAddFeedback(btn){
+      if(!btn) return;
+      const initial = btn.textContent;
+      btn.classList.add('added');
+      btn.textContent = 'Добавлено';
+      setTimeout(function(){
+        btn.classList.remove('added');
+        btn.textContent = initial;
+      }, 1100);
+    }
+
+    function bindAddButtons(){
+      document.querySelectorAll('.buy-btn[data-add]').forEach(function(btn){
+        btn.onclick = function(event){
+          event.preventDefault();
+          event.stopPropagation();
+          addToCart(btn.getAttribute('data-add'));
+          animateAddFeedback(btn);
+          return false;
+        };
+        btn.addEventListener('pointerdown', function(event){
+          event.stopPropagation();
+        });
+      });
+    }
+
+    function addToCart(name){
+      const item = products.find(function(p){ return p.name === name; });
+      if(!item) return;
+      const existing = cart.find(function(p){ return p.name === name; });
+      if(existing){ existing.qty += 1; }
+      else { cart.push(Object.assign({}, item, { qty: 1 })); }
+      renderCart();
+      openCart();
+      showToast('Добавлено: <strong>' + name + '</strong>');
+    }
+
+    function changeQty(name, delta){
+      const item = cart.find(function(p){ return p.name === name; });
+      if(!item) return;
+      item.qty += delta;
+      if(item.qty <= 0){
+        const index = cart.findIndex(function(p){ return p.name === name; });
+        if(index >= 0) cart.splice(index,1);
+      }
+      renderCart();
+    }
+
+    document.addEventListener('click', function(event){
+      const qtyBtn = event.target.closest('[data-qty]');
+      if(qtyBtn){ changeQty(qtyBtn.getAttribute('data-name'), qtyBtn.getAttribute('data-qty') === 'plus' ? 1 : -1); }
+    });
+
+    cartOpenBtn.addEventListener('click', openCart);
+    cartCloseBtn.addEventListener('click', closeCart);
+    cartOverlay.addEventListener('click', closeCart);
+    checkoutBtn.addEventListener('click', function(){
+      if(!cart.length) return;
+      checkoutForm.classList.add('open');
+    });
+    checkoutBackBtn.addEventListener('click', function(){
+      checkoutForm.classList.remove('open');
+    });
+    submitOrderBtn.addEventListener('click', function(){
+      if(!cart.length) return;
+      const name = document.getElementById('orderName').value.trim();
+      const phone = document.getElementById('orderPhone').value.trim();
+      if(!name || !phone){
+        showToast('Заполните имя и телефон');
+        return;
+      }
+      checkoutForm.classList.remove('open');
+      closeCart();
+      showToast('Заказ принят. Мы скоро свяжемся с вами');
+    });
+
+    function renderAll(){renderCategories(); renderActive(); renderOtherSections(); bindAddButtons(); renderCart();}
+    renderAll();
+  </script>
+</body>
+</html>

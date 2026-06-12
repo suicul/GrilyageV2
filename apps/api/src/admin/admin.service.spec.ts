@@ -1,0 +1,60 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { AdminService } from './admin.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { OrdersGateway } from '../orders/orders.gateway';
+
+const mockPrisma = {
+  category: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+  product: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+  order: { findUnique: jest.fn(), findMany: jest.fn(), update: jest.fn() },
+};
+
+const mockGateway = { notifyOrderUpdated: jest.fn() };
+
+describe('AdminService', () => {
+  let service: AdminService;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: OrdersGateway, useValue: mockGateway },
+      ],
+    }).compile();
+    service = module.get<AdminService>(AdminService);
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  describe('categories', () => {
+    it('should create category', async () => {
+      mockPrisma.category.create.mockResolvedValue({ id: 'cat-1', name: 'Drinks', slug: 'drinks' });
+      const r = await service.createCategory({ name: 'Drinks' });
+      expect(r.name).toBe('Drinks');
+      expect(mockPrisma.category.create).toHaveBeenCalled();
+    });
+
+    it('should throw on missing category for update', async () => {
+      mockPrisma.category.findUnique.mockResolvedValue(null);
+      await expect(service.updateCategory('bad-id', { name: 'X' })).rejects.toThrow('Category not found');
+    });
+  });
+
+  describe('order status transitions', () => {
+    it('should reject invalid transition', async () => {
+      mockPrisma.order.findUnique.mockResolvedValue({ id: 'o1', status: 'NEW' });
+      await expect(service.updateOrderStatus('o1', { status: 'COMPLETED' as any })).rejects.toThrow('Cannot transition');
+    });
+
+    it('should allow valid transition', async () => {
+      mockPrisma.order.findUnique.mockResolvedValue({ id: 'o1', status: 'NEW' });
+      mockPrisma.order.update.mockResolvedValue({
+        id: 'o1', status: 'CONFIRMED',
+        items: [], statusLogs: [],
+      });
+      const r = await service.updateOrderStatus('o1', { status: 'CONFIRMED' as any });
+      expect(r.status).toBe('CONFIRMED');
+    });
+  });
+});
