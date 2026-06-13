@@ -114,7 +114,7 @@ export default function AdminOrdersPage() {
       {selectedOrder && (
         <>
           <div className="auth-overlay" onClick={() => setSelectedOrder(null)} />
-          <div className="auth-modal" style={{ maxHeight: '80vh', overflow: 'auto' }}>
+          <div className="admin-modal">
             <button className="close" onClick={() => setSelectedOrder(null)}>×</button>
             <h2 style={{ marginBottom: 16 }}>Заказ №{selectedOrder.number}</h2>
 

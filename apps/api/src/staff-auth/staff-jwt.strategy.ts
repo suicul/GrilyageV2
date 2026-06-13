@@ -23,7 +23,7 @@ export class StaffJwtStrategy extends PassportStrategy(Strategy, 'staff-jwt') {
       select: { id: true, login: true, role: true, active: true },
     });
     if (!staff || !staff.active) {
-      throw new UnauthorizedException('Staff not found or inactive');
+      throw new UnauthorizedException('Сотрудник не найден или деактивирован');
     }
     return { sub: staff.id, login: staff.login, role: staff.role };
   }

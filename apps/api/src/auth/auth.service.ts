@@ -33,7 +33,7 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('Этот email уже зарегистрирован');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -57,12 +57,12 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Неверный email или пароль');
     }
 
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Неверный email или пароль');
     }
 
     return this.generateTokenPair(user.id, user.email);
@@ -75,7 +75,7 @@ export class AuthService {
     });
 
     if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException('Токен обновления недействителен или истёк');
     }
 
     await this.prisma.refreshToken.update({
@@ -87,7 +87,7 @@ export class AuthService {
       where: { id: stored.userId! },
     });
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Пользователь не найден');
     }
 
     return this.generateTokenPair(user.id, user.email);
@@ -108,13 +108,13 @@ export class AuthService {
     });
 
     if (!emailToken) {
-      throw new BadRequestException('Invalid verification token');
+      throw new BadRequestException('Недействительный токен подтверждения');
     }
     if (emailToken.expiresAt < new Date()) {
-      throw new BadRequestException('Verification token has expired');
+      throw new BadRequestException('Срок действия токена подтверждения истёк');
     }
     if (emailToken.type !== 'VERIFY') {
-      throw new BadRequestException('Invalid token type');
+      throw new BadRequestException('Неверный тип токена');
     }
 
     await this.prisma.user.update({
@@ -134,10 +134,10 @@ export class AuthService {
       where: { email },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Пользователь не найден');
     }
     if (user.emailVerifiedAt) {
-      throw new BadRequestException('Email already verified');
+      throw new BadRequestException('Email уже подтверждён');
     }
 
     await this.prisma.emailToken.deleteMany({
@@ -161,7 +161,7 @@ export class AuthService {
       },
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Пользователь не найден');
     }
     return user;
   }

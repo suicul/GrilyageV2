@@ -7,6 +7,16 @@ import { normalizeSearchText } from '@grilyage/shared';
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findAllSubcategories() {
+    return this.prisma.subcategory.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: 'asc' },
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+      },
+    });
+  }
+
   async findAllCategories() {
     return this.prisma.category.findMany({
       where: { active: true },
@@ -108,7 +118,7 @@ export class CatalogService {
     });
 
     if (!product || !product.active) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Товар не найден');
     }
 
     return product;

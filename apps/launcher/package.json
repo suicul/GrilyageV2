@@ -1,0 +1,30 @@
+{
+  "name": "@grilyage/launcher",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Grilyage Desktop Launcher — запуск и управление проектом",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "repair:electron": "node scripts/repair-electron.js",
+    "build": "electron-builder",
+    "dist": "electron-builder --win portable",
+    "dist:dir": "electron-builder --win portable --config.extraMetadata.main=main.js"
+  },
+  "build": {
+    "appId": "com.grilyage.launcher",
+    "productName": "Грильяж Лаунчер",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

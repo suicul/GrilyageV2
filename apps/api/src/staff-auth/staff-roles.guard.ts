@@ -25,7 +25,7 @@ export class StaffRolesGuard extends AuthGuard('staff-jwt') {
     const user = request.user as { sub: string; role: StaffRole };
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('Insufficient permissions');
+      throw new ForbiddenException('Недостаточно прав');
     }
 
     return true;

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Грильяж Лаунчер</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #171a20; color: #e8e8e8; font-size: 14px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    header { padding: 16px 20px; background: #22262e; border-bottom: 1px solid #333840; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    header h1 { font-size: 18px; color: #d6b06a; }
+    header .subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+    .actions, .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    button { padding: 8px 14px; border: 0; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: .15s; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-start { background: #4caf50; color: #fff; }
+    .btn-stop { background: #e53935; color: #fff; }
+    .btn-gold { background: #d6b06a; color: #171a20; }
+    .btn-ghost { background: transparent; color: #bbb; border: 1px solid #444a55; }
+    .btn-ghost:hover { background: #2a2e38; }
+    .content { display: grid; grid-template-columns: 320px 1fr; flex: 1; overflow: hidden; }
+    .sidebar { background: #1e2128; border-right: 1px solid #333840; padding: 12px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .panel-title { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin: 2px 4px; }
+    .service-card, .checks, .links, .account-form { padding: 14px; border-radius: 12px; background: #22262e; border: 1px solid #333840; }
+    .service-card { cursor: pointer; transition: .15s; }
+    .service-card:hover { border-color: #555b66; }
+    .service-card.active { border-color: #d6b06a; box-shadow: 0 0 0 1px rgba(214,176,106,.25); }
+    .service-card .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .service-card .name { font-weight: 800; font-size: 13px; }
+    .service-card .desc { color: #888; font-size: 12px; margin-top: 6px; line-height: 1.35; }
+    .service-card .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 700; white-space: nowrap; }
+    .status-stopped { background: #333; color: #999; }
+    .status-starting { background: #fff3e0; color: #e65100; }
+    .status-running { background: #e8f5e9; color: #2e7d32; }
+    .status-error { background: #fbe9e7; color: #c62828; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .service-card .controls { margin-top: 10px; display: flex; gap: 6px; }
+    .checks { display: grid; gap: 8px; }
+    .check-row { display: flex; align-items: center; justify-content: space-between; color: #bbb; font-size: 12px; }
+    .check-ok { color: #6fd36f; }
+    .check-bad { color: #ff7676; }
+    .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .links button { padding: 8px 10px; font-size: 12px; }
+    .account-form { display: grid; gap: 8px; }
+    .account-form input, .account-form select { width: 100%; padding: 9px 10px; border: 1px solid #444a55; border-radius: 8px; background: #171a20; color: #e8e8e8; font-size: 13px; }
+    .account-form .row { display: grid; grid-template-columns: 1fr 110px; gap: 8px; }
+    .account-note { color: #888; font-size: 11px; line-height: 1.35; }
+    .main-panel { display: flex; flex-direction: column; overflow: hidden; }
+    .toolbar { padding: 12px 20px; background: #20242c; border-bottom: 1px solid #333840; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .info-bar { display: flex; gap: 14px; font-size: 12px; color: #888; flex-wrap: wrap; }
+    .info-bar strong { color: #e8e8e8; }
+    .logs { flex: 1; padding: 14px 20px; overflow-y: auto; font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 12px; line-height: 1.6; background: #121419; }
+    .log-line { color: #bbb; white-space: pre-wrap; word-break: break-word; }
+    .log-line.error { color: #ff7676; }
+    .log-line.success { color: #6fd36f; }
+    .log-line.warn { color: #ffb84d; }
+    .empty { color: #555; text-align: center; padding: 40px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Грильяж Лаунчер</h1>
+      <div class="subtitle">Локальный запуск проекта: Docker, API, Web, CRM</div>
+    </div>
+    <div class="actions">
+      <button class="btn-start" style="font-size:15px;padding:10px 22px" onclick="quickStart()">⚡ Быстрый старт</button>
+      <button class="btn-start" id="btnStartAll" onclick="startAll()">Запустить все</button>
+      <button class="btn-stop" id="btnStopAll" onclick="stopAll()">Остановить все</button>
+      <button class="btn-ghost" onclick="refreshAll()">Обновить</button>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="sidebar">
+      <div class="panel-title">Сервисы</div>
+      <div id="serviceList"></div>
+
+      <div class="panel-title">Подготовка</div>
+      <div class="quick-actions">
+        <button class="btn-gold" onclick="runAction('install')">npm install</button>
+        <button class="btn-gold" onclick="runAction('migrate')">migrate</button>
+        <button class="btn-gold" onclick="runAction('seed')">seed</button>
+        <button class="btn-ghost" onclick="runAction('build-api')">build API</button>
+        <button class="btn-ghost" onclick="runAction('build-web')">build Web</button>
+        <button class="btn-ghost" onclick="runAction('free-api-port')">free 4000</button>
+        <button class="btn-ghost" onclick="runAction('free-web-port')">free 3000</button>
+      </div>
+
+      <div class="panel-title">CRM аккаунт</div>
+      <div class="account-form">
+        <input id="staffLogin" placeholder="Логин" value="admin">
+        <input id="staffName" placeholder="Имя" value="Администратор">
+        <div class="row">
+          <input id="staffPassword" type="password" placeholder="Пароль (мин. 6)" value="admin123">
+          <select id="staffRole">
+            <option value="ADMIN">ADMIN</option>
+            <option value="OPERATOR">OPERATOR</option>
+          </select>
+        </div>
+        <button class="btn-gold" onclick="createStaffUser()">Создать / обновить</button>
+        <div class="account-note">Перед созданием запустите Docker и выполните migrate. Если логин уже есть, пароль, имя и роль обновятся.</div>
+      </div>
+
+      <div class="panel-title">Клиентский аккаунт</div>
+      <div class="account-form">
+        <input id="customerEmail" type="email" placeholder="Email" value="demo@grilyazh.local">
+        <input id="customerName" placeholder="Имя" value="Демо клиент">
+        <input id="customerPhone" placeholder="Телефон" value="+7 (999) 000-00-00">
+        <input id="customerPassword" type="password" placeholder="Пароль (мин. 6)" value="demo123">
+        <button class="btn-gold" onclick="createCustomerUser()">Создать / обновить</button>
+        <div class="account-note">Аккаунт создаётся подтверждённым, чтобы сразу входить на сайте.</div>
+      </div>
+
+      <div class="panel-title">Окружение</div>
+      <div class="checks" id="checks"><div class="empty">Проверка...</div></div>
+
+      <div class="panel-title">Открыть</div>
+      <div class="links">
+        <button class="btn-ghost" onclick="openTarget('web')">Сайт</button>
+        <button class="btn-ghost" onclick="openTarget('admin')">CRM</button>
+        <button class="btn-ghost" onclick="openTarget('api')">Swagger</button>
+        <button class="btn-ghost" onclick="openTarget('mailpit')">Mailpit</button>
+        <button class="btn-ghost" onclick="openTarget('health')">Health</button>
+        <button class="btn-ghost" onclick="openTarget('logs')">Логи</button>
+      </div>
+    </div>
+
+    <div class="main-panel">
+      <div class="toolbar">
+        <div class="info-bar" id="infoBar"><span>Выберите сервис слева</span></div>
+        <button class="btn-ghost" onclick="selectService(activeService)">Перечитать лог</button>
+      </div>
+      <div class="logs" id="logs"><div class="empty">Нажмите «Запустить все» или выберите сервис</div></div>
+    </div>
+  </div>
+
+  <script>
+    const services = {};
+    let activeService = 'infra';
+    const logContainer = document.getElementById('logs');
+    const serviceList = document.getElementById('serviceList');
+    const infoBar = document.getElementById('infoBar');
+    const checks = document.getElementById('checks');
+
+    function getStatusBadge(status) {
+      const labels = { stopped: 'Остановлен', starting: 'Запускается', running: 'Запущен', error: 'Ошибка' };
+      return `<span class="status-badge status-${status}">${labels[status] || status}</span>`;
+    }
+
+    function getDotColor(status) {
+      if (status === 'running') return '#4caf50';
+      if (status === 'starting') return '#ff9800';
+      if (status === 'error') return '#e53935';
+      return '#666';
+    }
+
+    function renderSidebar(status) {
+      Object.assign(services, status);
+      serviceList.innerHTML = Object.entries(status).map(([key, svc]) => `
+        <div class="service-card ${activeService === key ? 'active' : ''}" onclick="selectService('${key}')">
+          <div class="row">
+            <span class="name"><span class="dot" style="background:${getDotColor(svc.status)};margin-right:8px"></span>${svc.name}</span>
+            ${getStatusBadge(svc.status)}
+          </div>
+          <div class="desc">${svc.description || ''}</div>
+          <div class="controls">
+            <button class="btn-start" onclick="event.stopPropagation();startService('${key}')" ${svc.status === 'running' || svc.status === 'starting' ? 'disabled' : ''}>Старт</button>
+            <button class="btn-stop" onclick="event.stopPropagation();stopService('${key}')" ${svc.status === 'stopped' || (!svc.managed && key !== 'infra') ? 'disabled' : ''}>Стоп</button>
+          </div>
+        </div>
+      `).join('');
+
+      const allRunning = Object.values(status).every((s) => s.status === 'running');
+      const anyActive = Object.values(status).some((s) => s.status === 'running' || s.status === 'starting');
+      document.getElementById('btnStartAll').disabled = allRunning;
+      document.getElementById('btnStopAll').disabled = !anyActive;
+      updateInfoBar();
+    }
+
+    function renderChecks(list) {
+      checks.innerHTML = list.map((item) => `
+        <div class="check-row"><span>${item.label}</span><strong class="${item.ok ? 'check-ok' : 'check-bad'}">${item.ok ? 'OK' : 'нет'}</strong></div>
+      `).join('');
+    }
+
+    function updateInfoBar() {
+      const svc = services[activeService];
+      if (!svc) return;
+      infoBar.innerHTML = `<span>Сервис:</span><strong>${svc.name}</strong><span>Статус:</span><strong>${svc.status}</strong>`;
+    }
+
+    function classifyLog(line) {
+      const lower = line.toLowerCase();
+      if (lower.includes('error') || lower.includes('ошибка') || lower.includes('failed')) return 'error';
+      if (lower.includes('warn') || lower.includes('ещё запускается')) return 'warn';
+      if (lower.includes('готов') || lower.includes('success') || lower.includes('успешно')) return 'success';
+      return '';
+    }
+
+    function setLogs(logData) {
+      logContainer.innerHTML = logData
+        ? logData.split('\n').filter(Boolean).map((line) => `<div class="log-line ${classifyLog(line)}"></div>`).join('')
+        : '<div class="empty">Логов пока нет</div>';
+      if (logData) {
+        logData.split('\n').filter(Boolean).forEach((line, index) => {
+          logContainer.children[index].textContent = line;
+        });
+      }
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    function appendLogLocal(line) {
+      if (logContainer.querySelector('.empty')) logContainer.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = `log-line ${classifyLog(line)}`;
+      div.textContent = line;
+      logContainer.appendChild(div);
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    async function selectService(key) {
+      if (!key) return;
+      activeService = key;
+      renderSidebar(services);
+      setLogs(await window.launcher.getLogs(key));
+    }
+
+    async function refreshAll() {
+      renderSidebar(await window.launcher.refreshStatus());
+      renderChecks(await window.launcher.getChecks());
+      if (activeService) await selectService(activeService);
+    }
+
+    async function startService(key) {
+      activeService = key;
+      appendLogLocal(`${services[key].name} — запуск...`);
+      await window.launcher.startService(key);
+      await refreshAll();
+    }
+
+    async function stopService(key) {
+      await window.launcher.stopService(key);
+      await refreshAll();
+    }
+
+    async function quickStart() {
+      appendLogLocal('══════ Быстрый старт — полный запуск с нуля ══════');
+      document.getElementById('btnStartAll').disabled = true;
+      document.getElementById('btnStopAll').disabled = true;
+      await window.launcher.runAction('quick-start');
+      document.getElementById('btnStartAll').disabled = false;
+      document.getElementById('btnStopAll').disabled = false;
+      await refreshAll();
+      appendLogLocal('══════ Быстрый старт завершён ══════');
+      appendLogLocal('Сайт: http://localhost:3000');
+      appendLogLocal('CRM: http://localhost:3000/admin');
+    }
+
+    async function startAll() {
+      appendLogLocal('Запуск всех сервисов...');
+      await window.launcher.startAll();
+      await refreshAll();
+    }
+
+    async function stopAll() {
+      await window.launcher.stopAll();
+      await refreshAll();
+    }
+
+    async function runAction(name) {
+      appendLogLocal(`Запуск операции: ${name}`);
+      await window.launcher.runAction(name);
+      await refreshAll();
+    }
+
+    async function createStaffUser() {
+      const input = {
+        login: document.getElementById('staffLogin').value,
+        name: document.getElementById('staffName').value,
+        password: document.getElementById('staffPassword').value,
+        role: document.getElementById('staffRole').value,
+      };
+      activeService = 'api';
+      appendLogLocal(`Создание CRM аккаунта: ${input.login} (${input.role})`);
+      const ok = await window.launcher.createStaffUser(input);
+      appendLogLocal(ok ? 'CRM аккаунт готов' : 'CRM аккаунт не создан, проверьте лог API');
+      await refreshAll();
+    }
+
+    async function createCustomerUser() {
+      const input = {
+        email: document.getElementById('customerEmail').value,
+        name: document.getElementById('customerName').value,
+        phone: document.getElementById('customerPhone').value,
+        password: document.getElementById('customerPassword').value,
+      };
+      activeService = 'api';
+      appendLogLocal(`Создание клиентского аккаунта: ${input.email}`);
+      const ok = await window.launcher.createCustomerUser(input);
+      appendLogLocal(ok ? 'Клиентский аккаунт готов' : 'Клиентский аккаунт не создан, проверьте лог API');
+      await refreshAll();
+    }
+
+    function openTarget(name) {
+      window.launcher.openTarget(name);
+    }
+
+    window.launcher.onStatusUpdate((status) => renderSidebar(status));
+    window.launcher.onLogAppend((data) => {
+      if (activeService === data.service) appendLogLocal(data.line);
+    });
+
+    refreshAll();
+  </script>
+</body>
+</html>

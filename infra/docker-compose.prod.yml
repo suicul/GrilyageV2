@@ -1,0 +1,89 @@
+# Production Docker Compose for GrilyageDelivery
+# Usage: docker compose -f infra/docker-compose.prod.yml up -d --build
+name: grilyage-prod
+
+services:
+  # ─── PostgreSQL ─────────────────────────────────────────────
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-grilyage}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-grilyage}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - grilyage-prod
+    # No ports exposed to host — access only via internal network
+
+  # ─── NestJS API ──────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      STAFF_JWT_ACCESS_SECRET: ${STAFF_JWT_ACCESS_SECRET}
+      STAFF_JWT_REFRESH_SECRET: ${STAFF_JWT_REFRESH_SECRET}
+      WEB_PUBLIC_URL: ${WEB_PUBLIC_URL:-http://localhost:3000}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    ports:
+      - "4000:4000"
+    networks:
+      - grilyage-prod
+
+  # ─── Next.js Web ─────────────────────────────────────────────
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - "3000:3000"
+    networks:
+      - grilyage-prod
+
+  # ─── Nginx Reverse Proxy ─────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - uploads:/var/www/uploads:ro
+    depends_on:
+      - api
+      - web
+    networks:
+      - grilyage-prod
+
+volumes:
+  pgdata:
+  uploads:
+
+networks:
+  grilyage-prod:
+    driver: bridge

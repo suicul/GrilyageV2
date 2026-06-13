@@ -53,7 +53,7 @@ export class ProfileService {
     });
 
     if (!address || address.userId !== userId) {
-      throw new NotFoundException('Address not found');
+      throw new NotFoundException('Адрес не найден');
     }
 
     const data: Record<string, string> = {};
@@ -75,7 +75,7 @@ export class ProfileService {
     });
 
     if (!address || address.userId !== userId) {
-      throw new NotFoundException('Address not found');
+      throw new NotFoundException('Адрес не найден');
     }
 
     await this.prisma.address.delete({

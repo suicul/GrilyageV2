@@ -20,4 +20,9 @@ export class CatalogController {
   async findProductBySlug(@Param('slug') slug: string) {
     return this.catalogService.findProductBySlug(slug);
   }
+
+  @Get('subcategories')
+  async findAllSubcategories() {
+    return this.catalogService.findAllSubcategories();
+  }
 }

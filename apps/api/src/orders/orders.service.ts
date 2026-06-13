@@ -22,14 +22,21 @@ export class OrdersService {
     // 1. Fetch products from DB (server-side — NEVER trust client prices)
     const productIds = dto.items.map((i) => i.productId);
     const products = await this.prisma.product.findMany({
-      where: { id: { in: productIds }, active: true },
+      where: {
+        active: true,
+        OR: [
+          { id: { in: productIds } },
+          { slug: { in: productIds } },
+          { name: { in: productIds } },
+        ],
+      },
     });
 
     if (products.length !== productIds.length) {
-      throw new BadRequestException('One or more products not found or inactive');
+      throw new BadRequestException('Один или несколько товаров не найдены или неактивны');
     }
 
-    const productMap = new Map(products.map((p) => [p.id, p]));
+    const productMap = new Map(products.flatMap((p) => [[p.id, p], [p.slug, p], [p.name, p]]));
 
     // 2. Calculate items total server-side
     let itemsTotal = 0;
@@ -43,7 +50,7 @@ export class OrdersService {
     for (const item of dto.items) {
       const product = productMap.get(item.productId);
       if (!product) {
-        throw new BadRequestException(`Product ${item.productId} not found`);
+        throw new BadRequestException(`Товар ${item.productId} не найден`);
       }
       itemsTotal += product.price * item.qty;
       orderItems.push({
@@ -115,8 +122,8 @@ export class OrdersService {
       },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.userId !== userId) throw new ForbiddenException('Access denied');
+    if (!order) throw new NotFoundException('Заказ не найден');
+    if (order.userId !== userId) throw new ForbiddenException('Доступ запрещён');
 
     return order;
   }
@@ -156,17 +163,17 @@ export class OrdersService {
       },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order) throw new NotFoundException('Заказ не найден');
     return order;
   }
 
   async updateStatus(id: string, dto: UpdateOrderStatusDto, staffUserId: string) {
     const order = await this.prisma.order.findUnique({ where: { id } });
-    if (!order) throw new NotFoundException('Order not found');
+    if (!order) throw new NotFoundException('Заказ не найден');
 
     if (!canTransition(order.status as any, dto.status as any)) {
       throw new BadRequestException(
-        `Cannot transition from ${order.status} to ${dto.status}`,
+        `Невозможен переход из ${order.status} в ${dto.status}`,
       );
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStaffAuth } from '@/lib/staff-auth-context';
 
@@ -13,10 +13,14 @@ export default function AdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // If already logged in, redirect to admin home
-  if (!loading && staffUser) {
-    router.replace('/admin');
-    return null;
-  }
+  useEffect(() => {
+    if (!loading && staffUser) {
+      router.replace('/admin');
+    }
+  }, [loading, staffUser, router]);
+
+  if (loading) return null;
+  if (staffUser) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

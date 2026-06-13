@@ -9,6 +9,7 @@
 apps/
   api/      — NestJS REST API + WebSocket (заказы realtime) + Prisma/PostgreSQL
   web/      — Next.js: публичный сайт (/) и CRM (/admin)
+  launcher/ — Electron-лаунчер для локального запуска и проверки проекта
   mobile/   — Flutter-приложение (Android/iOS)
 packages/
   shared/   — общие типы, DTO, константы
@@ -40,6 +41,18 @@ npm run dev                                         # api: :4000, web: :3000
 - CRM: http://localhost:3000/admin
 - API: http://localhost:4000/api/v1 (Swagger: /api/docs)
 - Mailpit (почтовая ловушка): http://localhost:8025
+
+## Лаунчер
+
+Для локальной проверки проекта можно использовать desktop-лаунчер:
+
+```bash
+npm run launcher
+```
+
+Лаунчер умеет запускать Docker-инфраструктуру, API и Web, показывать логи, проверять Node/npm/Docker/.env/URL-статусы, выполнять `npm install`, Prisma migrate/seed, создавать/обновлять CRM-аккаунты `ADMIN`/`OPERATOR`, создавать клиентский demo-аккаунт и открывать сайт, CRM, Swagger и Mailpit.
+
+Демонстрация через Tailscale описана в `docs/demo-tailscale.md`.
 
 ## Тесты
 

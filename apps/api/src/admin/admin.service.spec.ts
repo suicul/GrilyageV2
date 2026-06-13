@@ -37,14 +37,14 @@ describe('AdminService', () => {
 
     it('should throw on missing category for update', async () => {
       mockPrisma.category.findUnique.mockResolvedValue(null);
-      await expect(service.updateCategory('bad-id', { name: 'X' })).rejects.toThrow('Category not found');
+      await expect(service.updateCategory('bad-id', { name: 'X' })).rejects.toThrow('Категория не найдена');
     });
   });
 
   describe('order status transitions', () => {
     it('should reject invalid transition', async () => {
       mockPrisma.order.findUnique.mockResolvedValue({ id: 'o1', status: 'NEW' });
-      await expect(service.updateOrderStatus('o1', { status: 'COMPLETED' as any })).rejects.toThrow('Cannot transition');
+      await expect(service.updateOrderStatus('o1', { status: 'COMPLETED' as any })).rejects.toThrow('Невозможен переход');
     });
 
     it('should allow valid transition', async () => {

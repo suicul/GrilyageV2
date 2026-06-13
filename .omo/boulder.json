@@ -22,9 +22,9 @@
       "work_id": "grilyage-delivery-009e3b85",
       "active_plan": "C:\\DEV\\GrilyageV2-main\\.omo\\plans\\grilyage-delivery.md",
       "plan_name": "grilyage-delivery",
-      "status": "active",
+      "status": "completed",
       "started_at": "2026-06-11T19:34:23.894Z",
-      "updated_at": "2026-06-12T08:04:40.964Z",
+      "updated_at": "2026-06-13T13:11:08.679Z",
       "session_ids": [
         "opencode:ses_14812b19bffeDg4Ao3Rq7634pI",
         "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK",
@@ -38,13 +38,15 @@
         "opencode:ses_14523631affegRxrQj9mRL8Qlh": "appended"
       },
       "agent": "atlas",
-      "task_sessions": {}
+      "task_sessions": {},
+      "ended_at": "2026-06-13T13:11:08.679Z",
+      "elapsed_ms": 149804785
     }
   },
   "active_plan": "C:\\DEV\\GrilyageV2-main\\.omo\\plans\\grilyage-delivery.md",
   "started_at": "2026-06-11T19:34:23.894Z",
-  "status": "active",
-  "updated_at": "2026-06-12T08:04:40.964Z",
+  "status": "completed",
+  "updated_at": "2026-06-13T13:11:08.679Z",
   "session_ids": [
     "opencode:ses_14812b19bffeDg4Ao3Rq7634pI",
     "opencode:ses_1452a4a8dffejFRrm0HNPyeWDK",
@@ -59,5 +61,7 @@
   },
   "plan_name": "grilyage-delivery",
   "task_sessions": {},
-  "agent": "atlas"
+  "agent": "atlas",
+  "ended_at": "2026-06-13T13:11:08.679Z",
+  "elapsed_ms": 149804785
 }

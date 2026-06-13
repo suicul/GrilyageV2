@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const err = await res.json().catch(() => ({ message: 'Ошибка регистрации' }));
       throw new Error(err.message || 'Ошибка регистрации');
     }
+    await login(email, password);
   };
 
   const logout = async () => {

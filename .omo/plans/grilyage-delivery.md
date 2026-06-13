@@ -49,6 +49,7 @@ GrilyageDelivery/
 ├── apps/
 │   ├── api/        # NestJS: REST API + WebSocket gateway + Prisma
 │   ├── web/        # Next.js: публичный сайт (/) + CRM (/admin, скрыт, отдельная auth)
+│   ├── launcher/   # Electron: локальный запуск dev-инфраструктуры, API, Web и проверки окружения
 │   └── mobile/     # Flutter (фаза 5)
 ├── packages/
 │   └── shared/     # Общие TS-типы, DTO, константы (DELIVERY_*, статусы)
@@ -143,24 +144,33 @@ OrderStatusLog  id, orderId, status, staffUserId?, createdAt
 - [x] 3.4 Operator: лента заказов (фильтры статус/дата, звуковое уведомление о новом через WS), карточка заказа (состав, адрес, контакты, телефон-ссылка), смена статуса, печать заказа
 - [x] 3.5 Дашборд: заказы за сегодня, выручка, популярные блюда
 
-### Фаза 4 — Почта iRedMail
-- [ ] 4.1 Документация-runbook: установка iRedMail на VPS/поддомен `mail.<домен>`, DNS (MX, SPF, DKIM, DMARC, PTR)
-- [ ] 4.2 Корп. ящики (info@, orders@, noreply@) + отправка из API через SMTP relay (auth, TLS)
-- [ ] 4.3 Anti-spam проверка (mail-tester ≥ 8/10), лимиты, бэкап maildir
+### Фаза 4 — Почта (dev — Mailpit, прод — iRedMail)
+- [x] 4.0 Dev-решение: Mailpit уже работает (SMTP :1025, UI :8025) — перехватывает все письма, просмотр в браузере. Для тестирования через Tailscale достаточно.
+- [~] 4.1 iRedMail на VPS (продакшен) — ОТЛОЖЕНО до покупки домена
+- [~] 4.2 SMTP relay в проде (iRedMail) — ОТЛОЖЕНО до Phase 6
+- [~] 4.3 Anti-spam — ОТЛОЖЕНО до прода
 
-### Фаза 5 — Flutter-приложения
-- [ ] 5.1 Установка Flutter SDK, scaffold, архитектура (Riverpod + dio + go_router), генерация API-клиента из OpenAPI
-- [ ] 5.2 Дизайн-система: токены сайта (cream/gold/wood), Inter, компоненты (DishCard с КБЖУ, pill-кнопки)
-- [ ] 5.3 Экраны: главная/меню/поиск, карточка блюда, корзина+checkout, auth+профиль, история заказов
-- [ ] 5.4 Push-уведомления о статусе заказа (FCM) — если останется в объёме
-- [ ] 5.5 Сборки: Android APK/AAB, iOS (требует macOS — отметить как внешнюю зависимость)
+### Фаза 5 — Flutter-приложения (НИЗКИЙ ПРИОРИТЕТ)
+- [x] 5.1 Flutter SDK 3.27.4 установлен (C:\tools\flutter) — scaffold и архитектура ОТЛОЖЕНЫ до приоритета Web+CRM
+- [~] 5.2 Дизайн-система — ОТЛОЖЕНО (низкий приоритет, Flutter deferred)
+- [~] 5.3 Экраны — ОТЛОЖЕНО (низкий приоритет, Flutter deferred)
+- [~] 5.4 Push-уведомления (FCM) — ОТЛОЖЕНО (низкий приоритет, Flutter deferred)
+- [~] 5.5 Сборки — ОТЛОЖЕНО (iOS требует macOS, Flutter deferred)
 
-### Фаза 6 — Прод-деплой VPS
-- [ ] 6.1 `docker-compose.prod.yml`: api, web, postgres (volume), nginx; multi-stage Dockerfile'ы
-- [ ] 6.2 Nginx: reverse proxy, gzip/brotli, static `/uploads`, rate-limit на auth-эндпоинты
-- [ ] 6.3 Let's Encrypt (certbot), HTTPS-редирект, HSTS
-- [ ] 6.4 Бэкапы: pg_dump cron + uploads rsync; логи (rotation); systemd unit для compose
-- [ ] 6.5 Deploy-runbook: Ubuntu 24.04 с нуля → работающий прод (+ обновление: `git pull && docker compose build && up -d`)
+### Фаза 6 — Прод-деплой VPS (ОТЛОЖЕНО до покупки VPS + домена)
+- [x] 6.1 `docker-compose.prod.yml`: api, web, postgres (volume), nginx; multi-stage Dockerfile'ы
+- [x] 6.2 Nginx: reverse proxy, gzip/brotli, static `/uploads`, rate-limit на auth-эндпоинты
+- [~] 6.3 Let's Encrypt (certbot), HTTPS-редирект, HSTS — ОТЛОЖЕНО
+- [~] 6.4 Бэкапы: pg_dump cron + uploads rsync — ОТЛОЖЕНО
+- [~] 6.5 Deploy-runbook — ОТЛОЖЕНО
+
+### Фаза 7 — Desktop Launcher
+- [x] 7.1 Electron лаунчер: запуск docker-compose (БД), API (NestJS), web (Next.js); просмотр логов; кнопки старт/стоп
+- [x] 7.2 Dev-проверки лаунчера: Node/npm/Docker, `.env`, docker-compose, URL статусы API/Web/Mailpit
+- [x] 7.3 Dev-операции лаунчера: `npm install`, Prisma migrate/seed, открыть сайт/CRM/API/Mailpit, корректная остановка процессов
+- [x] 7.4 Управление demo-аккаунтами в лаунчере: создание/обновление StaffUser `ADMIN`/`OPERATOR` и клиентских User
+- [x] 7.5 Подготовка демонстрации через Tailscale: checks в лаунчере, bind `0.0.0.0`, runbook с demo-сценарием
+- [~] 7.6 Удалённое управление VPS через SSH — ОТЛОЖЕНО до прода
 
 ## 6. Сквозные требования
 - **Безопасность**: bcrypt(12), rate-limit login/register, валидация всех DTO (class-validator), CSRF-устойчивость (Bearer для API), helmet, санитизация upload'ов (тип/размер ≤5MB)

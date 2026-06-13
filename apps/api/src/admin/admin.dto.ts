@@ -10,10 +10,6 @@ export class CreateCategoryDto {
   slug?: string;
 
   @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
   @IsNumber()
   @Min(0)
   sortOrder?: number;
@@ -24,7 +20,7 @@ export class CreateCategoryDto {
 
   @IsOptional()
   @IsString()
-  image?: string;
+  imageUrl?: string;
 }
 
 export class UpdateCategoryDto {
@@ -37,10 +33,6 @@ export class UpdateCategoryDto {
   slug?: string;
 
   @IsOptional()
-  @IsString()
-  description?: string;
-
-  @IsOptional()
   @IsNumber()
   @Min(0)
   sortOrder?: number;
@@ -51,10 +43,139 @@ export class UpdateCategoryDto {
 
   @IsOptional()
   @IsString()
-  image?: string;
+  imageUrl?: string;
 }
 
 export class UpdateOrderStatusDto {
   @IsEnum(OrderStatus)
   status!: OrderStatus;
+}
+
+/* ─── Promotion DTOs ─── */
+export class CreatePromotionDto {
+  @IsString()
+  title!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercent?: number;
+
+  @IsOptional()
+  @IsString()
+  startsAt?: string;
+
+  @IsOptional()
+  @IsString()
+  endsAt?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+export class UpdatePromotionDto {
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  discountPercent?: number;
+
+  @IsOptional()
+  @IsString()
+  startsAt?: string;
+
+  @IsOptional()
+  @IsString()
+  endsAt?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+/* ─── Staff User DTOs ─── */
+export class CreateStaffUserDto {
+  @IsString()
+  login!: string;
+
+  @IsString()
+  name!: string;
+
+  @IsString()
+  password!: string;
+
+  @IsString()
+  role!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+export class UpdateStaffUserDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+/* ─── Subcategory DTOs ─── */
+export class CreateSubcategoryDto {
+  @IsString()
+  name!: string;
+
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  sortOrder?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
+}
+
+export class UpdateSubcategoryDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  slug?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  sortOrder?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  active?: boolean;
 }

@@ -23,18 +23,18 @@ async function main() {
 
   // 2. Categories, subcategories, products
   const categories: Array<{
-    name: string; slug: string; sortOrder: number;
+    name: string; slug: string; sortOrder: number; imageUrl?: string;
     subs: Array<{
       name: string; slug: string; sortOrder: number;
       prods: Array<{
         name: string; slug: string; desc: string;
         price: number; w: number; kcal: number; p: number; f: number; c: number;
-        isNew?: boolean;
+        isNew?: boolean; imageUrl?: string;
       }>;
     }>;
   }> = [
     {
-      name: 'Новинки', slug: 'novinki', sortOrder: 10,
+      name: 'Новинки', slug: 'novinki', sortOrder: 10, imageUrl: '/images/category-novinki.jpg',
       subs: [{
         name: 'Все новинки', slug: 'all', sortOrder: 10,
         prods: [
@@ -46,7 +46,7 @@ async function main() {
       }],
     },
     {
-      name: 'Кулинария', slug: 'kulinariya', sortOrder: 20,
+      name: 'Кулинария', slug: 'kulinariya', sortOrder: 20, imageUrl: '/images/category-kulinariya.jpg',
       subs: [
         {
           name: 'Горячая кухня', slug: 'goryachaya-kuhnya', sortOrder: 10,
@@ -87,7 +87,7 @@ async function main() {
       ],
     },
     {
-      name: 'Пекарня', slug: 'pekarnya', sortOrder: 30,
+      name: 'Пекарня', slug: 'pekarnya', sortOrder: 30, imageUrl: '/images/category-pekarnya.jpg',
       subs: [
         {
           name: 'Сдобные пироги', slug: 'sdobnye-pirogi', sortOrder: 10,
@@ -138,7 +138,7 @@ async function main() {
       ],
     },
     {
-      name: 'Кондитерская', slug: 'konditerskaya', sortOrder: 40,
+      name: 'Кондитерская', slug: 'konditerskaya', sortOrder: 40, imageUrl: '/images/category-konditerskaya.jpg',
       subs: [
         {
           name: 'Торты', slug: 'torty', sortOrder: 10,
@@ -172,7 +172,7 @@ async function main() {
       ],
     },
     {
-      name: 'Бизнес-ланч', slug: 'biznes-lanch', sortOrder: 50,
+      name: 'Бизнес-ланч', slug: 'biznes-lanch', sortOrder: 50, imageUrl: '/images/category-biznes-lanch.jpg',
       subs: [
         { name: 'Понедельник', slug: 'monday', sortOrder: 10, prods: [{ name: 'Ланч понедельника', slug: 'lanch-ponedelnika', desc: 'Суп, горячее и напиток', price: 42000, w: 430, kcal: 450, p: 22, f: 14, c: 58 }] },
         { name: 'Вторник', slug: 'tuesday', sortOrder: 20, prods: [{ name: 'Ланч вторника', slug: 'lanch-vtornika', desc: 'Салат, горячее и гарнир', price: 43000, w: 430, kcal: 458, p: 23, f: 14, c: 59 }] },
@@ -192,7 +192,7 @@ async function main() {
 
   for (const cat of categories) {
     const cc = await prisma.category.create({
-      data: { name: cat.name, slug: cat.slug, sortOrder: cat.sortOrder },
+      data: { name: cat.name, slug: cat.slug, sortOrder: cat.sortOrder, imageUrl: cat.imageUrl ?? null },
     });
     console.log(`  ✓ Category: ${cat.name}`);
 
@@ -220,6 +220,7 @@ async function main() {
             fat: p.f,
             carbs: p.c,
             isNew: p.isNew ?? false,
+            imageUrl: p.imageUrl ?? null,
             sortOrder: 10,
           },
         });

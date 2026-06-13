@@ -30,9 +30,12 @@ export default function AuthModal() {
         setPassword('');
       } else {
         await register(email, password, name, phone || undefined);
-        setSuccess('Регистрация прошла успешно! Проверьте почту для верификации.');
-        setTab('login');
+        setSuccess('Аккаунт создан, вы вошли в систему.');
+        setAuthModalOpen(false);
+        setEmail('');
         setPassword('');
+        setName('');
+        setPhone('');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Произошла ошибка');

@@ -22,12 +22,12 @@ export class StaffAuthService {
     });
 
     if (!staff || !staff.active) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Неверный логин или пароль');
     }
 
     const valid = await bcrypt.compare(dto.password, staff.passwordHash);
     if (!valid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Неверный логин или пароль');
     }
 
     return this.generateTokenPair(staff.id, staff.login, staff.role);
@@ -40,10 +40,10 @@ export class StaffAuthService {
     });
 
     if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException('Токен обновления недействителен или истёк');
     }
     if (!stored.staffUserId) {
-      throw new UnauthorizedException('Invalid token type');
+      throw new UnauthorizedException('Неверный тип токена');
     }
 
     await this.prisma.refreshToken.update({
@@ -55,7 +55,7 @@ export class StaffAuthService {
       where: { id: stored.staffUserId },
     });
     if (!staff || !staff.active) {
-      throw new UnauthorizedException('Staff not found or inactive');
+      throw new UnauthorizedException('Сотрудник не найден или деактивирован');
     }
 
     return this.generateTokenPair(staff.id, staff.login, staff.role);
@@ -75,7 +75,7 @@ export class StaffAuthService {
       select: { id: true, login: true, name: true, role: true, active: true },
     });
     if (!staff) {
-      throw new UnauthorizedException('Staff not found');
+      throw new UnauthorizedException('Сотрудник не найден');
     }
     return staff;
   }
