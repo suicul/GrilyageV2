@@ -36,7 +36,7 @@ export default function AuthModal() {
 
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [showCode, setShowCode] = useState('');
+  const [_showCode, _setShowCode] = useState('');
 
   const [emailOtpStep, setEmailOtpStep] = useState<'email' | 'code'>('email');
   const [emailOtpCode, setEmailOtpCode] = useState('');

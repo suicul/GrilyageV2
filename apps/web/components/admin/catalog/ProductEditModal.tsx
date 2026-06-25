@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 
 interface Subcategory {
   id: string; name: string; slug: string; categoryId: string;

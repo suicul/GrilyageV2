@@ -25,7 +25,7 @@ export default function Header({
   children,
   stickyMode,
 }: HeaderProps & { children?: React.ReactNode }) {
-  const { cartQty, toggleCart, cartOpen } = useCart();
+  const { cartQty, toggleCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);

@@ -23,12 +23,10 @@ export default function CartDrawer() {
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState('');
-  const [productIdMapReady, setProductIdMapReady] = useState(false);
-
   const deliveryCost = getDeliveryCost(subtotal, deliveryMode);
   const total = subtotal + deliveryCost;
 
-  const deliveryProgress = deliveryMode === DeliveryMode.PICKUP
+  const _deliveryProgress = deliveryMode === DeliveryMode.PICKUP
     ? 100
     : Math.min(100, Math.round((subtotal / FREE_DELIVERY_THRESHOLD_KOPECKS) * 100));
 

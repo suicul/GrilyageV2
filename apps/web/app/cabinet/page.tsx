@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth, type User } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import { formatPrice } from '@grilyage/shared';
 

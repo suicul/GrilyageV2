@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { DeliveryMode, FREE_DELIVERY_THRESHOLD_KOPECKS, getDeliveryCost } from '@grilyage/shared';
 
 const CART_KEY = 'grilyazh-cart';
 
@@ -140,3 +139,4 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     </CartContext.Provider>
   );
 }
+

@@ -140,11 +140,9 @@ export default function HomeContentClient({
   const [activeCategory, setActiveCategory] = useState(initialData.categories[0]?.title || '');
   const [displayCategories, setDisplayCategories] = useState(initialData.categories);
   const [displayProducts, setDisplayProducts] = useState(initialData.products);
-  const [productIdMap, setProductIdMap] = useState(initialData.productIdMap);
   const { setAuthModalOpen } = useAuth();
   const { openCart, addToCart: cartAddToCart } = useCart();
   const [toast, setToast] = useState('');
-  const [mounted, setMounted] = useState(false);
   const [heroIndex, setHeroIndex] = useState(0);
   const [brandPressed, setBrandPressed] = useState(false);
   const [sticky, setSticky] = useState(false);
