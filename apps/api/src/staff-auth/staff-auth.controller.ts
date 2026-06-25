@@ -8,7 +8,7 @@ import { StaffAuthService } from './staff-auth.service';
 import { StaffTwoFactorService } from './staff-two-factor.service';
 import {
   StaffLoginDto, StaffRefreshDto,
-  TwoFactorSetupDto, TwoFactorEnableDto, TwoFactorDisableDto, TwoFactorCompleteLoginDto,
+  TwoFactorEnableDto, TwoFactorDisableDto, TwoFactorCompleteLoginDto,
 } from './dto/staff-auth.dto';
 import { StaffJwtGuard } from './staff-jwt.guard';
 import { CsrfService } from '../common/csrf.service';

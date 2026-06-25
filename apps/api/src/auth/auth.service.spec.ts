@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
@@ -10,7 +10,6 @@ import * as crypto from 'crypto';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let prisma: PrismaService;
 
   const mockUser = {
     id: 'user-1',

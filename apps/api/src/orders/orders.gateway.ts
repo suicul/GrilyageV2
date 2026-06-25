@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Logger, Inject } from '@nestjs/common';
 import {
   WebSocketGateway as WSGateway,
   WebSocketServer,

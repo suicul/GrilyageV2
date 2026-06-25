@@ -1,5 +1,3 @@
-import { Logger } from '@nestjs/common';
-
 export interface EnvVars {
   [key: string]: string | undefined;
 }

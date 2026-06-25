@@ -4,7 +4,6 @@ import { CatalogService } from './catalog.service';
 
 describe('CatalogController', () => {
   let controller: CatalogController;
-  let service: CatalogService;
 
   const mockService = {
     findAllCategories: jest.fn(),

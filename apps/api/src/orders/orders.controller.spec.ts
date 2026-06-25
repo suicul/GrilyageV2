@@ -4,7 +4,6 @@ import { OrdersService } from './orders.service';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
-  let service: OrdersService;
 
   const mockService = {
     create: jest.fn(),

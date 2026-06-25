@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('CatalogService', () => {
   let service: CatalogService;
-  let prisma: PrismaService;
 
   const mockPrisma = {
     category: {

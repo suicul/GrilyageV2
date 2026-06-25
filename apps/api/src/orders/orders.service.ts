@@ -5,9 +5,9 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto, CreateOrderItemDto } from './dto/create-order.dto';
+import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { DeliveryMode, OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 import { getDeliveryCost, canTransition, toKopecks } from '@grilyage/shared';
 import { OrdersGateway } from './orders.gateway';
 import { EmailService } from '../email/email.service';

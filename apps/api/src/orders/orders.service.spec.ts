@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersGateway } from './orders.gateway';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { DeliveryMode, PaymentMethod, OrderStatus } from '@prisma/client';
 
 describe('OrdersService', () => {
