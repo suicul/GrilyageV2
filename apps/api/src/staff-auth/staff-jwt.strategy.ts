@@ -2,7 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
+
+const cookieExtractor = (req: Request): string | null => {
+  return req?.cookies?.staffAccessToken ?? null;
+};
 
 @Injectable()
 export class StaffJwtStrategy extends PassportStrategy(Strategy, 'staff-jwt') {
@@ -11,7 +16,10 @@ export class StaffJwtStrategy extends PassportStrategy(Strategy, 'staff-jwt') {
     private readonly prisma: PrismaService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        cookieExtractor,
+      ]),
       ignoreExpiration: false,
       secretOrKey: config.get<string>('STAFF_JWT_ACCESS_SECRET', 'change-me-staff-access'),
     });

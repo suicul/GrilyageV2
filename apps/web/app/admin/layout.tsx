@@ -62,6 +62,9 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             <Link href="/admin/orders" className={pathname.startsWith('/admin/orders') ? 'active' : ''}>
               📋 Заказы
             </Link>
+            <Link href="/admin/chat" className={pathname.startsWith('/admin/chat') ? 'active' : ''}>
+              💬 Чат
+            </Link>
             {staffUser.role === 'ADMIN' && (
               <>
                 <Link href="/admin/catalog" className={pathname.startsWith('/admin/catalog') ? 'active' : ''}>

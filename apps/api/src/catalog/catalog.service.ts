@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductsQueryDto } from './dto/products-query.dto';
-import { normalizeSearchText } from '@grilyage/shared';
+import { normalizeSearchText, toKopecks } from '@grilyage/shared';
 
 @Injectable()
 export class CatalogService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private addComputedPrice(product: any) {
+    return { ...product, price: toKopecks(product.priceRubles, product.priceKopecks) };
+  }
 
   async findAllSubcategories() {
     return this.prisma.subcategory.findMany({
@@ -18,7 +22,7 @@ export class CatalogService {
   }
 
   async findAllCategories() {
-    return this.prisma.category.findMany({
+    const cats = await this.prisma.category.findMany({
       where: { active: true },
       orderBy: { sortOrder: 'asc' },
       include: {
@@ -34,7 +38,8 @@ export class CatalogService {
                 id: true,
                 name: true,
                 slug: true,
-                price: true,
+                priceRubles: true,
+                priceKopecks: true,
                 weightGrams: true,
                 kcal: true,
                 protein: true,
@@ -49,6 +54,14 @@ export class CatalogService {
         },
       },
     });
+
+    return cats.map((cat) => ({
+      ...cat,
+      subcategories: cat.subcategories.map((sub) => ({
+        ...sub,
+        products: sub.products.map((p) => this.addComputedPrice(p)),
+      })),
+    }));
   }
 
   async findProducts(query: ProductsQueryDto) {
@@ -88,7 +101,7 @@ export class CatalogService {
       where.isNew = true;
     }
 
-    return this.prisma.product.findMany({
+    const products = await this.prisma.product.findMany({
       where,
       orderBy: { sortOrder: 'asc' },
       include: {
@@ -100,6 +113,16 @@ export class CatalogService {
           },
         },
       },
+    });
+
+    return products.map((p) => this.addComputedPrice(p));
+  }
+
+  async findActivePromotions() {
+    const now = new Date();
+    return this.prisma.promotion.findMany({
+      where: { active: true, startsAt: { lte: now }, endsAt: { gte: now } },
+      orderBy: { startsAt: 'desc' },
     });
   }
 
@@ -121,6 +144,6 @@ export class CatalogService {
       throw new NotFoundException('Товар не найден');
     }
 
-    return product;
+    return this.addComputedPrice(product);
   }
 }

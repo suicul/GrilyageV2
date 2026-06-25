@@ -1,0 +1,93 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  deploy:
+    name: Build & Deploy to VPS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: false
+          tags: grilyage-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/api-image.tar
+
+      - name: Build Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: false
+          tags: grilyage-web:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/web-image.tar
+
+      - name: Compress images
+        run: |
+          gzip -c /tmp/api-image.tar > api-image.tar.gz
+          gzip -c /tmp/web-image.tar > web-image.tar.gz
+
+      - name: Copy images to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: 'api-image.tar.gz,web-image.tar.gz,infra/docker-compose.prod.yml'
+          target: '/opt/grilyage/deploy'
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            cd /opt/grilyage
+
+            # Load new images
+            docker load < deploy/api-image.tar.gz
+            docker load < deploy/web-image.tar.gz
+
+            # Copy compose file
+            cp deploy/docker-compose.prod.yml infra/docker-compose.prod.yml
+
+            # Pull latest env from secrets (already on VPS)
+            # Restart services
+            docker compose -f infra/docker-compose.prod.yml up -d --no-deps --build api web
+
+            # Cleanup old images
+            docker image prune -f
+            rm -rf deploy/*.tar.gz
+
+      - name: Health check
+        run: |
+          sleep 15
+          curl -f --retry 5 --retry-delay 10 https://grillyage.ru/ || exit 1

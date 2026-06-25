@@ -13,6 +13,7 @@ coverage/
 .env
 .env.local
 .env.*.local
+.env.production
 
 # Uploads (runtime data)
 uploads/
@@ -35,6 +36,9 @@ Thumbs.db
 apps/mobile/.dart_tool/
 apps/mobile/.flutter-plugins*
 apps/mobile/build/
+apps/mobile/android/key.properties
+apps/mobile/android/app/*.keystore
+apps/mobile/android/app/*.jks
 apps/mobile/ios/Pods/
 
 # Playwright
@@ -43,3 +47,36 @@ test-results/
 
 # OMO internal
 .omo/drafts/
+
+# Temporary / debugging scripts
+*.py
+!deploy.py
+tmp_*
+check_*
+test_*
+fix_*
+verify_*
+rebuild_*
+restart_*
+diag_*
+force_*
+read_*
+start_*
+get_*
+create_*
+
+# Archives
+*.tar.gz
+*.tgz
+
+# Electron
+apps/launcher/out/
+apps/launcher/dist/
+
+# Windows
+*.bat
+*.exe
+
+# Prisma
+__pycache__/
+*.pyc

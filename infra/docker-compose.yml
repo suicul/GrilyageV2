@@ -1,31 +1,243 @@
-name: grilyage-dev
+name: grilyage
 
 services:
   postgres:
-    image: postgres:17-alpine
+    image: dockerhub.timeweb.cloud/library/postgres:17-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: grilyage
-      POSTGRES_PASSWORD: grilyage_dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: grilyage
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U grilyage -d grilyage"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
 
-  mailpit:
-    image: axllent/mailpit:latest
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://grilyage:${POSTGRES_PASSWORD}@postgres:5432/grilyage
+      API_PORT: 4000
+      API_PUBLIC_URL: https://grillyage.ru
+      WEB_PUBLIC_URL: https://grillyage.ru
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 30d
+      STAFF_JWT_ACCESS_SECRET: ${STAFF_JWT_ACCESS_SECRET}
+      STAFF_JWT_REFRESH_SECRET: ${STAFF_JWT_REFRESH_SECRET}
+      STAFF_JWT_ACCESS_TTL: 15m
+      STAFF_JWT_REFRESH_TTL: 30d
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_IGNORE_TLS: ${SMTP_IGNORE_TLS:-false}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      UPLOADS_DIR: /app/uploads
+      MAX_UPLOAD_SIZE_MB: 5
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      NEXT_PUBLIC_VK_CLIENT_ID: ${NEXT_PUBLIC_VK_CLIENT_ID}
+      NEXT_PUBLIC_YANDEX_CLIENT_ID: ${NEXT_PUBLIC_YANDEX_CLIENT_ID}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET}
+      SMS_RU_API_KEY: ${SMS_RU_API_KEY:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      LIVEKIT_HOST: ${LIVEKIT_HOST}
+      LIVEKIT_PORT: ${LIVEKIT_PORT}
+      FCM_CREDENTIALS_PATH: ${FCM_CREDENTIALS_PATH:-}
+    volumes:
+      - uploads:/app/uploads
+      - ${FCM_CREDENTIALS_SOURCE:-./firebase-credentials.json}:${FCM_CREDENTIALS_PATH:-/app/firebase-credentials.json}:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_VK_CLIENT_ID: ${NEXT_PUBLIC_VK_CLIENT_ID}
+        NEXT_PUBLIC_YANDEX_CLIENT_ID: ${NEXT_PUBLIC_YANDEX_CLIENT_ID}
+        NEXT_PUBLIC_YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY}
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: production
+      API_INTERNAL_URL: http://api:4000
+      NEXT_PUBLIC_YANDEX_MAPS_API_KEY: ${YANDEX_MAPS_API_KEY}
+      NEXT_PUBLIC_VK_CLIENT_ID: ${NEXT_PUBLIC_VK_CLIENT_ID}
+      NEXT_PUBLIC_YANDEX_CLIENT_ID: ${NEXT_PUBLIC_YANDEX_CLIENT_ID}
+      HOSTNAME: 0.0.0.0
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+
+  nginx:
+    image: dockerhub.timeweb.cloud/library/nginx:stable-alpine
     restart: unless-stopped
     ports:
-      - "1025:1025" # SMTP
-      - "8025:8025" # Web UI
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot-www:/var/www/certbot
+      - certbot-etc:/etc/letsencrypt
+      - ./nginx/ssl-dhparams.pem:/etc/nginx/ssl-dhparams.pem:ro
+    depends_on:
+      web:
+        condition: service_started
+      api:
+        condition: service_started
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.5'
+        reservations:
+          memory: 64M
+
+  smtp:
+    build:
+      context: ./smtp
+      dockerfile: Dockerfile
+    restart: unless-stopped
     environment:
-      MP_MAX_MESSAGES: 500
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    healthcheck:
+      test: ["CMD", "postfix", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    ports:
+      - "7880:7880"
+      - "7881:7881/udp"
+      - "7882:7882/udp"
+    environment:
+      LIVEKIT_CONFIG: |
+        port: 7880
+        bind_addresses: ["0.0.0.0"]
+        rtc:
+          port_range_start: 7881
+          port_range_end: 7882
+          use_external_ip: true
+          stun_servers: ["stun.l.google.com:19302"]
+        turn:
+          enabled: false
+        keys:
+          ${LIVEKIT_API_KEY}: ${LIVEKIT_API_SECRET}
+        logging:
+          level: info
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7880"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+
+  livekit-agent:
+    build:
+      context: ./livekit-agent
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      livekit:
+        condition: service_healthy
+    environment:
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_HOST: livekit
+      LIVEKIT_PORT: 7880
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+    volumes:
+      - ./livekit-agent/audio:/app/audio
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+
+  certbot:
+    image: dockerhub.timeweb.cloud/library/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    entrypoint: /bin/sh
+    command: -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h; done"
 
 volumes:
   pgdata:
+  uploads:
+  certbot-www:
+  certbot-etc:

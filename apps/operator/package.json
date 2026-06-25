@@ -1,0 +1,31 @@
+{
+  "name": "@grilyage/operator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Grilyage Operator Desktop — управление заказами, чат и звонки",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.grilyage.operator",
+    "productName": "Грильяж Оператор",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*"
+    ],
+    "win": {
+      "target": "portable"
+    }
+  },
+  "dependencies": {
+    "livekit-client": "^2.0.0"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

@@ -3,6 +3,18 @@
 name: grilyage-prod
 
 services:
+  # ─── Redis ──────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - grilyage-prod
+
   # ─── PostgreSQL ─────────────────────────────────────────────
   postgres:
     image: postgres:17-alpine
@@ -23,15 +35,83 @@ services:
       - grilyage-prod
     # No ports exposed to host — access only via internal network
 
+  # ─── Monitoring: Loki (log storage) ──────────────────────────
+  loki:
+    image: grafana/loki:3.4
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - grilyage-prod
+
+  # ─── Monitoring: Promtail (log collector) ────────────────────
+  promtail:
+    image: grafana/promtail:3.4
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    networks:
+      - grilyage-prod
+
+  # ─── Monitoring: Prometheus (metrics) ────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - grilyage-prod
+
+  # ─── Monitoring: Node Exporter (system metrics) ──────────────
+  node-exporter:
+    image: prom/node-exporter:latest
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+    networks:
+      - grilyage-prod
+
+  # ─── Monitoring: Grafana (dashboards) ────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - loki
+      - prometheus
+    networks:
+      - grilyage-prod
+
   # ─── NestJS API ──────────────────────────────────────────────
   api:
     build:
       context: ..
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
+    labels:
+      logging: promtail
     environment:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL}
@@ -43,11 +123,20 @@ services:
       SMTP_HOST: ${SMTP_HOST:-mailpit}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@grillyage.ru}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      LIVEKIT_HOST: ${LIVEKIT_HOST:-livekit}
+      FCM_CREDENTIALS_PATH: ${FCM_CREDENTIALS_PATH}
+    volumes:
+      - ${FCM_CREDENTIALS_SOURCE:-./firebase-credentials.json}:${FCM_CREDENTIALS_PATH:-/app/firebase-credentials.json}:ro
     ports:
       - "4000:4000"
     networks:
       - grilyage-prod
+      - grilyage_default
 
   # ─── Next.js Web ─────────────────────────────────────────────
   web:
@@ -55,11 +144,14 @@ services:
       context: ..
       dockerfile: apps/web/Dockerfile
     restart: unless-stopped
+    labels:
+      logging: promtail
     depends_on:
       - api
     environment:
       NODE_ENV: production
       API_INTERNAL_URL: http://api:4000
+      HOSTNAME: 0.0.0.0
     ports:
       - "3000:3000"
     networks:
@@ -69,6 +161,8 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    labels:
+      logging: promtail
     ports:
       - "80:80"
     volumes:
@@ -83,7 +177,12 @@ services:
 volumes:
   pgdata:
   uploads:
+  loki-data:
+  prometheus-data:
+  grafana-data:
 
 networks:
   grilyage-prod:
     driver: bridge
+  grilyage_default:
+    external: true

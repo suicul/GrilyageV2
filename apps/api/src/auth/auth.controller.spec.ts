@@ -35,7 +35,7 @@ describe('AuthController', () => {
 
       const result = await controller.register(dto);
       expect(result).toEqual(expected);
-      expect(mockAuthService.register).toHaveBeenCalledWith(dto);
+      expect(mockAuthService.register).toHaveBeenCalledWith(dto, undefined);
     });
   });
 
@@ -65,28 +65,30 @@ describe('AuthController', () => {
     it('should call logout', async () => {
       mockAuthService.logout.mockResolvedValue(undefined);
 
-      const result = await controller.logout({ refreshToken: 'rt' });
+      const mockRes = { clearCookie: jest.fn() } as any;
+      const result = await controller.logout({ refreshToken: 'rt' }, mockRes);
       expect(result).toBeUndefined();
       expect(mockAuthService.logout).toHaveBeenCalledWith('rt');
+      expect(mockRes.clearCookie).toHaveBeenCalledWith('accessToken', expect.any(Object));
     });
   });
 
   describe('GET /auth/verify-email', () => {
     it('should verify email', async () => {
-      mockAuthService.verifyEmail.mockResolvedValue({ message: 'Email verified successfully' });
+      mockAuthService.verifyEmail.mockResolvedValue({ message: 'Email подтверждён' });
 
       const result = await controller.verifyEmail('token123');
-      expect(result).toEqual({ message: 'Email verified successfully' });
+      expect(result).toEqual({ message: 'Email подтверждён' });
       expect(mockAuthService.verifyEmail).toHaveBeenCalledWith('token123');
     });
   });
 
   describe('POST /auth/resend-verification', () => {
     it('should resend verification', async () => {
-      mockAuthService.resendVerification.mockResolvedValue({ message: 'Verification email sent' });
+      mockAuthService.resendVerification.mockResolvedValue({ message: 'Письмо для подтверждения отправлено' });
 
       const result = await controller.resendVerification({ email: 'test@example.com' });
-      expect(result).toEqual({ message: 'Verification email sent' });
+      expect(result).toEqual({ message: 'Письмо для подтверждения отправлено' });
     });
   });
 

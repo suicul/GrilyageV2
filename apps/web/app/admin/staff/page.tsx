@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 
 type StaffMember = {
-  id: string; login: string; name: string; role: 'ADMIN' | 'OPERATOR'; active: boolean; createdAt: string;
+  id: string; login: string; name: string; role: 'SUPER_ADMIN' | 'ADMIN' | 'OPERATOR' | 'COURIER'; active: boolean; transportType?: 'WALKING' | 'CAR'; deliveryRadius?: number; createdAt: string;
 };
 
-const EMPTY_STAFF = { login: '', name: '', password: '', role: 'OPERATOR', active: true };
+const EMPTY_STAFF = { login: '', name: '', password: '', role: 'OPERATOR', active: true, transportType: 'WALKING', deliveryRadius: 5 };
 
 export default function AdminStaffPage() {
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -14,12 +14,11 @@ export default function AdminStaffPage() {
   const [editing, setEditing] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('staffAccessToken') : null;
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
+  const jsonHeaders = { 'Content-Type': 'application/json' };
 
   const fetchData = () => {
     setLoading(true);
-    fetch('/api/v1/staff/users', { headers })
+    fetch('/api/v1/staff/users')
       .then((r) => r.json())
       .then((data) => setStaff(Array.isArray(data) ? data : []))
       .catch(() => setStaff([]))
@@ -35,10 +34,14 @@ export default function AdminStaffPage() {
     setSaving(true);
     try {
       const body: any = { name: editing.name, login: editing.login, role: editing.role, active: editing.active };
+      if (editing.role === 'COURIER') {
+        body.transportType = editing.transportType || 'WALKING';
+        body.deliveryRadius = editing.deliveryRadius || 5;
+      }
       if (editing.password) body.password = editing.password;
       const isNew = !editing.id;
       const url = isNew ? '/api/v1/staff/users' : `/api/v1/staff/users/${editing.id}`;
-      const res = await fetch(url, { method: isNew ? 'POST' : 'PATCH', headers, body: JSON.stringify(body) });
+      const res = await fetch(url, { method: isNew ? 'POST' : 'PATCH', headers: jsonHeaders, body: JSON.stringify(body) });
       if (res.ok) { setEditing(null); fetchData(); }
       else { const err = await res.json().catch(() => ({ message: 'Ошибка' })); alert(err.message); }
     } catch { alert('Ошибка сети'); }
@@ -47,7 +50,7 @@ export default function AdminStaffPage() {
 
   const toggleActive = async (user: StaffMember) => {
     const res = await fetch(`/api/v1/staff/users/${user.id}`, {
-      method: 'PATCH', headers, body: JSON.stringify({ active: !user.active }),
+      method: 'PATCH', headers: jsonHeaders, body: JSON.stringify({ active: !user.active }),
     });
     if (res.ok) fetchData(); else alert('Ошибка');
   };
@@ -66,6 +69,7 @@ export default function AdminStaffPage() {
               <th>Имя</th>
               <th>Логин</th>
               <th>Роль</th>
+              <th>Тип</th>
               <th>Статус</th>
               <th>Создан</th>
               <th></th>
@@ -78,11 +82,14 @@ export default function AdminStaffPage() {
                 <td style={{ color: '#888' }}>{s.login}</td>
                 <td>
                   <span className="order-status" style={{
-                    background: s.role === 'ADMIN' ? '#fff3e0' : '#e3f2fd',
-                    color: s.role === 'ADMIN' ? '#e65100' : '#1565c0',
+                    background: s.role === 'SUPER_ADMIN' ? '#fce4ec' : s.role === 'ADMIN' ? '#fff3e0' : s.role === 'COURIER' ? '#e8f5e9' : '#e3f2fd',
+                    color: s.role === 'SUPER_ADMIN' ? '#c62828' : s.role === 'ADMIN' ? '#e65100' : s.role === 'COURIER' ? '#2e7d32' : '#1565c0',
                   }}>
-                    {s.role === 'ADMIN' ? 'Админ' : 'Оператор'}
+                    {s.role === 'SUPER_ADMIN' ? 'Супер-админ' : s.role === 'ADMIN' ? 'Админ' : s.role === 'COURIER' ? 'Курьер' : 'Оператор'}
                   </span>
+                </td>
+                <td style={{ fontSize: 13, color: '#666' }}>
+                  {s.role === 'COURIER' ? (s.transportType === 'CAR' ? '🚗 Машина' : '🚶 Пеший') + (s.deliveryRadius ? ` ${s.deliveryRadius}км` : '') : '-'}
                 </td>
                 <td>
                   <span
@@ -94,14 +101,14 @@ export default function AdminStaffPage() {
                 </td>
                 <td style={{ fontSize: 12, color: '#888' }}>{new Date(s.createdAt).toLocaleDateString('ru-RU')}</td>
                 <td>
-                  <button className="admin-btn admin-btn-sm" onClick={() => setEditing({ id: s.id, login: s.login, name: s.name, role: s.role, active: s.active, password: '' })}>
+                  <button className="admin-btn admin-btn-sm" onClick={() => setEditing({ id: s.id, login: s.login, name: s.name, role: s.role, active: s.active, transportType: s.transportType || 'WALKING', deliveryRadius: s.deliveryRadius || 5, password: '' })}>
                     ✎
                   </button>
                 </td>
               </tr>
             ))}
             {staff.length === 0 && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#888', padding: 40 }}>Нет сотрудников</td></tr>
+              <tr><td colSpan={7} style={{ textAlign: 'center', color: '#888', padding: 40 }}>Нет сотрудников</td></tr>
             )}
           </tbody>
         </table>
@@ -124,15 +131,34 @@ export default function AdminStaffPage() {
               </label>
               <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--text2)' }}>
                 Пароль {editing.id && '(оставьте пустым, чтобы не менять)'}
-                <input type="text" value={editing.password || ''} onChange={(e) => setEditing({ ...editing, password: e.target.value })} />
+                <input type="password" value={editing.password || ''} onChange={(e) => setEditing({ ...editing, password: e.target.value })} />
               </label>
               <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--text2)' }}>
                 Роль
                 <select value={editing.role || 'OPERATOR'} onChange={(e) => setEditing({ ...editing, role: e.target.value })}>
                   <option value="ADMIN">Администратор</option>
                   <option value="OPERATOR">Оператор</option>
+                  <option value="COURIER">Курьер</option>
+                  <option value="SUPER_ADMIN">Супер-админ</option>
                 </select>
               </label>
+
+              {editing.role === 'COURIER' && (
+                <>
+                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--text2)' }}>
+                    Тип курьера
+                    <select value={editing.transportType || 'WALKING'} onChange={(e) => setEditing({ ...editing, transportType: e.target.value })}>
+                      <option value="WALKING">Пеший</option>
+                      <option value="CAR">На машине</option>
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 4, fontSize: 13, color: 'var(--text2)' }}>
+                    Радиус доставки (км)
+                    <input type="number" min={1} max={50} value={editing.deliveryRadius || 5} onChange={(e) => setEditing({ ...editing, deliveryRadius: Number(e.target.value) })} />
+                  </label>
+                </>
+              )}
+
               <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 13, color: 'var(--text2)' }}>
                 <input type="checkbox" checked={editing.active !== false} onChange={(e) => setEditing({ ...editing, active: e.target.checked })} />
                 Активен

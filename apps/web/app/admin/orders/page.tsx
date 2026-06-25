@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { formatPrice } from '@grilyage/shared';
 
 type OrderItem = { id: string; nameSnapshot: string; priceSnapshot: number; qty: number };
@@ -25,36 +25,51 @@ const TRANSITIONS: Record<string, string[]> = {
   READY_FOR_PICKUP: ['COMPLETED', 'CANCELLED'],
 };
 
+const PAGE_SIZE = 50;
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('staffAccessToken') : null;
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-
-  const fetchOrders = async (status?: string) => {
+  const fetchOrders = useCallback(async (status?: string, pageNum = 0) => {
     setLoading(true);
     const params = new URLSearchParams();
     if (status) params.set('status', status);
+    params.set('skip', String(pageNum * PAGE_SIZE));
+    params.set('take', String(PAGE_SIZE));
     try {
-      const res = await fetch(`/api/v1/staff/orders?${params}`, { headers });
-      if (res.ok) setOrders(await res.json());
+      const res = await fetch(`/api/v1/staff/orders?${params}`);
+      if (res.ok) {
+        const json = await res.json();
+        setOrders(json.data ?? []);
+        setTotal(json.total ?? 0);
+      }
     } catch { /* ignore */ }
     setLoading(false);
-  };
+  }, []);
 
-  useEffect(() => { fetchOrders(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchOrders('', 0); }, [fetchOrders]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const goToPage = (p: number) => {
+    if (p < 0 || p >= totalPages) return;
+    setPage(p);
+    fetchOrders(filterStatus, p);
+  };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     const res = await fetch(`/api/v1/staff/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus }),
     });
     if (res.ok) {
-      fetchOrders(filterStatus);
+      fetchOrders(filterStatus, page);
       setSelectedOrder(null);
     }
   };
@@ -63,10 +78,10 @@ export default function AdminOrdersPage() {
     <div>
       <h1>Заказы</h1>
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-        <button className={`admin-btn admin-btn-sm ${!filterStatus ? 'admin-btn-active' : ''}`} onClick={() => { setFilterStatus(''); fetchOrders(''); }}>Все</button>
+        <button className={`admin-btn admin-btn-sm ${!filterStatus ? 'admin-btn-active' : ''}`} onClick={() => { setFilterStatus(''); setPage(0); fetchOrders('', 0); }}>Все</button>
         {Object.keys(STATUS_LABELS).map((s) => (
           <button key={s} className={`admin-btn admin-btn-sm ${filterStatus === s ? 'admin-btn-active' : ''}`}
-            onClick={() => { setFilterStatus(s); fetchOrders(s); }}
+            onClick={() => { setFilterStatus(s); setPage(0); fetchOrders(s, 0); }}
           >
             {STATUS_LABELS[s]}
           </button>
@@ -108,6 +123,27 @@ export default function AdminOrdersPage() {
             )}
           </tbody>
         </table>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && !loading && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 20 }}>
+          <button className="admin-btn admin-btn-sm" disabled={page === 0} onClick={() => goToPage(page - 1)}>
+            ← Назад
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={`admin-btn admin-btn-sm ${page === i ? 'admin-btn-active' : ''}`}
+              onClick={() => goToPage(i)}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button className="admin-btn admin-btn-sm" disabled={page >= totalPages - 1} onClick={() => goToPage(page + 1)}>
+            Вперед →
+          </button>
+        </div>
       )}
 
       {/* Order detail modal */}

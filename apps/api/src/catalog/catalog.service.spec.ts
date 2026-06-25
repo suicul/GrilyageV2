@@ -63,11 +63,11 @@ describe('CatalogService', () => {
 
   describe('findProducts', () => {
     it('should return filtered products by search', async () => {
-      const expected = [{ id: 'p1', name: 'Паста с курицей', slug: 'pasta-s-kuricej' }];
-      mockPrisma.product.findMany.mockResolvedValue(expected);
+      const dbProduct = { id: 'p1', name: 'Паста с курицей', slug: 'pasta-s-kuricej', priceRubles: 410, priceKopecks: 0 };
+      mockPrisma.product.findMany.mockResolvedValue([dbProduct]);
 
       const result = await service.findProducts({ search: 'паста' });
-      expect(result).toEqual(expected);
+      expect(result).toEqual([{ ...dbProduct, price: 41000 }]);
     });
 
     it('should filter by isNew flag', async () => {
@@ -93,11 +93,11 @@ describe('CatalogService', () => {
 
   describe('findProductBySlug', () => {
     it('should return product for valid slug', async () => {
-      const expected = { id: 'p1', name: 'Паста с курицей', slug: 'pasta-s-kuricej', active: true };
-      mockPrisma.product.findUnique.mockResolvedValue(expected);
+      const dbProduct = { id: 'p1', name: 'Паста с курицей', slug: 'pasta-s-kuricej', active: true, priceRubles: 410, priceKopecks: 0 };
+      mockPrisma.product.findUnique.mockResolvedValue(dbProduct);
 
       const result = await service.findProductBySlug('pasta-s-kuricej');
-      expect(result).toEqual(expected);
+      expect(result).toEqual({ ...dbProduct, price: 41000 });
     });
   });
 });

@@ -4,7 +4,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcrypt';
+import { EmailService } from '../email/email.service';
+import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
 describe('AuthService', () => {
@@ -17,16 +18,24 @@ describe('AuthService', () => {
     name: 'Test User',
     phone: null,
     passwordHash: '',
+    isActive: true,
+    loginAttempts: 0,
+    lockedUntil: null,
     emailVerifiedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   const mockPrisma = {
+    $transaction: jest.fn().mockImplementation((cb: any) => cb(mockPrisma)),
     user: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+    },
+    userConsent: {
+      create: jest.fn(),
     },
     emailToken: {
       findUnique: jest.fn(),
@@ -53,6 +62,10 @@ describe('AuthService', () => {
     }),
   };
 
+  const mockEmailService = {
+    sendVerificationEmail: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -60,6 +73,7 @@ describe('AuthService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 
@@ -71,9 +85,10 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should create a user and email token', async () => {
+    it('should create a user, consent record, and email token', async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       mockPrisma.user.create.mockResolvedValue(mockUser);
+      mockPrisma.userConsent.create.mockResolvedValue({ id: 'consent-1' });
       mockPrisma.emailToken.create.mockResolvedValue({ id: 'token-1' });
 
       const result = await service.register({
@@ -85,7 +100,8 @@ describe('AuthService', () => {
       expect(result.email).toBe('test@example.com');
       expect(result).not.toHaveProperty('passwordHash');
       expect(mockPrisma.user.create).toHaveBeenCalled();
-      expect(mockPrisma.emailToken.create).toHaveBeenCalled();
+      expect(mockPrisma.userConsent.create).toHaveBeenCalled();
+      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalledWith('test@example.com', expect.any(String));
     });
 
     it('should throw ConflictException for duplicate email', async () => {
@@ -193,18 +209,15 @@ describe('AuthService', () => {
       const futureDate = new Date();
       futureDate.setHours(futureDate.getHours() + 1);
 
-      mockPrisma.emailToken.findUnique.mockResolvedValue({
-        id: 'et-1',
-        userId: 'user-1',
-        token: hash,
-        type: 'VERIFY',
-        expiresAt: futureDate,
+      mockPrisma.user.findFirst.mockResolvedValue({
+        ...mockUser,
+        activationToken: hash,
+        activationTokenExpiresAt: futureDate,
       });
       mockPrisma.user.update.mockResolvedValue({ ...mockUser, emailVerifiedAt: new Date() });
-      mockPrisma.emailToken.delete.mockResolvedValue({});
 
       const result = await service.verifyEmail(token);
-      expect(result).toEqual({ message: 'Email verified successfully' });
+      expect(result).toEqual({ message: 'Email подтверждён' });
       expect(mockPrisma.user.update).toHaveBeenCalled();
     });
 
@@ -214,12 +227,10 @@ describe('AuthService', () => {
       const pastDate = new Date();
       pastDate.setHours(pastDate.getHours() - 1); // expired
 
-      mockPrisma.emailToken.findUnique.mockResolvedValue({
-        id: 'et-1',
-        userId: 'user-1',
-        token: hash,
-        type: 'VERIFY',
-        expiresAt: pastDate,
+      mockPrisma.user.findFirst.mockResolvedValue({
+        ...mockUser,
+        activationToken: hash,
+        activationTokenExpiresAt: pastDate,
       });
 
       await expect(service.verifyEmail(token)).rejects.toThrow(BadRequestException);

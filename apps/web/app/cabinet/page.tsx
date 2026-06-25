@@ -58,20 +58,20 @@ export default function CabinetPage() {
   const [newLabel, setNewLabel] = useState('');
   const [msg, setMsg] = useState('');
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
-    : { 'Content-Type': 'application/json' };
+  const fetchOptions: RequestInit = {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  };
 
   useEffect(() => {
     if (tab === 'addresses') {
-      fetch('/api/v1/profile/addresses', { headers })
+      fetch('/api/v1/profile/addresses', fetchOptions)
         .then((r) => r.json())
         .then(setAddresses)
         .catch(() => {});
     }
     if (tab === 'orders') {
-      fetch('/api/v1/orders/my', { headers })
+      fetch('/api/v1/orders/my', fetchOptions)
         .then((r) => r.json())
         .then((data) => setOrders(Array.isArray(data) ? data : []))
         .catch(() => {});
@@ -91,7 +91,7 @@ export default function CabinetPage() {
   const handleSaveProfile = async () => {
     const res = await fetch('/api/v1/profile', {
       method: 'PATCH',
-      headers,
+      ...fetchOptions,
       body: JSON.stringify({ name: editName || undefined, phone: editPhone || undefined }),
     });
     if (res.ok) {
@@ -106,7 +106,7 @@ export default function CabinetPage() {
   const handleAddAddress = async () => {
     const res = await fetch('/api/v1/profile/addresses', {
       method: 'POST',
-      headers,
+      ...fetchOptions,
       body: JSON.stringify({ label: newLabel || undefined, street: newStreet, house: newHouse, apartment: newApartment || undefined }),
     });
     if (res.ok) {
@@ -115,13 +115,13 @@ export default function CabinetPage() {
       setNewHouse('');
       setNewApartment('');
       setNewLabel('');
-      const updated = await fetch('/api/v1/profile/addresses', { headers }).then((r) => r.json());
+      const updated = await fetch('/api/v1/profile/addresses', fetchOptions).then((r) => r.json());
       setAddresses(updated);
     }
   };
 
   const handleDeleteAddress = async (id: string) => {
-    await fetch(`/api/v1/profile/addresses/${id}`, { method: 'DELETE', headers });
+    await fetch(`/api/v1/profile/addresses/${id}`, { method: 'DELETE', ...fetchOptions });
     setAddresses((prev) => prev.filter((a) => a.id !== id));
   };
 

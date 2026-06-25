@@ -1,17 +1,22 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { PrismaService } from '../prisma/prisma.service';
 
-interface HealthResponse {
-  status: 'ok';
-  uptime: number;
-}
-
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
   @Get()
-  check(): HealthResponse {
-    return {
-      status: 'ok',
-      uptime: process.uptime(),
-    };
+  async check() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return { status: 'ok', uptime: process.uptime(), db: 'connected' };
+    } catch (err) {
+      this.logger.error('Health check — DB not reachable', err);
+      return { status: 'error', uptime: process.uptime(), db: 'disconnected' };
+    }
   }
 }

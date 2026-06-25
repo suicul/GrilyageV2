@@ -9,8 +9,8 @@ describe('OrdersService', () => {
   let service: OrdersService;
 
   const mockProducts = [
-    { id: 'p1', name: 'Паста', slug: 'pasta', price: 41000, active: true, subcategoryId: 's1' },
-    { id: 'p2', name: 'Пирог', slug: 'pirog', price: 42000, active: true, subcategoryId: 's2' },
+    { id: 'p1', name: 'Паста', slug: 'pasta', priceRubles: 410, priceKopecks: 0, active: true, subcategoryId: 's1' },
+    { id: 'p2', name: 'Пирог', slug: 'pirog', priceRubles: 420, priceKopecks: 0, active: true, subcategoryId: 's2' },
   ];
 
   const mockPrisma = {
@@ -81,7 +81,7 @@ describe('OrdersService', () => {
     });
 
     it('should make delivery free above 1500 threshold', async () => {
-      const expensive = [{ id: 'p3', name: 'Торт', slug: 'tort', price: 150000, active: true, subcategoryId: 's1' }];
+      const expensive = [{ id: 'p3', name: 'Торт', slug: 'tort', priceRubles: 1500, priceKopecks: 0, active: true, subcategoryId: 's1' }];
       mockPrisma.product.findMany.mockResolvedValue(expensive);
       mockPrisma.order.create.mockImplementation(async ({ data }) => ({
         id: 'order-2', ...data, items: data.items.create, statusLogs: data.statusLogs.create,

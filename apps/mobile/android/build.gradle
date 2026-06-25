@@ -1,0 +1,21 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://maven.google.com") }
+        maven { url = uri("https://artifactory.appodeal.com/appodeal") }
+        maven { url = uri("https://artifactory-external.vkpartner.ru/artifactory/maven") }
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

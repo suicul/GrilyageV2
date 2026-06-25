@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       await login(loginVal, password);
       router.replace('/admin');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка входа');
+      setError(err instanceof Error ? err.message : 'Не удалось войти');
     } finally {
       setSubmitting(false);
     }

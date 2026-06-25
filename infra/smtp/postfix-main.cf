@@ -1,0 +1,36 @@
+# Postfix as a null client — relay through Yandex SMTP
+myhostname = grillyage.ru
+mydomain = grillyage.ru
+myorigin = $mydomain
+
+inet_interfaces = all
+mynetworks = 172.0.0.0/8 127.0.0.0/8
+mynetworks_style = subnet
+
+mydestination =
+local_transport = error:localhost mail delivery is disabled
+
+relayhost = [smtp.yandex.ru]:465
+disable_dns_lookups = no
+smtp_helo_name = grillyage.ru
+
+# Force IPv4 — Yandex SMTP may not have a working AAAA record
+smtp_address_preference = ipv4
+inet_protocols = ipv4
+
+# SASL auth for Yandex SMTP
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_sasl_mechanism_filter = login
+smtp_tls_wrappermode = yes
+smtp_tls_security_level = encrypt
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+smtp_tls_loglevel = 2
+
+smtpd_banner = $myhostname ESMTP
+smtpd_use_tls = no
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+
+# Direct logging (no syslog needed) - NOTE: path is relative to chroot (/var/spool/postfix)
+maillog_file = /var/log/mail.log

@@ -10,18 +10,23 @@
     "packages/shared"
   ],
   "scripts": {
-    "dev": "npm-run-all --parallel dev:api dev:web",
+    "dev": "npm run ports:free && npm-run-all --parallel dev:api dev:web",
     "dev:api": "npm run dev --workspace apps/api",
     "dev:web": "npm run dev --workspace apps/web",
+    "ports:free": "node -e \"const{execSync}=require('child_process');[3000,4000].forEach(p=>{try{execSync('taskkill /F /IM node.exe /FI \\\"CPUS gt 0\\\" 2>nul',{stdio:'pipe'});const r=execSync('netstat -ano|findstr :'+p+'|findstr LISTENING',{encoding:'utf-8',stdio:'pipe'});r.split('\\n').forEach(l=>{const pid=l.trim().split(/\\s+/).pop();if(pid)try{execSync('taskkill /PID '+pid+' /F',{stdio:'pipe'})}catch{}}) }catch{}})\"",
     "build": "npm run build --workspace packages/shared && npm run build --workspace apps/api && npm run build --workspace apps/web",
     "db:migrate": "npm run db:migrate --workspace apps/api",
+    "db:migrate:prod": "npm run db:migrate:prod --workspace apps/api",
     "db:seed": "npm run db:seed --workspace apps/api",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspace apps/web",
     "launcher": "npm run start --workspace apps/launcher",
     "launcher:repair": "npm run repair:electron --workspace apps/launcher",
-    "launcher:build": "npm run build --workspace apps/launcher"
+    "launcher:build": "npm run build --workspace apps/launcher",
+    "backup:postgres": "bash scripts/backup-postgres.sh",
+    "backup:uploads": "bash scripts/backup-uploads.sh",
+    "backup:test-restore": "bash scripts/test-restore.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -36,6 +41,11 @@
     "node": ">=22"
   },
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "@nestjs/throttler": "^6.5.0",
+    "ioredis": "^5.11.1",
+    "leaflet": "^1.9.4",
+    "picomatch": "^4.0.4",
+    "resolve-cwd": "^3.0.0",
+    "sharp": "^0.35.1"
   }
 }

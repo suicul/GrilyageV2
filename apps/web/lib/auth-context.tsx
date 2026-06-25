@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export type User = {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   phone: string | null;
   emailVerifiedAt: string | null;
@@ -15,11 +15,15 @@ type AuthContextValue = {
   user: User | null;
   loading: boolean;
   authModalOpen: boolean;
-  setAuthModalOpen: (open: boolean) => void;
+  setAuthModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
+  phoneLogin: (phone: string, code: string, name?: string) => Promise<void>;
+  socialLogin: (provider: string, token: string, telegramData?: any) => Promise<void>;
+  sendEmailOtp: (email: string) => Promise<void>;
+  verifyEmailOtp: (email: string, code: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -30,20 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
     try {
-      const res = await fetch('/api/v1/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // httpOnly cookie is sent automatically — no need to read from localStorage
+      const res = await fetch('/api/v1/auth/me', { credentials: 'include' });
       if (res.ok) {
         const data = (await res.json()) as User;
         setUser(data);
-      } else {
-        // Try refresh token
+      } else if (res.status === 401) {
+        // Try refresh with stored refresh token
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const refreshRes = await fetch('/api/v1/auth/refresh', {
@@ -56,19 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               accessToken: string;
               refreshToken: string;
             };
-            localStorage.setItem('accessToken', tokens.accessToken);
+            // Access token is now httpOnly cookie (set by server)
+            // Only store refresh token in localStorage
             localStorage.setItem('refreshToken', tokens.refreshToken);
-            // Retry fetch
-            const retry = await fetch('/api/v1/auth/me', {
-              headers: { Authorization: `Bearer ${tokens.accessToken}` },
-            });
+            // Retry fetch — cookie is already set
+            const retry = await fetch('/api/v1/auth/me', { credentials: 'include' });
             if (retry.ok) setUser((await retry.json()) as User);
           } else {
-            localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
           }
-        } else {
-          localStorage.removeItem('accessToken');
         }
       }
     } catch {
@@ -88,11 +82,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Ошибка входа' }));
-      throw new Error(err.message || 'Ошибка входа');
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Не удалось войти');
     }
-    const { accessToken, refreshToken } = await res.json();
-    localStorage.setItem('accessToken', accessToken);
+    const { refreshToken } = await res.json();
+    // Access token is set as httpOnly cookie by the server
+    // Only store refresh token in localStorage
     localStorage.setItem('refreshToken', refreshToken);
     await fetchUser();
   };
@@ -104,10 +99,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password, name, phone }),
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Ошибка регистрации' }));
-      throw new Error(err.message || 'Ошибка регистрации');
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Не удалось зарегистрироваться');
     }
-    await login(email, password);
+  };
+
+  const phoneLogin = async (phone: string, code: string, name?: string) => {
+    const res = await fetch('/api/v1/auth/social/phone-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, code, name }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Не удалось войти через телефон');
+    }
+    const { refreshToken } = await res.json();
+    // Access token set via httpOnly cookie by the server
+    localStorage.setItem('refreshToken', refreshToken);
+    await fetchUser();
+  };
+
+  const socialLogin = async (provider: string, token: string, telegramData?: any) => {
+    let endpoint = `/api/v1/auth/social/${provider}`;
+    let body: any = {};
+    if (provider === 'vk' || provider === 'yandex') {
+      body = { access_token: token };
+    } else if (provider === 'telegram' && telegramData) {
+      body = telegramData;
+    } else if (provider === 'email-otp') {
+      endpoint = `/api/v1/auth/social/email-otp`;
+      body = JSON.parse(token);
+    }
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Ошибка авторизации');
+    }
+    const { refreshToken } = await res.json();
+    // Access token set via httpOnly cookie by the server
+    localStorage.setItem('refreshToken', refreshToken);
+    await fetchUser();
+  };
+
+  const sendEmailOtp = async (email: string) => {
+    const res = await fetch('/api/v1/auth/social/send-email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Ошибка отправки кода');
+    }
+  };
+
+  const verifyEmailOtp = async (email: string, code: string) => {
+    const res = await fetch('/api/v1/auth/social/email-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Неверный код');
+    }
+    const data = await res.json();
+    // Access token set via httpOnly cookie by the server
+    localStorage.setItem('refreshToken', data.refreshToken);
+    await fetchUser();
   };
 
   const logout = async () => {
@@ -123,14 +187,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // ignore
       }
     }
-    localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, authModalOpen, setAuthModalOpen, login, register, logout, fetchUser }}
+      value={{ user, loading, authModalOpen, setAuthModalOpen, login, register, logout, fetchUser, phoneLogin, socialLogin, sendEmailOtp, verifyEmailOtp }}
     >
       {children}
     </AuthContext.Provider>

@@ -421,10 +421,10 @@ async function createStaffUser(input) {
   return runCommand('api', 'node', ['scripts/create-staff-user.js'], {
     cwd: path.join(ROOT_DIR, 'apps', 'launcher'),
     env: {
-      CRM_LOGIN: login,
-      CRM_NAME: name,
-      CRM_PASSWORD: password,
-      CRM_ROLE: role,
+      STAFF_LOGIN: login,
+      STAFF_NAME: name,
+      STAFF_PASSWORD: password,
+      STAFF_ROLE: role,
     },
   });
 }

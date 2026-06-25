@@ -24,7 +24,9 @@ export class StaffRolesGuard extends AuthGuard('staff-jwt') {
     const request = context.switchToHttp().getRequest();
     const user = request.user as { sub: string; role: StaffRole };
 
-    if (!requiredRoles.includes(user.role)) {
+    // SUPER_ADMIN inherits all ADMIN-level permissions
+    const effectiveRole = user.role === StaffRole.SUPER_ADMIN ? StaffRole.ADMIN : user.role;
+    if (!requiredRoles.includes(effectiveRole as StaffRole) && !requiredRoles.includes(user.role)) {
       throw new ForbiddenException('Недостаточно прав');
     }
 

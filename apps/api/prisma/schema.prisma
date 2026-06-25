@@ -1,5 +1,6 @@
 // Грильяж — Prisma schema
-// Денежные значения — INTEGER КОПЕЙКИ (никаких float).
+// Цены продуктов — rubles + kopecks (для удобства ввода).
+// Итоговые суммы заказов — INTEGER КОПЕЙКИ (внутренние расчёты).
 
 generator client {
   provider = "prisma-client-js"
@@ -33,8 +34,15 @@ enum OrderStatus {
 }
 
 enum StaffRole {
+  SUPER_ADMIN
   ADMIN
   OPERATOR
+  COURIER
+}
+
+enum TransportType {
+  WALKING
+  CAR
 }
 
 enum EmailTokenType {
@@ -45,19 +53,65 @@ enum EmailTokenType {
 // --- Users (clients) ---
 
 model User {
-  id              String         @id @default(cuid())
-  email           String         @unique
-  phone           String?
-  name            String
-  passwordHash    String
-  emailVerifiedAt DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                      String         @id @default(cuid())
+  email                   String?  @unique
+  phone                   String?
+  name                    String
+  passwordHash            String?
+  emailVerifiedAt         DateTime?
+  phoneVerifiedAt         DateTime?
+  isActive                Boolean        @default(false)
+  activationToken         String?  @unique
+  activationTokenExpiresAt DateTime?
+  loginAttempts           Int            @default(0)
+  lockedUntil             DateTime?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 
   addresses     Address[]
+  pushTokens    PushToken[]
   orders        Order[]
   emailTokens   EmailToken[]
   refreshTokens RefreshToken[]
+  consent       UserConsent?
+  socialAccounts SocialAccount[]
+  calls         CallQueue[]
+  chatRooms     ChatRoom[]
+}
+
+model SocialAccount {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   String   // VK | YANDEX | TELEGRAM | MAX | WHATSAPP | EMAIL
+  providerId String   // ID from the provider
+  email      String?
+  name       String?
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@index([provider])
+}
+
+// --- User Consent (152-ФЗ) ---
+
+model UserConsent {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  privacyAcceptedAt   DateTime @default(now())
+  termsAcceptedAt     DateTime @default(now())
+  marketingAcceptedAt DateTime?
+  dataProcessingAt    DateTime @default(now())
+  ip                  String?
+  userAgent           String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model EmailToken {
@@ -70,6 +124,25 @@ model EmailToken {
   createdAt DateTime       @default(now())
 
   @@index([userId])
+}
+
+// --- OTP Codes (phone + email verification) ---
+
+model OtpCode {
+  id         String   @id @default(cuid())
+  identifier String   // phone number or email
+  code       String   // 6-digit code
+  type       String   // "PHONE" | "EMAIL"
+  purpose    String   // "AUTH" | "VERIFY_EMAIL" | "RESET"
+  expiresAt  DateTime
+  usedAt     DateTime?
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, purpose])
+  @@index([identifier, code])
+  @@index([identifier])
 }
 
 model RefreshToken {
@@ -103,16 +176,25 @@ model Address {
 // --- Staff (CRM) ---
 
 model StaffUser {
-  id           String    @id @default(cuid())
-  login        String    @unique
-  name         String
-  passwordHash String
-  role         StaffRole
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  id             String        @id @default(cuid())
+  login          String        @unique
+  name           String
+  passwordHash   String
+  role           StaffRole
+  active         Boolean       @default(true)
+  loginAttempts  Int           @default(0)
+  lockedUntil    DateTime?
+  totpSecret     String?
+  transportType  TransportType @default(WALKING)
+  deliveryRadius Int           @default(5)
+  lastLatitude   Float?
+  lastLongitude  Float?
+  lastLocationAt DateTime?
+  createdAt      DateTime      @default(now())
 
-  refreshTokens RefreshToken[]
-  statusLogs    OrderStatusLog[]
+  assignedOrders  Order[]           @relation("CourierAssignment")
+  refreshTokens   RefreshToken[]
+  statusLogs      OrderStatusLog[]
 }
 
 // --- Catalog ---
@@ -149,7 +231,8 @@ model Product {
   name          String
   slug          String      @unique
   description   String      @default("")
-  price         Int
+  priceRubles   Int         @default(0)
+  priceKopecks  Int         @default(0)
   weightGrams   Int
   kcal          Int
   protein       Int
@@ -177,6 +260,83 @@ model Promotion {
   productIds      String[]
 }
 
+// --- Chat (user ↔ operator) ---
+
+model ChatRoom {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffId   String?
+  status    ChatRoomStatus @default(OPEN)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@index([staffId])
+  @@index([status])
+}
+
+enum ChatRoomStatus {
+  OPEN
+  ASSIGNED
+  CLOSED
+}
+
+model ChatMessage {
+  id         String    @id @default(cuid())
+  roomId     String
+  room       ChatRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderType String    // "USER" | "OPERATOR"
+  senderId   String
+  text       String
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([roomId])
+  @@index([createdAt])
+}
+
+// --- Call Queue (LiveKit voice calls) ---
+
+model CallQueue {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomName  String   @unique
+  status    CallStatus @default(QUEUED)
+  position  Int?
+  createdAt DateTime @default(now())
+  endedAt   DateTime?
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum CallStatus {
+  QUEUED
+  CONNECTING
+  ACTIVE
+  ENDED
+}
+
+// --- Push Tokens (Mobile) ---
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String
+  platform  String   // "android" | "ios"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, token])
+  @@index([userId])
+}
+
 // --- Orders ---
 
 model Order {
@@ -196,6 +356,9 @@ model Order {
   itemsTotal     Int
   deliveryCost   Int
   total          Int
+  courierId      String?
+  courier        StaffUser?    @relation("CourierAssignment", fields: [courierId], references: [id], onDelete: SetNull)
+  assignedAt     DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -204,6 +367,7 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([courierId])
 }
 
 model OrderItem {

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { staffApiFetch, fetchCsrfToken } from './staff-api';
 
 type StaffUser = {
   id: string;
@@ -22,41 +23,36 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
   const [staffUser, setStaffUser] = useState<StaffUser | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch CSRF token on mount — sets the non-httpOnly csrf-token cookie
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
+
   const fetchStaffUser = useCallback(async () => {
-    const token = localStorage.getItem('staffAccessToken');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
     try {
-      const res = await fetch('/api/v1/staff/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // httpOnly cookie is sent automatically — no need to read from localStorage
+      const res = await staffApiFetch('/api/v1/staff/auth/me');
       if (res.ok) {
         setStaffUser(await res.json());
-      } else {
-        // Try refresh
+      } else if (res.status === 401) {
+        // Try refresh with stored refresh token
         const refreshToken = localStorage.getItem('staffRefreshToken');
         if (refreshToken) {
-          const refreshRes = await fetch('/api/v1/staff/auth/refresh', {
+          const refreshRes = await staffApiFetch('/api/v1/staff/auth/refresh', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken }),
           });
           if (refreshRes.ok) {
             const tokens = await refreshRes.json();
-            localStorage.setItem('staffAccessToken', tokens.accessToken);
+            // Store new refresh token (access token is in httpOnly cookie)
             localStorage.setItem('staffRefreshToken', tokens.refreshToken);
-            const retry = await fetch('/api/v1/staff/auth/me', {
-              headers: { Authorization: `Bearer ${tokens.accessToken}` },
-            });
+            // Retry profile fetch — cookie is already set
+            const retry = await staffApiFetch('/api/v1/staff/auth/me');
             if (retry.ok) setStaffUser(await retry.json());
           } else {
-            localStorage.removeItem('staffAccessToken');
             localStorage.removeItem('staffRefreshToken');
           }
-        } else {
-          localStorage.removeItem('staffAccessToken');
         }
       }
     } catch {
@@ -70,18 +66,21 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
   }, [fetchStaffUser]);
 
   const login = async (loginVal: string, password: string) => {
-    const res = await fetch('/api/v1/staff/auth/login', {
+    const res = await staffApiFetch('/api/v1/staff/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ login: loginVal, password }),
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Ошибка входа' }));
-      throw new Error(err.message || 'Ошибка входа');
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message ?? 'Не удалось войти');
     }
-    const { accessToken, refreshToken } = await res.json();
-    localStorage.setItem('staffAccessToken', accessToken);
+    const { refreshToken } = await res.json();
+    // Access token is set as httpOnly cookie by the server
+    // Only store refresh token in localStorage
     localStorage.setItem('staffRefreshToken', refreshToken);
+    // Re-fetch CSRF token after login (new session)
+    await fetchCsrfToken();
     await fetchStaffUser();
   };
 
@@ -89,7 +88,7 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
     const refreshToken = localStorage.getItem('staffRefreshToken');
     if (refreshToken) {
       try {
-        await fetch('/api/v1/staff/auth/logout', {
+        await staffApiFetch('/api/v1/staff/auth/logout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),
@@ -98,7 +97,6 @@ export function StaffAuthProvider({ children }: { children: ReactNode }) {
         // ignore
       }
     }
-    localStorage.removeItem('staffAccessToken');
     localStorage.removeItem('staffRefreshToken');
     setStaffUser(null);
   };

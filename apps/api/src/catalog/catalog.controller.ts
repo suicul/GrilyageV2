@@ -25,4 +25,9 @@ export class CatalogController {
   async findAllSubcategories() {
     return this.catalogService.findAllSubcategories();
   }
+
+  @Get('promotions')
+  async findActivePromotions() {
+    return this.catalogService.findActivePromotions();
+  }
 }

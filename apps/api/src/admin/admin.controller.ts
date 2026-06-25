@@ -1,21 +1,27 @@
 import {
-  Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, UseInterceptors, UploadedFile, BadRequestException,
+  Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Req,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
+import sharp from 'sharp';
 import { AdminService } from './admin.service';
 import { StaffRolesGuard, Roles } from '../staff-auth/staff-roles.guard';
+import { CsrfGuard } from '../common/csrf.guard';
 import { StaffRole } from '@prisma/client';
 import {
   CreateCategoryDto, UpdateCategoryDto, UpdateOrderStatusDto,
   CreatePromotionDto, UpdatePromotionDto,
   CreateStaffUserDto, UpdateStaffUserDto,
   CreateSubcategoryDto, UpdateSubcategoryDto,
+  CreateProductDto, UpdateProductDto,
+  AssignCourierDto, UpdateCourierLocationDto,
 } from './admin.dto';
 
-@UseGuards(StaffRolesGuard)
+@UseGuards(StaffRolesGuard, CsrfGuard)
 @Controller('staff')
 export class AdminController {
   constructor(private readonly admin: AdminService) {}
@@ -67,19 +73,19 @@ export class AdminController {
   /* ─── Products ─── */
   @Roles(StaffRole.ADMIN)
   @Get('products')
-  listProducts() {
-    return this.admin.listProducts();
+  listProducts(@Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.admin.listProducts(Number(skip) || 0, Number(take) || 50);
   }
 
   @Roles(StaffRole.ADMIN)
   @Post('products')
-  createProduct(@Body() dto: any) {
+  createProduct(@Body() dto: CreateProductDto) {
     return this.admin.createProduct(dto);
   }
 
   @Roles(StaffRole.ADMIN)
   @Patch('products/:id')
-  updateProduct(@Param('id') id: string, @Body() dto: any) {
+  updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
     return this.admin.updateProduct(id, dto);
   }
 
@@ -115,19 +121,19 @@ export class AdminController {
   }
 
   /* ─── Staff Users ─── */
-  @Roles(StaffRole.ADMIN)
+  @Roles(StaffRole.SUPER_ADMIN, StaffRole.ADMIN)
   @Get('users')
   listStaffUsers() {
     return this.admin.listStaffUsers();
   }
 
-  @Roles(StaffRole.ADMIN)
+  @Roles(StaffRole.SUPER_ADMIN, StaffRole.ADMIN)
   @Post('users')
   createStaffUser(@Body() dto: CreateStaffUserDto) {
     return this.admin.createStaffUser(dto);
   }
 
-  @Roles(StaffRole.ADMIN)
+  @Roles(StaffRole.SUPER_ADMIN, StaffRole.ADMIN)
   @Patch('users/:id')
   updateStaffUser(@Param('id') id: string, @Body() dto: UpdateStaffUserDto) {
     return this.admin.updateStaffUser(id, dto);
@@ -141,18 +147,18 @@ export class AdminController {
   }
 
   @Roles(StaffRole.ADMIN)
+  @SkipThrottle()
   @Post('uploads/file')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (_req: any, _file: any, cb: any) => {
-          const dir = path.resolve(__dirname, '..', '..', '..', 'uploads');
+          const dir = process.env.UPLOADS_DIR || path.resolve(__dirname, '..', '..', '..', 'uploads');
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
           cb(null, dir);
         },
         filename: (_req: any, file: any, cb: any) => {
-          const ext = path.extname(file.originalname) || '.jpg';
-          const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+          const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
           cb(null, name);
         },
       }),
@@ -161,15 +167,51 @@ export class AdminController {
   )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Файл не загружен');
-    const url = `/uploads/${file.filename}`;
+
+    // Convert to WebP, resize to 800px max width
+    const outputPath = file.path;
+    const tempPath = outputPath.replace('.webp', '-orig.webp');
+    fs.renameSync(outputPath, tempPath);
+
+    try {
+      await sharp(tempPath)
+        .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(outputPath);
+
+      // Also create a thumbnail
+      const thumbPath = outputPath.replace('.webp', '-thumb.webp');
+      await sharp(tempPath)
+        .resize(320, 320, { fit: 'cover' })
+        .webp({ quality: 70 })
+        .toFile(thumbPath);
+    } finally {
+      if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+    }
+
+    const url = `/uploads/${path.basename(outputPath)}`;
     return { url, message: 'Файл загружен' };
   }
 
+  /* ─── Dashboard ─── */
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
+  @Get('dashboard')
+  getDashboardStats() {
+    return this.admin.getDashboardStats();
+  }
+
   /* ─── Orders ─── */
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR, StaffRole.COURIER)
+  @Get('orders/courier')
+  listCourierOrders(@Req() req: Request) {
+    const staff = req.user as { sub: string };
+    return this.admin.listCourierOrders(staff.sub);
+  }
+
   @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
   @Get('orders')
-  listOrders() {
-    return this.admin.listOrders();
+  listOrders(@Query('status') status?: string, @Query('date') date?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.admin.listOrders({ status, date, skip: Number(skip) || 0, take: Number(take) || 50 });
   }
 
   @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
@@ -178,9 +220,31 @@ export class AdminController {
     return this.admin.getOrder(id);
   }
 
-  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR, StaffRole.COURIER)
   @Patch('orders/:id/status')
-  updateOrderStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
-    return this.admin.updateOrderStatus(id, dto);
+  updateOrderStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto, @Req() req: Request) {
+    const staff = req.user as { sub: string };
+    return this.admin.updateOrderStatus(id, dto, staff.sub);
+  }
+
+  /* ─── Courier Assignment ─── */
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
+  @Post('orders/:id/assign')
+  assignCourier(@Param('id') id: string, @Body() dto: AssignCourierDto) {
+    return this.admin.assignCourier(id, dto);
+  }
+
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
+  @Get('orders/:id/nearest-courier')
+  findNearestCourier(@Param('id') id: string) {
+    return this.admin.findNearestCourier(id);
+  }
+
+  /* ─── Courier Location (GPS tracking) ─── */
+  @Roles(StaffRole.COURIER)
+  @Patch('location')
+  updateLocation(@Req() req: Request, @Body() dto: UpdateCourierLocationDto) {
+    const staff = req.user as { sub: string };
+    return this.admin.updateCourierLocation(staff.sub, dto);
   }
 }

@@ -10,11 +10,14 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ProfileService } from './profile.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { SaveConsentDto } from './dto/consent.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request } from 'express';
 
@@ -59,5 +62,26 @@ export class ProfileController {
   async deleteAddress(@Param('id') id: string, @Req() req: Request) {
     const user = req.user as { sub: string };
     await this.profileService.deleteAddress(user.sub, id);
+  }
+
+  /* ─── Consent ─── */
+  @SkipThrottle()
+  @Get('consent')
+  async getConsent(@Req() req: Request) {
+    const user = req.user as { sub: string };
+    return this.profileService.getConsent(user.sub);
+  }
+
+  @SkipThrottle()
+  @Post('consent')
+  @HttpCode(HttpStatus.OK)
+  async saveConsent(
+    @Body() dto: SaveConsentDto,
+    @Req() req: Request,
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    const user = req.user as { sub: string };
+    const ip = (req.ip ?? req.socket?.remoteAddress) || undefined;
+    return this.profileService.saveConsent(user.sub, dto, ip, userAgent);
   }
 }

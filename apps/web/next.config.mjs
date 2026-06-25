@@ -1,11 +1,13 @@
-/** @type {import('next').NextConfig} */
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+import { withSentryConfig } from '@sentry/nextjs';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const apiUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:4000';
 
 const nextConfig = {
   output: 'standalone',
-  images: {
-    // Images now served from /public/ — no remote patterns needed
-  },
+  images: {},
   async rewrites() {
     return [
       {
@@ -16,4 +18,12 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: 'grilyage',
+  project: 'grilyage-web',
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+  automaticVercelMonitors: false,
+});

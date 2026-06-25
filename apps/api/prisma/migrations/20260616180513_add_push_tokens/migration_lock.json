@@ -1,0 +1,33 @@
+{
+  "version": "6.19.3",
+  "steps": [
+    {
+      "tag": "CreateTable",
+      "table": "PushToken",
+      "columns": [
+        { "name": "id", "type": "Text", "default": { "name": "cuid" } },
+        { "name": "userId", "type": "Text" },
+        { "name": "token", "type": "Text" },
+        { "name": "platform", "type": "Text" },
+        { "name": "active", "type": "Boolean", "default": true },
+        { "name": "createdAt", "type": "DateTime", "default": { "name": "now" } },
+        { "name": "updatedAt", "type": "DateTime", "default": { "name": "now" } }
+      ],
+      "primaryKey": { "columns": ["id"] },
+      "foreignKeys": [
+        {
+          "columns": ["userId"],
+          "referencedTable": "User",
+          "referencedColumns": ["id"],
+          "onDelete": "Cascade"
+        }
+      ],
+      "uniqueConstraints": [
+        { "columns": ["userId", "token"] }
+      ],
+      "indexes": [
+        { "columns": ["userId"] }
+      ]
+    }
+  ]
+}

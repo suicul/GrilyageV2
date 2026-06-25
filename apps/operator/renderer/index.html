@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Грильяж Оператор</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121419; color: #e8e8e8; font-size: 14px; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Sidebar */
+    .sidebar { width: 220px; background: #1a1d24; border-right: 1px solid #2a2e38; display: flex; flex-direction: column; }
+    .sidebar h1 { padding: 16px; font-size: 16px; color: #d6b06a; border-bottom: 1px solid #2a2e38; }
+    .nav { flex: 1; padding: 8px; }
+    .nav-item { padding: 10px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: #999; transition: .15s; margin-bottom: 2px; }
+    .nav-item:hover { background: #22262e; color: #e8e8e8; }
+    .nav-item.active { background: #d6b06a22; color: #d6b06a; font-weight: 600; }
+    .nav-item .badge { margin-left: auto; background: #e53935; color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 99px; font-weight: 700; }
+
+    /* Main content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .toolbar { padding: 12px 20px; background: #1a1d24; border-bottom: 1px solid #2a2e38; display: flex; align-items: center; justify-content: space-between; }
+    .toolbar h2 { font-size: 16px; color: #e8e8e8; }
+    .toolbar .status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .status-dot.online { background: #4caf50; }
+    .status-dot.offline { background: #e53935; }
+    .content { flex: 1; overflow-y: auto; padding: 16px; }
+
+    /* Order cards */
+    .order-card { background: #1e2128; border: 1px solid #2a2e38; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: .15s; }
+    .order-card:hover { border-color: #d6b06a44; }
+    .order-card .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .order-card .order-id { font-weight: 700; color: #888; font-size: 12px; }
+    .order-card .customer { font-weight: 600; color: #e8e8e8; }
+    .order-card .total { font-weight: 600; color: #d6b06a; }
+    .status-badge { font-size: 11px; padding: 3px 8px; border-radius: 99px; font-weight: 600; }
+    .status-new { background: #1a237e33; color: #5c8aff; }
+    .status-accepted { background: #e6510033; color: #ff9800; }
+    .status-preparing { background: #f57f1733; color: #ffc107; }
+    .status-ready { background: #1b5e2033; color: #4caf50; }
+    .status-picked_up { background: #4a148c33; color: #ce93d8; }
+    .status-delivered { background: #21212133; color: #9e9e9e; }
+    .status-cancelled { background: #b71c1c33; color: #ef5350; }
+
+    /* Order details panel */
+    .detail-panel { width: 380px; background: #1a1d24; border-left: 1px solid #2a2e38; display: flex; flex-direction: column; overflow: hidden; }
+    .detail-panel.hidden { display: none; }
+    .detail-header { padding: 12px 16px; border-bottom: 1px solid #2a2e38; display: flex; align-items: center; justify-content: space-between; }
+    .detail-header h3 { font-size: 14px; color: #d6b06a; }
+    .detail-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .detail-section { margin-bottom: 16px; }
+    .detail-section h4 { font-size: 11px; text-transform: uppercase; color: #888; letter-spacing: .08em; margin-bottom: 8px; }
+    .detail-row { padding: 4px 0; display: flex; gap: 8px; align-items: center; color: #ccc; font-size: 13px; }
+    .detail-actions { padding: 12px 16px; border-top: 1px solid #2a2e38; display: flex; flex-direction: column; gap: 6px; }
+    .detail-actions button { width: 100%; padding: 10px; border: 0; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; transition: .15s; }
+    .btn-accept { background: #4caf50; color: #fff; }
+    .btn-accept:hover { background: #43a047; }
+    .btn-ready { background: #ff9800; color: #fff; }
+    .btn-ready:hover { background: #f57c00; }
+    .btn-call { background: #2196f3; color: #fff; }
+    .btn-call:hover { background: #1976d2; }
+    .btn-chat { background: #9c27b0; color: #fff; }
+    .btn-chat:hover { background: #7b1fa2; }
+    .item-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; color: #ccc; }
+
+    /* Empty state */
+    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #555; gap: 12px; }
+    .empty svg { opacity: .3; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333840; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h1>Грильяж Оператор</h1>
+    <div class="nav">
+      <div class="nav-item active" data-tab="orders" onclick="switchTab('orders')">
+        📋 Заказы
+        <span class="badge" id="newOrdersBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" data-tab="calls" onclick="switchTab('calls')">
+        📞 Звонки
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="toolbar">
+      <h2 id="pageTitle">Заказы</h2>
+      <div class="status">
+        <span class="status-dot" id="wsDot"></span>
+        <span id="wsStatus">Подключение...</span>
+      </div>
+    </div>
+    <div id="ordersTab" class="content"></div>
+    <div id="callsTab" class="content" style="display:none">
+      <div class="empty">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        <span>Для совершения звонка клиенту нажмите "Позвонить" в карточке заказа</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  <div class="detail-panel hidden" id="detailPanel">
+    <div class="detail-header">
+      <h3 id="detailTitle">Заказ</h3>
+      <button onclick="closeDetail()" style="background:none;border:none;color:#888;cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+    <div class="detail-actions" id="detailActions"></div>
+  </div>
+
+  <script>
+    // ==================== State ====================
+    const state = {
+      orders: [],
+      ws: null,
+      token: null,
+      selectedOrder: null,
+      activeTab: 'orders',
+    };
+
+    const STATUS_MAP = {
+      new: 'Новый',
+      accepted: 'Принят',
+      preparing: 'Готовится',
+      ready: 'Готов',
+      picked_up: 'В пути',
+      delivered: 'Доставлен',
+      cancelled: 'Отменён',
+    };
+
+    // ==================== Auth ====================
+    async function login() {
+      const email = prompt('Email оператора:');
+      const password = prompt('Пароль:');
+      if (!email || !password) return;
+
+      try {
+        const apiUrl = await window.operator.getApiUrl();
+        const res = await fetch(`${apiUrl}/api/auth/staff/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        state.token = data.access_token;
+        connectWebSocket();
+        fetchOrders();
+      } catch {
+        alert('Ошибка входа');
+      }
+    }
+
+    // ==================== WebSocket ====================
+    function connectWebSocket() {
+      const dot = document.getElementById('wsDot');
+      const label = document.getElementById('wsStatus');
+
+      if (!state.token) {
+        dot.className = 'status-dot offline';
+        label.textContent = 'Не авторизован';
+        return;
+      }
+
+      try {
+        state.ws = new WebSocket(`${window.location.origin.replace('http', 'ws')}/ws?token=${state.token}`);
+        
+        state.ws.onopen = () => {
+          dot.className = 'status-dot online';
+          label.textContent = 'Подключено';
+        };
+
+        state.ws.onclose = () => {
+          dot.className = 'status-dot offline';
+          label.textContent = 'Отключено. Переподключение...';
+          setTimeout(connectWebSocket, 5000);
+        };
+
+        state.ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'new-order') {
+              state.orders.unshift(msg.order);
+              renderOrders();
+              updateBadge();
+              window.operator.showNotification('Новый заказ', `Заказ от ${msg.order.customerName} на ${msg.order.total} ₽`);
+            } else if (msg.type === 'order-update') {
+              const idx = state.orders.findIndex(o => o.id === msg.order.id);
+              if (idx >= 0) state.orders[idx] = msg.order;
+              else state.orders.unshift(msg.order);
+              renderOrders();
+              updateBadge();
+            }
+          } catch {}
+        };
+      } catch {
+        dot.className = 'status-dot offline';
+        label.textContent = 'Ошибка подключения';
+        setTimeout(connectWebSocket, 5000);
+      }
+    }
+
+    // ==================== API ====================
+    async function fetchOrders() {
+      if (!state.token) return;
+      try {
+        const apiUrl = await window.operator.getApiUrl();
+        const res = await fetch(`${apiUrl}/api/orders`, {
+          headers: { Authorization: `Bearer ${state.token}` },
+        });
+        state.orders = await res.json();
+        renderOrders();
+        updateBadge();
+      } catch {}
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      if (!state.token) return;
+      try {
+        const apiUrl = await window.operator.getApiUrl();
+        await fetch(`${apiUrl}/api/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${state.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        });
+        await fetchOrders();
+      } catch {}
+    }
+
+    // ==================== Render ====================
+    function renderOrders() {
+      const container = document.getElementById('ordersTab');
+      if (state.orders.length === 0) {
+        container.innerHTML = '<div class="empty">📭 Нет заказов</div>';
+        return;
+      }
+
+      container.innerHTML = state.orders.map(order => `
+        <div class="order-card" onclick="selectOrder('${order.id}')">
+          <div class="row">
+            <span class="order-id">#${order.id.slice(0, 8)}</span>
+            <span class="status-badge status-${order.status}">${STATUS_MAP[order.status] || order.status}</span>
+          </div>
+          <div class="row" style="margin-top:6px">
+            <span class="customer">${order.customerName || '—'}</span>
+            <span class="total">${Number(order.total || 0).toFixed(0)} ₽</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectOrder(orderId) {
+      const order = state.orders.find(o => o.id === orderId);
+      if (!order) return;
+      state.selectedOrder = order;
+
+      const panel = document.getElementById('detailPanel');
+      panel.classList.remove('hidden');
+
+      document.getElementById('detailTitle').textContent = `Заказ #${order.id.slice(0, 8)}`;
+
+      // Body
+      const items = (order.items || []).map(item => `
+        <div class="item-row">
+          <span>${item.name} ×${item.quantity}</span>
+          <span>${(item.price * item.quantity).toFixed(0)} ₽</span>
+        </div>
+      `).join('');
+
+      const address = order.address || {};
+      document.getElementById('detailBody').innerHTML = `
+        <div class="detail-section">
+          <h4>Статус</h4>
+          <div class="detail-row"><span class="status-badge status-${order.status}">${STATUS_MAP[order.status] || order.status}</span></div>
+        </div>
+        <div class="detail-section">
+          <h4>Клиент</h4>
+          <div class="detail-row">👤 ${order.customerName || '—'}</div>
+          <div class="detail-row">📞 ${order.customerPhone || '—'}</div>
+          ${order.comment ? `<div class="detail-row">💬 ${order.comment}</div>` : ''}
+        </div>
+        <div class="detail-section">
+          <h4>Адрес</h4>
+          <div class="detail-row">📍 ${address.street || '—'}, ${address.building || ''}</div>
+          ${address.apartment ? `<div class="detail-row">🚪 Кв ${address.apartment}</div>` : ''}
+          ${address.entrance ? `<div class="detail-row">🏢 Подъезд ${address.entrance}</div>` : ''}
+        </div>
+        <div class="detail-section">
+          <h4>Состав (${order.items ? order.items.length : 0} поз.)</h4>
+          ${items || '<div class="item-row">—</div>'}
+          <div class="item-row" style="margin-top:8px;font-weight:700;color:#d6b06a">
+            <span>Итого</span>
+            <span>${Number(order.total || 0).toFixed(0)} ₽</span>
+          </div>
+        </div>
+      `;
+
+      // Actions
+      const actions = [];
+      const status = order.status;
+
+      if (status === 'new') {
+        actions.push(`<button class="btn-accept" onclick="doAction('${order.id}', 'accepted')">✅ Принять заказ</button>`);
+      } else if (status === 'accepted') {
+        actions.push(`<button class="btn-ready" onclick="doAction('${order.id}', 'preparing')">👨‍🍳 Начать готовку</button>`);
+      } else if (status === 'preparing') {
+        actions.push(`<button class="btn-ready" onclick="doAction('${order.id}', 'ready')">✅ Готов</button>`);
+      }
+
+      if (order.customerPhone) {
+        actions.push(`<button class="btn-call" onclick="callCustomer('${order.customerPhone}')">📞 Позвонить</button>`);
+      }
+
+      document.getElementById('detailActions').innerHTML = actions.join('');
+    }
+
+    function closeDetail() {
+      state.selectedOrder = null;
+      document.getElementById('detailPanel').classList.add('hidden');
+    }
+
+    function doAction(orderId, status) {
+      updateOrderStatus(orderId, status);
+    }
+
+    function callCustomer(phone) {
+      window.operator.showNotification('Звонок', `Набор номера: ${phone}`);
+      // In production this would integrate with LiveKit or SIP
+      alert(`Звонок клиенту: ${phone}\n(Интеграция с LiveKit/SIP)`);
+    }
+
+    function updateBadge() {
+      const badge = document.getElementById('newOrdersBadge');
+      const newCount = state.orders.filter(o => o.status === 'new').length;
+      if (newCount > 0) {
+        badge.textContent = newCount;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // ==================== Tabs ====================
+    function switchTab(tab) {
+      state.activeTab = tab;
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById('ordersTab').style.display = tab === 'orders' ? 'block' : 'none';
+      document.getElementById('callsTab').style.display = tab === 'calls' ? 'block' : 'none';
+      document.getElementById('pageTitle').textContent = tab === 'orders' ? 'Заказы' : 'Звонки';
+    }
+
+    // ==================== Init ====================
+    login();
+  </script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StaffAuthService } from './staff-auth.service';
+import { StaffTwoFactorService } from './staff-two-factor.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
 describe('StaffAuthService', () => {
@@ -17,11 +18,18 @@ describe('StaffAuthService', () => {
     passwordHash: '',
     role: 'ADMIN' as any,
     active: true,
+    loginAttempts: 0,
+    lockedUntil: null,
     createdAt: new Date(),
   };
 
   const mockPrisma = {
+    $transaction: jest.fn().mockImplementation((cb: any) => cb(mockPrisma)),
     staffUser: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    user: {
       findUnique: jest.fn(),
     },
     refreshToken: {
@@ -44,6 +52,14 @@ describe('StaffAuthService', () => {
     }),
   };
 
+  const mockTwoFactorService = {
+    isEnabled: jest.fn().mockResolvedValue(false),
+    verifyCode: jest.fn(),
+    setup: jest.fn(),
+    enable: jest.fn(),
+    disable: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,6 +67,7 @@ describe('StaffAuthService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: StaffTwoFactorService, useValue: mockTwoFactorService },
       ],
     }).compile();
 

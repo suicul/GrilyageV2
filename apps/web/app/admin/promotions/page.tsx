@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useEffect, useState } from 'react';
 
 type Promotion = {
@@ -9,7 +7,8 @@ type Promotion = {
   startsAt: string; endsAt: string; active: boolean;
 };
 
-const EMPTY_PROMO = { title: '', description: '', discountPercent: 0, startsAt: '', endsAt: '', active: true };
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+const EMPTY_PROMO = { title: '', description: '', discountPercent: 0, startsAt: todayStr(), endsAt: todayStr(), active: true };
 
 export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -17,12 +16,11 @@ export default function AdminPromotionsPage() {
   const [editing, setEditing] = useState<Partial<Promotion> | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('staffAccessToken') : null;
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
+  const jsonHeaders = { 'Content-Type': 'application/json' };
 
   const fetchData = () => {
     setLoading(true);
-    fetch('/api/v1/staff/promotions', { headers })
+    fetch('/api/v1/staff/promotions')
       .then((r) => r.json())
       .then((data) => setPromotions(Array.isArray(data) ? data : []))
       .catch(() => setPromotions([]))
@@ -33,15 +31,18 @@ export default function AdminPromotionsPage() {
 
   const save = async () => {
     if (!editing || !editing.title?.trim()) return alert('Введите название акции');
+    if (!editing.startsAt || !editing.endsAt) return alert('Укажите даты начала и окончания');
     setSaving(true);
     try {
-      const body = { ...editing };
-      delete (body as any).id;
+      const body: any = { ...editing };
+      delete body.id;
+      body.startsAt = body.startsAt.slice(0, 10) + 'T00:00:00Z';
+      body.endsAt = body.endsAt.slice(0, 10) + 'T23:59:59Z';
       const isNew = !('id' in editing && editing.id);
       const url = isNew ? '/api/v1/staff/promotions' : `/api/v1/staff/promotions/${editing.id}`;
       const res = await fetch(url, {
         method: isNew ? 'POST' : 'PATCH',
-        headers,
+        headers: jsonHeaders,
         body: JSON.stringify(body),
       });
       if (res.ok) { setEditing(null); fetchData(); }
@@ -52,14 +53,14 @@ export default function AdminPromotionsPage() {
 
   const remove = async (id: string) => {
     if (!confirm('Удалить акцию?')) return;
-    const res = await fetch(`/api/v1/staff/promotions/${id}`, { method: 'DELETE', headers });
+    const res = await fetch(`/api/v1/staff/promotions/${id}`, { method: 'DELETE', headers: jsonHeaders });
     if (res.ok) fetchData();
     else alert('Ошибка удаления');
   };
 
   const toggleActive = async (id: string, current: boolean) => {
     const res = await fetch(`/api/v1/staff/promotions/${id}`, {
-      method: 'PATCH', headers, body: JSON.stringify({ active: !current }),
+      method: 'PATCH', headers: jsonHeaders, body: JSON.stringify({ active: !current }),
     });
     if (res.ok) fetchData();
   };

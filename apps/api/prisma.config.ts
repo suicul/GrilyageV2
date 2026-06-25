@@ -6,4 +6,10 @@ config({ path: '.env' });
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
+  seed: {
+    ts: {
+      command: 'ts-node',
+      args: ['prisma/seed.ts'],
+    },
+  },
 });

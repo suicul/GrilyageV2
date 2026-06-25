@@ -8,6 +8,19 @@ export function formatPrice(kopecks: number): string {
     : `${rublesStr},${String(remainder).padStart(2, '0')} ₽`;
 }
 
+/** Форматирование цены из рублей + копеек: (1500, 0) → "1 500 ₽" */
+export function formatProductPrice(rubles: number, kopecks: number): string {
+  const rublesStr = rubles.toLocaleString('ru-RU');
+  return kopecks === 0
+    ? `${rublesStr} ₽`
+    : `${rublesStr},${String(kopecks).padStart(2, '0')} ₽`;
+}
+
+/** Перевод рублей + копеек в копейки для расчётов */
+export function toKopecks(rubles: number, kopecks: number): number {
+  return rubles * 100 + Math.max(0, Math.min(99, kopecks));
+}
+
 /**
  * Нормализация текста для поиска (как в макете): нижний регистр, ё→е, трим.
  */
