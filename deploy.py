@@ -11,7 +11,7 @@ import time
 import traceback
 from pathlib import Path
 
-from scripts.vps_config import create_ssh_client, VPS_HOST, VPS_USER, VPS_PASSWORD
+from scripts.vps.vps_config import create_ssh_client, VPS_HOST, VPS_USER, VPS_PASSWORD
 import paramiko
 
 SERVER = VPS_HOST
