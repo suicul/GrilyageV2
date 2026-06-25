@@ -44,7 +44,7 @@ export default function AuthModal() {
   const vkContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    return () => { setOtpSent(false); setShowCode(''); };
+    return () => { setOtpSent(false); _setShowCode(''); };
   }, []);
 
   useEffect(() => {
@@ -141,7 +141,7 @@ export default function AuthModal() {
   const resetPhoneState = () => {
     setOtpSent(false);
     setOtpCode('');
-    setShowCode('');
+    _setShowCode('');
     setRegistrationName('');
     setNameError('');
     setError('');

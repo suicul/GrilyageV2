@@ -159,16 +159,12 @@ export default function HomeContentClient({
         setDisplayCategories(mapped);
         if (all.length > 0) {
           setDisplayProducts(all);
-          setProductIdMap(idMap);
         }
         setActiveCategory(mapped[0]?.title || activeCategory);
       })
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   useEffect(() => {
     if (!toast) return;
     const timeout = window.setTimeout(() => setToast(''), 1800);
