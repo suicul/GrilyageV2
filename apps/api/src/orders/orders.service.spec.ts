@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersGateway } from './orders.gateway';
+import { EmailService } from '../email/email.service';
+import { PushService } from '../push/push.service';
 import { BadRequestException } from '@nestjs/common';
 import { DeliveryMode, PaymentMethod, OrderStatus } from '@prisma/client';
 
@@ -22,6 +24,9 @@ describe('OrdersService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+    },
+    $transaction<T>(fn: (tx: any) => T): T {
+      return fn(this);
     },
   };
 
@@ -46,6 +51,8 @@ describe('OrdersService', () => {
         OrdersService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: OrdersGateway, useValue: mockGateway },
+        { provide: EmailService, useValue: { sendOrderConfirmation: jest.fn().mockResolvedValue(undefined) } },
+        { provide: PushService, useValue: { sendToAllStaff: jest.fn().mockResolvedValue(undefined), sendToUser: jest.fn().mockResolvedValue(undefined) } },
       ],
     }).compile();
 

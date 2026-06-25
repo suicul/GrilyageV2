@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersGateway } from '../orders/orders.gateway';
+import { UserOrdersGateway } from '../orders/user-orders.gateway';
+import { ConfigService } from '@nestjs/config';
 
 const mockPrisma = {
   category: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
@@ -10,6 +12,8 @@ const mockPrisma = {
 };
 
 const mockGateway = { notifyOrderUpdated: jest.fn() };
+const mockUserGateway = { notifyCourierLocation: jest.fn() };
+const mockConfig = { get: jest.fn() };
 
 describe('AdminService', () => {
   let service: AdminService;
@@ -20,6 +24,8 @@ describe('AdminService', () => {
         AdminService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: OrdersGateway, useValue: mockGateway },
+        { provide: UserOrdersGateway, useValue: mockUserGateway },
+        { provide: ConfigService, useValue: mockConfig },
       ],
     }).compile();
     service = module.get<AdminService>(AdminService);
