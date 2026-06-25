@@ -77,7 +77,6 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
     mockUser.passwordHash = await bcrypt.hash('password123', 12);

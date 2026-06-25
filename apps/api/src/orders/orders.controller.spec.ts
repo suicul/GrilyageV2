@@ -18,7 +18,6 @@ describe('OrdersController', () => {
     }).compile();
 
     controller = module.get<OrdersController>(OrdersController);
-    service = module.get<OrdersService>(OrdersService);
     jest.clearAllMocks();
   });
 

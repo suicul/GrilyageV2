@@ -18,7 +18,6 @@ describe('CatalogController', () => {
     }).compile();
 
     controller = module.get<CatalogController>(CatalogController);
-    service = module.get<CatalogService>(CatalogService);
     jest.clearAllMocks();
   });
 

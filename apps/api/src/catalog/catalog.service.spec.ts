@@ -29,7 +29,6 @@ describe('CatalogService', () => {
     }).compile();
 
     service = module.get<CatalogService>(CatalogService);
-    prisma = module.get<PrismaService>(PrismaService);
     jest.clearAllMocks();
   });
 
