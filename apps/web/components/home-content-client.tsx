@@ -155,7 +155,7 @@ export default function HomeContentClient({
       .then((data: any) => {
         const cats = Array.isArray(data) ? data : ((data as any)?.categories || []);
         if (cats.length === 0) return;
-        const { categories: mapped, products: all, productIdMap: idMap } = transformApiData(cats);
+        const { categories: mapped, products: all, productIdMap: _idMap } = transformApiData(cats);
         setDisplayCategories(mapped);
         if (all.length > 0) {
           setDisplayProducts(all);
