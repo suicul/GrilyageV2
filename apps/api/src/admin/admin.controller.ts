@@ -152,12 +152,12 @@ export class AdminController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (_req: any, _file: any, cb: any) => {
+        destination: (_req: Express.Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
           const dir = process.env.UPLOADS_DIR || path.resolve(__dirname, '..', '..', '..', 'uploads');
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
           cb(null, dir);
         },
-        filename: (_req: any, file: any, cb: any) => {
+        filename: (_req: Express.Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
           const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
           cb(null, name);
         },

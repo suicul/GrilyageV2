@@ -44,6 +44,7 @@ describe('AdminService', () => {
   describe('order status transitions', () => {
     it('should reject invalid transition', async () => {
       mockPrisma.order.findUnique.mockResolvedValue({ id: 'o1', status: 'NEW' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(service.updateOrderStatus('o1', { status: 'COMPLETED' as any }, 'staff-1')).rejects.toThrow('Невозможен переход');
     });
 
@@ -53,6 +54,7 @@ describe('AdminService', () => {
         id: 'o1', status: 'CONFIRMED',
         items: [], statusLogs: [],
       });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const r = await service.updateOrderStatus('o1', { status: 'CONFIRMED' as any }, 'staff-1');
       expect(r.status).toBe('CONFIRMED');
     });

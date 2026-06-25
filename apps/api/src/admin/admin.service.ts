@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { OrdersGateway } from '../orders/orders.gateway';
 import { UserOrdersGateway } from '../orders/user-orders.gateway';
 import { CreateCategoryDto, UpdateCategoryDto, UpdateOrderStatusDto, CreatePromotionDto, UpdatePromotionDto, CreateStaffUserDto, UpdateStaffUserDto, CreateSubcategoryDto, UpdateSubcategoryDto, CreateProductDto, UpdateProductDto, AssignCourierDto, UpdateCourierLocationDto } from './admin.dto';
-import { StaffRole, TransportType } from '@prisma/client';
+import { StaffRole } from '@prisma/client';
 import { canTransition, toKopecks } from '@grilyage/shared';
 import * as bcrypt from 'bcryptjs';
 import * as fs from 'fs/promises';
@@ -160,7 +160,7 @@ export class AdminService {
   async updateProduct(id: string, dto: UpdateProductDto) {
     const prod = await this.prisma.product.findUnique({ where: { id } });
     if (!prod) throw new NotFoundException('Товар не найден');
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (dto.subcategoryId !== undefined) data.subcategoryId = dto.subcategoryId;
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.slug !== undefined) data.slug = dto.slug;
