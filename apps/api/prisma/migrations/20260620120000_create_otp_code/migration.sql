@@ -9,7 +9,6 @@ CREATE TABLE "OtpCode" (
     "usedAt" TIMESTAMP(3),
     "attempts" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "OtpCode_pkey" PRIMARY KEY ("id")
 );
