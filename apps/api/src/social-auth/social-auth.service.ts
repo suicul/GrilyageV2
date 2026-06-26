@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { SmsService } from '../sms/sms.service';
 import { validateOtpBackoff } from '../common/otp-backoff';
+import { OtpThrottleService, OtpThrottleException } from '../common/otp-throttle.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -16,6 +18,8 @@ export class SocialAuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly emailService: EmailService,
+    private readonly sms: SmsService,
+    private readonly otpThrottle: OtpThrottleService,
   ) {
     const raw = this.config.get<string>('JWT_REFRESH_TTL', '30d');
     this.refreshTtl = this.parseTtl(raw);
@@ -62,6 +66,7 @@ export class SocialAuthService {
 
   async emailOtpLogin(email: string, code: string) {
     if (!email || !code) throw new BadRequestException('Email и код обязательны');
+    this.otpThrottle.checkIdentifier(email);
 
     const otp = await this.prisma.otpCode.findFirst({
       where: { identifier: email, type: 'EMAIL', usedAt: null, expiresAt: { gt: new Date() } },
@@ -69,11 +74,13 @@ export class SocialAuthService {
     if (!otp) throw new BadRequestException('Неверный или истёкший код');
     if (otp.attempts >= 5) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+      this.otpThrottle.recordFailedAttempt(email);
       throw new BadRequestException('Превышено число попыток. Запросите новый код');
     }
     validateOtpBackoff(otp);
     if (otp.code !== code) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+      this.otpThrottle.recordFailedAttempt(email);
       throw new BadRequestException('Неверный или истёкший код');
     }
 
@@ -81,6 +88,8 @@ export class SocialAuthService {
       where: { id: otp.id },
       data: { usedAt: new Date() },
     });
+
+    this.otpThrottle.clearIdentifier(email);
 
     let user = await this.prisma.user.findFirst({ where: { email } });
     if (!user) {
@@ -101,6 +110,7 @@ export class SocialAuthService {
   }
 
   async sendPhoneOtp(phone: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const existing = await this.prisma.otpCode.findFirst({
       where: { identifier: phone, type: 'PHONE', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });
@@ -117,22 +127,26 @@ export class SocialAuthService {
       create: { identifier: phone, code, type: 'PHONE', purpose: 'AUTH', expiresAt },
     });
 
-    this.logger.log(`Phone OTP ${code} generated for ${phone}`);
+    await this.sms.sendOtp(phone, code);
+    this.logger.log(`Phone OTP ${code} sent to ${phone}`);
     return { success: true };
   }
 
   async phoneOtpLogin(phone: string, code: string, name?: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const otp = await this.prisma.otpCode.findFirst({
       where: { identifier: phone, type: 'PHONE', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });
     if (!otp) throw new BadRequestException('Неверный или истёкший код');
     if (otp.attempts >= 5) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Превышено число попыток. Запросите новый код');
     }
     validateOtpBackoff(otp);
     if (otp.code !== code) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Неверный или истёкший код');
     }
 
@@ -140,6 +154,8 @@ export class SocialAuthService {
       where: { id: otp.id },
       data: { usedAt: new Date() },
     });
+
+    this.otpThrottle.clearIdentifier(phone);
 
     let user = await this.prisma.user.findFirst({ where: { phone } });
     if (!user) {
@@ -167,6 +183,7 @@ export class SocialAuthService {
   }
 
   async sendEmailOtp(email: string) {
+    this.otpThrottle.checkIdentifier(email);
     const existing = await this.prisma.otpCode.findFirst({
       where: { identifier: email, type: 'EMAIL', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });

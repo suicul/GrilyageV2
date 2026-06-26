@@ -3,12 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
+import { SmsService } from '../sms/sms.service';
 import { SocialAuthService } from '../social-auth/social-auth.service';
 import { toKopecks, getDeliveryCost, DeliveryMode as SharedDeliveryMode } from '@grilyage/shared';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { MobileGateway } from './mobile.gateway';
 import { validateOtpBackoff } from '../common/otp-backoff';
+import { OtpThrottleService, OtpThrottleException } from '../common/otp-throttle.service';
 
 @Injectable()
 export class MobileService {
@@ -21,6 +23,8 @@ export class MobileService {
     private readonly config: ConfigService,
     private readonly gateway: MobileGateway,
     private readonly email: EmailService,
+    private readonly sms: SmsService,
+    private readonly otpThrottle: OtpThrottleService,
     private readonly social: SocialAuthService,
   ) {
     const raw = this.config.get<string>('JWT_REFRESH_TTL', '30d');
@@ -168,6 +172,7 @@ export class MobileService {
   }
 
   async sendCode(phone: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const existing = await this.prisma.otpCode.findFirst({
       where: { identifier: phone, type: 'PHONE', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });
@@ -189,17 +194,20 @@ export class MobileService {
   }
 
   async completeAuth(phone: string, code: string, name?: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const otp = await this.prisma.otpCode.findFirst({
       where: { identifier: phone, type: 'PHONE', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });
     if (!otp) throw new BadRequestException('Неверный или истёкший код');
     if (otp.attempts >= 5) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Превышено число попыток. Запросите новый код');
     }
     validateOtpBackoff(otp);
     if (otp.code !== code) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Неверный или истёкший код');
     }
 
@@ -207,6 +215,8 @@ export class MobileService {
       where: { id: otp.id },
       data: { usedAt: new Date() },
     });
+
+    this.otpThrottle.clearIdentifier(phone);
 
     let user = await this.prisma.user.findFirst({ where: { phone } });
     if (!user) {
@@ -233,6 +243,7 @@ export class MobileService {
   // — Email OTP —
 
   async sendEmailOtp(email: string) {
+    this.otpThrottle.checkIdentifier(email);
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) throw new BadRequestException('Этот email уже зарегистрирован');
 
@@ -256,17 +267,20 @@ export class MobileService {
   }
 
   async verifyEmailOtp(email: string, code: string) {
+    this.otpThrottle.checkIdentifier(email);
     const otp = await this.prisma.otpCode.findFirst({
       where: { identifier: email, type: 'EMAIL', purpose: 'VERIFY_EMAIL', usedAt: null, expiresAt: { gt: new Date() } },
     });
     if (!otp) throw new BadRequestException('Неверный или истёкший код');
     if (otp.attempts >= 5) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+      this.otpThrottle.recordFailedAttempt(email);
       throw new BadRequestException('Превышено число попыток. Запросите новый код');
     }
     validateOtpBackoff(otp);
     if (otp.code !== code) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+      this.otpThrottle.recordFailedAttempt(email);
       throw new BadRequestException('Неверный или истёкший код');
     }
 
@@ -275,6 +289,7 @@ export class MobileService {
       data: { usedAt: new Date() },
     });
 
+    this.otpThrottle.clearIdentifier(email);
     this.logger.log(`Email OTP verified for ${email}`);
     return { success: true, verified: true };
   }
@@ -282,6 +297,7 @@ export class MobileService {
   // — Phone OTP (fallback) —
 
   async sendPhoneOtp(phone: string, email?: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const code = this.generateOtp();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -296,26 +312,32 @@ export class MobileService {
       data: { identifier: phone, code, type: 'PHONE', purpose: 'AUTH', expiresAt },
     });
 
+    await this.sms.sendOtp(phone, code);
+    this.logger.log(`Phone OTP ${code} sent via SMS to ${phone}`);
+
     if (email) {
       await this.email.sendPhoneOtp(email, code);
-      this.logger.log(`Phone OTP ${code} sent via email to ${email}`);
+      this.logger.log(`Phone OTP ${code} sent via email to ${email} (fallback)`);
     }
 
     return { success: true };
   }
 
   async verifyPhoneOtp(phone: string, code: string) {
+    this.otpThrottle.checkIdentifier(phone);
     const otp = await this.prisma.otpCode.findFirst({
       where: { identifier: phone, type: 'PHONE', purpose: 'AUTH', usedAt: null, expiresAt: { gt: new Date() } },
     });
     if (!otp) throw new BadRequestException('Неверный или истёкший код');
     if (otp.attempts >= 5) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { usedAt: new Date() } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Превышено число попыток. Запросите новый код');
     }
     validateOtpBackoff(otp);
     if (otp.code !== code) {
       await this.prisma.otpCode.update({ where: { id: otp.id }, data: { attempts: { increment: 1 } } });
+      this.otpThrottle.recordFailedAttempt(phone);
       throw new BadRequestException('Неверный или истёкший код');
     }
 
@@ -324,6 +346,7 @@ export class MobileService {
       data: { usedAt: new Date() },
     });
 
+    this.otpThrottle.clearIdentifier(phone);
     return { success: true, verified: true };
   }
 

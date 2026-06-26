@@ -4,6 +4,8 @@ import { MobileGateway } from './mobile.gateway';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { SocialAuthService } from '../social-auth/social-auth.service';
+import { SmsService } from '../sms/sms.service';
+import { OtpThrottleService } from '../common/otp-throttle.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
@@ -26,6 +28,8 @@ describe('MobileService — getMyOrderCourierInfo', () => {
     gateway: { notifyOrderCreated: jest.fn() },
     email: { sendEmailOtp: jest.fn(), sendPhoneOtp: jest.fn() },
     social: {},
+    sms: { sendOtp: jest.fn() },
+    otpThrottle: { checkIdentifier: jest.fn(), recordFailedAttempt: jest.fn(), clearIdentifier: jest.fn() },
   };
 
   const mockJwt = mockOtherDeps.jwtService;
@@ -33,6 +37,8 @@ describe('MobileService — getMyOrderCourierInfo', () => {
   const mockGateway = mockOtherDeps.gateway;
   const mockEmail = mockOtherDeps.email;
   const mockSocial = mockOtherDeps.social;
+  const mockSms = mockOtherDeps.sms;
+  const mockOtpThrottle = mockOtherDeps.otpThrottle;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +50,8 @@ describe('MobileService — getMyOrderCourierInfo', () => {
         { provide: MobileGateway, useValue: mockGateway },
         { provide: EmailService, useValue: mockEmail },
         { provide: SocialAuthService, useValue: mockSocial },
+        { provide: SmsService, useValue: mockSms },
+        { provide: OtpThrottleService, useValue: mockOtpThrottle },
       ],
     }).compile();
 
