@@ -21,7 +21,7 @@ export class CatalogService {
     });
   }
 
-  async findAllCategories() {
+  async findAllCategories(loadAll = false) {
     const cats = await this.prisma.category.findMany({
       where: { active: true },
       orderBy: { sortOrder: 'asc' },
@@ -33,7 +33,7 @@ export class CatalogService {
             products: {
               where: { active: true },
               orderBy: { sortOrder: 'asc' },
-              take: 4,
+              ...(loadAll ? {} : { take: 4 }),
               select: {
                 id: true,
                 name: true,

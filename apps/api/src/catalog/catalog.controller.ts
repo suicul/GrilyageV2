@@ -7,8 +7,8 @@ export class CatalogController {
   constructor(private readonly catalogService: CatalogService) {}
 
   @Get('categories')
-  async findAllCategories() {
-    return this.catalogService.findAllCategories();
+  async findAllCategories(@Query('all') all?: string) {
+    return this.catalogService.findAllCategories(all === 'true');
   }
 
   @Get('products')

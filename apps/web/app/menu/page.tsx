@@ -4,7 +4,7 @@ const API_INTERNAL_URL = process.env.API_INTERNAL_URL ?? 'http://localhost:4000'
 
 async function getCatalog() {
   try {
-    const res = await fetch(`${API_INTERNAL_URL}/api/v1/categories`, {
+    const res = await fetch(`${API_INTERNAL_URL}/api/v1/categories?all=true`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) throw new Error('API error');
