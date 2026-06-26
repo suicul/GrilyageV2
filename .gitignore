@@ -80,3 +80,6 @@ apps/launcher/dist/
 # Prisma
 __pycache__/
 *.pyc
+
+# Playwright snapshots / test artifacts
+.playwright-mcp/

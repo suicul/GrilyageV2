@@ -16,6 +16,8 @@ import { MobileModule } from './mobile/mobile.module';
 import { CallModule } from './call/call.module';
 import { ChatModule } from './chat/chat.module';
 import { PushModule } from './push/push.module';
+import { SmsModule } from './sms/sms.module';
+import { OtpThrottleModule } from './common/otp-throttle.module';
 import { AccessTokenCookieInterceptor } from './common/access-token-cookie.interceptor';
 
 @Module({
@@ -45,6 +47,8 @@ import { AccessTokenCookieInterceptor } from './common/access-token-cookie.inter
     CallModule,
     ChatModule,
     PushModule,
+    SmsModule,
+    OtpThrottleModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
