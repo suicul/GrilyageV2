@@ -9,8 +9,8 @@ final profileProvider = FutureProvider<UserProfile>((ref) async {
   return UserProfile.fromJson(resp.data);
 });
 
-final addressesProvider = FutureProvider<List<Address>>((ref) async {
+final addressesProvider = FutureProvider<List<UserAddress>>((ref) async {
   final api = ref.read(apiClientProvider);
   final resp = await api.get('/addresses');
-  return (resp.data['addresses'] as List?)?.map((e) => Address.fromJson(e)).toList() ?? [];
+  return (resp.data['addresses'] as List?)?.map((e) => UserAddress.fromJson(e)).toList() ?? [];
 });

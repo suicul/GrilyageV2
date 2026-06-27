@@ -1,5 +1,5 @@
 import {
-  Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Req,
+  Controller, Get, Post, Patch, Delete, Param, Body, Query, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Req, Res,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Request } from 'express';
@@ -210,8 +210,23 @@ export class AdminController {
 
   @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
   @Get('orders')
-  listOrders(@Query('status') status?: string, @Query('date') date?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
-    return this.admin.listOrders({ status, date, skip: Number(skip) || 0, take: Number(take) || 50 });
+  listOrders(@Query('status') status?: string, @Query('date') date?: string, @Query('search') search?: string, @Query('skip') skip?: string, @Query('take') take?: string) {
+    return this.admin.listOrders({ status, date, search, skip: Number(skip) || 0, take: Number(take) || 50 });
+  }
+
+  @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)
+  @Get('orders/export')
+  async exportOrders(
+    @Query('status') status?: string,
+    @Query('date') date?: string,
+    @Query('search') search?: string,
+    @Res() res?: any,
+  ) {
+    const csv = await this.admin.exportOrders({ status, date, search });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
+    // Add BOM for Excel to recognise UTF-8
+    res.send('\ufeff' + csv);
   }
 
   @Roles(StaffRole.ADMIN, StaffRole.OPERATOR)

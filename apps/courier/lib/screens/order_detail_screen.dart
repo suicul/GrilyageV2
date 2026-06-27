@@ -216,7 +216,7 @@ class OrderDetailScreen extends ConsumerWidget {
   String _statusLabel(String status) {
     switch (status) {
       case Order.statusNew: return 'Новый';
-      case Order.statusAccepted: return 'Принят';
+      case Order.statusAccepted: return 'Подтверждён';
       case Order.statusPreparing: return 'Готовится';
       case Order.statusReady: return 'Готов';
       case Order.statusPickedUp: return 'В пути';

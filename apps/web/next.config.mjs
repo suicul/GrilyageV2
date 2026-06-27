@@ -7,7 +7,13 @@ const apiUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:4000';
 
 const nextConfig = {
   output: 'standalone',
-  images: {},
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '*.unsplash.com' },
+      { protocol: 'https', hostname: 'images.meme-arsenal.com' },
+    ],
+  },
   async rewrites() {
     return [
       {

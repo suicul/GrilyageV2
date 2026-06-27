@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/orders_provider.dart';
+import 'core/services/push_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/order_detail_screen.dart';
@@ -11,6 +12,9 @@ class CourierApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Initialize push service — listen for FCM token and register after auth
+    ref.watch(pushServiceProvider);
+
     final authStatus = ref.watch(authProvider);
 
     ref.listen<AuthStatus>(authProvider, (prev, next) {
@@ -27,7 +31,17 @@ class CourierApp extends ConsumerWidget {
       }
     });
 
+    // Set up notification tap handler for push navigation
+    ref.listen(pushServiceProvider, (prev, service) {
+      service?.onNotificationTap = (type, orderId) {
+        if (orderId != null && orderId.isNotEmpty) {
+          courierNotificationNavKey.currentState?.pushNamed('/order/$orderId');
+        }
+      };
+    });
+
     return MaterialApp(
+      navigatorKey: courierNotificationNavKey,
       title: 'Грильяж — Курьер',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

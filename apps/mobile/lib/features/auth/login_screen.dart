@@ -62,12 +62,7 @@ class _PhoneInputScreenState extends ConsumerState<PhoneInputScreen> {
               _SocialButton(
                 icon: Icons.telegram, label: 'Telegram',
                 color: const Color(0xFF27A7E7),
-                onTap: () {
-                  Clipboard.setData(const ClipboardData(text: 'Грильяж'));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Telegram скоро будет доступен')),
-                  );
-                },
+                onTap: () => context.push('/auth-telegram'),
               ),
 
               const SizedBox(height: 24),
@@ -344,6 +339,99 @@ class _SocialAuthScreenState extends ConsumerState<SocialAuthScreen> {
     final title = widget.provider == 'vk' ? 'VK ID' : 'Яндекс ID';
     return Scaffold(
       appBar: AppBar(title: Text(title)),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_loading) const Center(child: CircularProgressIndicator()),
+        ],
+      ),
+    );
+  }
+}
+
+/// Telegram Login Widget — loads the official widget in a WebView
+/// and captures the auth callback via JS bridge.
+class TelegramAuthScreen extends ConsumerStatefulWidget {
+  const TelegramAuthScreen({super.key});
+  @override
+  ConsumerState<TelegramAuthScreen> createState() => _TelegramAuthScreenState();
+}
+
+class _TelegramAuthScreenState extends ConsumerState<TelegramAuthScreen> {
+  late final WebViewController _controller;
+  bool _loading = true;
+
+  /// The bot username used in the Telegram Login Widget.
+  /// Replace with your actual bot username (e.g. 'GrilyageBot').
+  /// The bot must be created via @BotFather and have the widget enabled.
+  static const _botUsername = 'PLACEHOLDER_BOT';
+
+  @override
+  void initState() {
+    super.initState();
+
+    final html = '''
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"></head>
+<body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#fff">
+<script async src="https://telegram.org/js/telegram-widget.js?22"
+  data-telegram-login="$_botUsername"
+  data-size="large"
+  data-onauth="onTelegramAuth(user)"
+  data-request-access="write">
+</script>
+<script>
+function onTelegramAuth(user) {
+  TelegramLoginCallback.postMessage(JSON.stringify(user));
+}
+</script>
+</body>
+</html>
+''';
+
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel('TelegramLoginCallback',
+        onMessageReceived: (msg) {
+          if (!mounted) return;
+          try {
+            final data = msg.message;
+            _handleAuthData(data);
+          } catch (_) {}
+        },
+      )
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (_) {
+          if (mounted) setState(() => _loading = false);
+        },
+      ))
+      ..loadHtmlString(html);
+  }
+
+  Future<void> _handleAuthData(String jsonStr) async {
+    try {
+      final api = ref.read(apiClientProvider);
+      final resp = await api.post('/auth/social/telegram', data: jsonStr);
+      await api.setTokens(resp.data['accessToken'], resp.data['refreshToken']);
+      if (!mounted) return;
+      await ref.read(authStateProvider.notifier).fetchProfile();
+      if (!mounted) return;
+      context.go('/');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка авторизации Telegram: $e')),
+        );
+        context.pop();
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Telegram')),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),

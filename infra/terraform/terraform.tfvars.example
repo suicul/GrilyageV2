@@ -1,0 +1,15 @@
+# Grilyage — Terraform example variables
+# Copy to terraform.tfvars and fill in your values
+
+do_token        = "dop_v1_your_token_here"
+cloudflare_token = "your_cloudflare_api_token_here"
+
+ssh_key_ids = [
+  "12345678",  # Your SSH key ID in DigitalOcean
+]
+
+domain = "grilyazh-omsk.ru"
+
+# Optional overrides:
+# droplet_size = "s-2vcpu-4gb-120gb-intel"
+# region       = "fra1"

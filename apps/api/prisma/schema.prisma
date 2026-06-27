@@ -393,3 +393,28 @@ model OrderStatusLog {
 
   @@index([orderId])
 }
+
+// --- Preorder (large / scheduled orders) ---
+
+model Preorder {
+  id            String         @id @default(cuid())
+  userId        String?
+  status        PreorderStatus @default(NEW)
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  desiredDate   DateTime
+  guestCount    Int            @default(1)
+  comment       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status])
+  @@index([desiredDate])
+}
+
+enum PreorderStatus {
+  NEW
+  CONFIRMED
+  CANCELLED
+}

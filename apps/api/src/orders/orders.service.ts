@@ -237,11 +237,10 @@ export class OrdersService {
     const labels: Record<string, string> = {
       NEW: 'Новый',
       CONFIRMED: 'Подтверждён',
-      PREPARING: 'Готовится',
-      READY: 'Готов',
+      COOKING: 'Готовится',
       DELIVERING: 'В пути',
-      DELIVERED: 'Доставлен',
-      COMPLETED: 'Завершён',
+      READY_FOR_PICKUP: 'Готов к выдаче',
+      COMPLETED: 'Доставлен',
       CANCELLED: 'Отменён',
     };
     return labels[status] ?? status;

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, type MouseEvent } from 'react';
 import { useCart } from '@/lib/cart-context';
 import SearchPanel from '@/components/search-panel';
 
@@ -38,6 +38,15 @@ export default function Header({
       onBrandClick();
     }
   }, [pathname, router, onBrandClick]);
+
+  const handleContactsClick = useCallback((e: MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault();
+      const el = document.getElementById('contacts');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+    // else: navigate to /#contacts — Next.js handles scroll on page load
+  }, [pathname]);
 
   return (
     <header className={`header${sticky ? ' is-sticky' : ''}${stickyMode ? ' sticky-mode' : ''}`}>
@@ -83,7 +92,7 @@ export default function Header({
         <nav className="nav" aria-label="Основная навигация">
           <Link href={simple ? '/#menu' : '/menu'} className={isActive('/menu')}>Меню</Link>
           <Link href={simple ? '/about' : '/about'} className={isActive('/about')}>О нас</Link>
-          <Link href={simple ? '/#contacts' : '/#contacts'} className={isActive('/contacts')}>Контакты</Link>
+          <Link href="/#contacts" className={isActive('/contacts')} onClick={handleContactsClick}>Контакты</Link>
           <Link href="/preorder" className={isActive('/preorder')}>Предзаказ</Link>
         </nav>
 

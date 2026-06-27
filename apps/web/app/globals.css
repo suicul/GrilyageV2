@@ -1,3 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #f6f1e7;
+  --color-gold: #d6b06a;
+  --color-wood: #7b6147;
+  --color-text: #2f261f;
+  --color-border: #eadfcf;
+  --color-footer: #2f261f;
+  --color-dark: #20170f;
+}
+
 :root {
   --cream: #f6f1e7;
   --gold: #d6b06a;

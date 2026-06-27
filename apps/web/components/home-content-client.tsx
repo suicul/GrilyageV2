@@ -52,19 +52,19 @@ type ApiCategory = {
 
 const HERO_SLIDES = [
   {
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1800&q=80',
+    image: '/images/hero-1.svg',
     alt: 'Большой стол с красиво поданными блюдами',
   },
   {
-    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1800&q=80',
+    image: '/images/hero-2.svg',
     alt: 'Сервировка с горячими блюдами и зеленью',
   },
   {
-    image: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1800&q=80',
+    image: '/images/hero-3.svg',
     alt: 'Аппетитная подача обеда в ресторане',
   },
   {
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80',
+    image: '/images/hero-4.svg',
     alt: 'Уютный гастро-интерьер с едой на столе',
   },
 ];

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { OrdersGateway } from '../orders/orders.gateway';
 import { UserOrdersGateway } from '../orders/user-orders.gateway';
+import { GeocoderService } from '../common/geocoder.service';
 import { CreateCategoryDto, UpdateCategoryDto, UpdateOrderStatusDto, CreatePromotionDto, UpdatePromotionDto, CreateStaffUserDto, UpdateStaffUserDto, CreateSubcategoryDto, UpdateSubcategoryDto, CreateProductDto, UpdateProductDto, AssignCourierDto, UpdateCourierLocationDto } from './admin.dto';
 import { StaffRole } from '@prisma/client';
 import { canTransition, toKopecks } from '@grilyage/shared';
@@ -30,6 +31,7 @@ export class AdminService {
     private readonly gateway: OrdersGateway,
     private readonly userGateway: UserOrdersGateway,
     private readonly config: ConfigService,
+    private readonly geocoder: GeocoderService,
   ) {}
 
   /* ─── Categories ─── */
@@ -336,11 +338,20 @@ export class AdminService {
   async findNearestCourier(orderId: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('Заказ не найден');
-    // Use café coordinates as default pickup point
-    const pickupLat = 54.9893;
-    const pickupLng = 73.3682;
-    // TODO: geocode order.address to use as delivery destination
-    return this.findNearestAvailableCourier(pickupLat, pickupLng);
+
+    // Try to geocode the delivery address; fall back to café coordinates
+    let lat = 54.9893;
+    let lng = 73.3682;
+
+    if (order.address) {
+      const result = await this.geocoder.geocode(order.address);
+      if (result) {
+        lat = result.latitude;
+        lng = result.longitude;
+      }
+    }
+
+    return this.findNearestAvailableCourier(lat, lng);
   }
 
   async findNearestAvailableCourier(deliveryLat: number, deliveryLng: number, transportType?: string) {
@@ -368,11 +379,25 @@ export class AdminService {
   }
 
   /* ─── Orders ─── */
-  async listOrders(query: { status?: string; date?: string; skip?: number; take?: number }) {
+  async listOrders(query: { status?: string; date?: string; search?: string; skip?: number; take?: number }) {
     const where: any = {};
 
     if (query.status) {
       where.status = query.status;
+    }
+
+    if (query.search) {
+      const term = query.search.trim();
+      // Search by order number (exact), customer name (partial), or phone (partial)
+      where.OR = [
+        { customerName: { contains: term, mode: 'insensitive' } },
+        { customerPhone: { contains: term, mode: 'insensitive' } },
+      ];
+      // If the search term is numeric, also try matching the order number
+      const num = Number(term);
+      if (!Number.isNaN(num)) {
+        where.OR.push({ number: num });
+      }
     }
 
     if (query.date) {
@@ -486,6 +511,68 @@ export class AdminService {
       weeklyTrend,
       recentOrders,
     };
+  }
+
+  /* ─── CSV Export ─── */
+  async exportOrders(query: { status?: string; date?: string; search?: string }) {
+    const where: any = {};
+
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    if (query.search) {
+      const term = query.search.trim();
+      where.OR = [
+        { customerName: { contains: term, mode: 'insensitive' } },
+        { customerPhone: { contains: term, mode: 'insensitive' } },
+      ];
+      const num = Number(term);
+      if (!Number.isNaN(num)) {
+        where.OR.push({ number: num });
+      }
+    }
+
+    if (query.date) {
+      const date = new Date(query.date);
+      if (!Number.isNaN(date.getTime())) {
+        const next = new Date(date);
+        next.setDate(next.getDate() + 1);
+        where.createdAt = { gte: date, lt: next };
+      }
+    }
+
+    const orders = await this.prisma.order.findMany({
+      where,
+      include: { items: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const statusLabels: Record<string, string> = {
+      NEW: 'Новый', CONFIRMED: 'Подтверждён', COOKING: 'Готовится',
+      DELIVERING: 'В пути', READY_FOR_PICKUP: 'Готов к выдаче',
+      COMPLETED: 'Выполнен', CANCELLED: 'Отменён',
+    };
+
+    const header = 'Номер;Статус;Клиент;Телефон;Способ;Оплата;Сумма;Товары;Адрес;Комментарий;Время';
+    const rows = orders.map((o) => {
+      const items = o.items.map((i) => `${i.nameSnapshot} x${i.qty}`).join(', ');
+      return [
+        o.number,
+        statusLabels[o.status] ?? o.status,
+        o.customerName,
+        o.customerPhone,
+        o.deliveryMode === 'DELIVERY' ? 'Доставка' : 'Самовывоз',
+        o.paymentMethod === 'CASH' ? 'Наличные' : 'Картой',
+        (o.total / 100).toFixed(2),
+        `"${items}"`,
+        o.address ?? '',
+        o.comment ?? '',
+        o.createdAt.toISOString(),
+      ].join(';');
+    });
+
+    return [header, ...rows].join('\n');
   }
 
   async updateOrderStatus(id: string, dto: UpdateOrderStatusDto, staffUserId: string) {

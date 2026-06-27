@@ -1,0 +1,139 @@
+# Dev overrides for docker-compose.yml
+# Auto-loaded by `docker compose up`
+# Usage: docker compose -p grilyage up -d
+#
+# Differences from production:
+# - Mailpit instead of SMTP (catch-all email for testing)
+# - Exposed postgres port for local DB tools
+# - Source code bind mounts for hot reload
+# - Reduced resource limits for local dev
+# - No certbot (use plain HTTP locally)
+
+name: grilyage-dev
+
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+
+  api:
+    ports:
+      - "4000:4000"
+    volumes:
+      - ../apps/api/src:/app/apps/api/src:ro
+    environment:
+      NODE_ENV: development
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      SMTP_IGNORE_TLS: "true"
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.75'
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      start_period: 10s
+
+  web:
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../apps/web/src:/app/apps/web/src:ro
+      - ../apps/web/public:/app/apps/web/public:ro
+    build:
+      args:
+        NEXT_PUBLIC_ENV: development
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.75'
+        reservations:
+          memory: 256M
+
+  nginx:
+    ports:
+      - "80:80"
+      # No 443 in dev
+    volumes:
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.25'
+        reservations:
+          memory: 32M
+
+  smtp:
+    profiles:
+      - never  # Disabled in dev — use Mailpit instead
+
+  certbot:
+    profiles:
+      - never  # Disabled in dev — no SSL
+
+  # ─── Dev Email Catcher ──────────────────────────────────────
+  mailpit:
+    image: dockerhub.timeweb.cloud/library/axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.25'
+
+  # ─── Monitoring (lightweight for dev) ───────────────────────
+  loki:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  prometheus:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  grafana:
+    ports:
+      - "3001:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  # ─── LiveKit (reduced resources) ────────────────────────────
+  livekit:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+
+  livekit-agent:
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'

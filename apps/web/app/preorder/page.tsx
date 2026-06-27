@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import AuthModal from '@/components/auth-modal';
 import Header from '@/components/header';
 import { useAuth } from '@/lib/auth-context';
@@ -9,11 +9,59 @@ export default function PreorderPage() {
   const { setAuthModalOpen } = useAuth();
   const [sticky, setSticky] = useState(true);
 
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [date, setDate] = useState('');
+  const [guestCount, setGuestCount] = useState(1);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const onScroll = () => setSticky(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/v1/preorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: name,
+          customerPhone: phone,
+          customerEmail: email || undefined,
+          desiredDate: date,
+          guestCount,
+          comment: comment || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const msg = await res.text().catch(() => '');
+        throw new Error(msg || 'Ошибка при отправке');
+      }
+
+      setSuccess(true);
+      setName('');
+      setPhone('');
+      setEmail('');
+      setDate('');
+      setGuestCount(1);
+      setComment('');
+    } catch (err: any) {
+      setError(err.message ?? 'Что-то пошло не так');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="page">
@@ -23,15 +71,60 @@ export default function PreorderPage() {
         <div className="hero-content">
           <div className="hero-copy">
             <h1>Предзаказ</h1>
-            <p>Форма предзаказа для больших заказов и праздников подключается следующим этапом.</p>
+            <p>Закажите заранее — для больших компаний, праздников и мероприятий. Мы свяжемся с вами для уточнения деталей.</p>
           </div>
         </div>
       </section>
 
-      <section style={{ margin: '32px 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        <div className="preorder-ghost">
-          <span>Форма предзаказа будет здесь</span>
-        </div>
+      <section style={{ margin: '32px auto', maxWidth: 800, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {success ? (
+          <div className="preorder-ghost" style={{ gridColumn: '1 / -1', padding: '48px 24px', textAlign: 'center' }}>
+            <h2 style={{ color: 'var(--gold)', marginBottom: 12 }}>✓ Заявка отправлена</h2>
+            <p>Мы свяжемся с вами в ближайшее время для подтверждения предзаказа.</p>
+            <button className="admin-btn admin-btn-sm" style={{ marginTop: 16 }} onClick={() => setSuccess(false)}>
+              Отправить ещё
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Имя *</label>
+              <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Телефон *</label>
+              <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Желаемая дата и время *</label>
+              <input type="datetime-local" required value={date} onChange={(e) => setDate(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Количество гостей</label>
+              <input type="number" min={1} value={guestCount} onChange={(e) => setGuestCount(Math.max(1, Number(e.target.value)))}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15 }} />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: 4, fontSize: 13, color: '#888' }}>Комментарий</label>
+              <textarea rows={3} value={comment} onChange={(e) => setComment(e.target.value)}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 15, resize: 'vertical' }} />
+            </div>
+            {error && <p style={{ color: '#e74c3c', fontSize: 13 }}>{error}</p>}
+            <button type="submit" disabled={submitting} className="admin-btn"
+              style={{ padding: '12px 24px', fontSize: 16, background: 'var(--gold)', color: '#fff', border: 'none', borderRadius: 8 }}>
+              {submitting ? 'Отправка...' : 'Отправить заявку'}
+            </button>
+          </form>
+        )}
+
         <div>
           <div className="about-card" style={{ marginBottom: 16 }}>
             <h3>Быстрые ссылки</h3>
@@ -39,6 +132,14 @@ export default function PreorderPage() {
               <li><a href="/menu" style={{ color: 'var(--gold)', fontWeight: 700 }}>Меню и каталог</a></li>
               <li><a href="/about" style={{ color: 'var(--gold)', fontWeight: 700 }}>О производстве</a></li>
               <li><a href="/cabinet" style={{ color: 'var(--gold)', fontWeight: 700 }}>Личный кабинет</a></li>
+            </ul>
+          </div>
+          <div className="about-card">
+            <h3>Почему предзаказ?</h3>
+            <ul style={{ paddingLeft: 18, lineHeight: 2, color: '#888', fontSize: 14 }}>
+              <li>Уверенность, что всё будет готово к вашему времени</li>
+              <li>Индивидуальные условия для больших заказов</li>
+              <li>Приоритетная обработка заявки</li>
             </ul>
           </div>
         </div>

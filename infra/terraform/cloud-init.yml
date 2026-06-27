@@ -1,0 +1,48 @@
+#cloud-config
+# Grilyage Delivery — VPS bootstrap via cloud-init
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose-v2
+  - ufw
+  - fail2ban
+
+runcmd:
+  # ─── Docker ──────────────────────────────────────────────
+  - systemctl enable docker
+  - systemctl start docker
+  - usermod -aG docker root
+
+  # ─── Firewall ────────────────────────────────────────────
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+
+  # ─── Fail2ban (SSH protection) ──────────────────────────
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+
+  # ─── Project directory ──────────────────────────────────
+  - mkdir -p ${project_dir}
+  - mkdir -p ${project_dir}/infra
+  - mkdir -p ${project_dir}/scripts
+
+  # ─── Swap (1 GB for smaller droplets) ───────────────────
+  - fallocate -l 1G /swapfile 2>/dev/null || true
+  - chmod 600 /swapfile
+  - mkswap /swapfile 2>/dev/null || true
+  - swapon /swapfile 2>/dev/null || true
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab 2>/dev/null || true
+
+  # ─── Logging ────────────────────────────────────────────
+  - mkdir -p /var/log/grilyage
+  - touch /var/log/grilyage-deploy.log
+  - chmod 644 /var/log/grilyage-deploy.log
+
+final_message: "VPS bootstrap complete. Upload project via deploy.py or CI."

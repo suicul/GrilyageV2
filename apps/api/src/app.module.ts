@@ -18,6 +18,8 @@ import { ChatModule } from './chat/chat.module';
 import { PushModule } from './push/push.module';
 import { SmsModule } from './sms/sms.module';
 import { OtpThrottleModule } from './common/otp-throttle.module';
+import { TasksModule } from './tasks/tasks.module';
+import { PreorderModule } from './preorder/preorder.module';
 import { AccessTokenCookieInterceptor } from './common/access-token-cookie.interceptor';
 
 @Module({
@@ -49,6 +51,8 @@ import { AccessTokenCookieInterceptor } from './common/access-token-cookie.inter
     PushModule,
     SmsModule,
     OtpThrottleModule,
+    TasksModule,
+    PreorderModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

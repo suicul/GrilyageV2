@@ -68,25 +68,11 @@ export class CatalogService {
     const where: any = { active: true };
 
     if (query.subcategory) {
-      const sub = await this.prisma.subcategory.findFirst({
-        where: { slug: query.subcategory },
-      });
-      if (sub) {
-        where.subcategoryId = sub.id;
-      }
+      // Single-query join via Prisma relation filter — avoids a separate subcategory lookup.
+      where.subcategory = { slug: query.subcategory };
     } else if (query.category) {
-      const cat = await this.prisma.category.findUnique({
-        where: { slug: query.category },
-      });
-      if (cat) {
-        const subIds = (
-          await this.prisma.subcategory.findMany({
-            where: { categoryId: cat.id },
-            select: { id: true },
-          })
-        ).map((s) => s.id);
-        where.subcategoryId = { in: subIds };
-      }
+      // Same: Prisma flattens this into a JOIN, no extra query needed.
+      where.subcategory = { category: { slug: query.category } };
     }
 
     if (query.search) {

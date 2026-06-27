@@ -1,4 +1,4 @@
-import AboutPageClient from '@/components/about-page-client';
+import PublicShell from '@/components/public-shell';
 
 const sectionStyle: React.CSSProperties = {
   padding: 24,
@@ -10,8 +10,8 @@ const sectionStyle: React.CSSProperties = {
 
 export default function AboutPage() {
   return (
-    <main className="page">
-      <AboutPageClient />
+    <PublicShell headerStickyMode>
+      <main className="page">
 
       <section className="hero" style={{
         marginTop: 18,
@@ -179,5 +179,6 @@ export default function AboutPage() {
       </footer>
 
     </main>
+    </PublicShell>
   );
 }

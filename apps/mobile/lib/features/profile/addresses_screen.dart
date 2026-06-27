@@ -49,7 +49,7 @@ class _AddressesScreenState extends ConsumerState<AddressesScreen> {
     }
   }
 
-  Future<void> _deleteAddress(Address addr) async {
+  Future<void> _deleteAddress(UserAddress addr) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

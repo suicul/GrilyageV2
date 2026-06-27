@@ -1,16 +1,10 @@
-'use client';
-
 import Link from 'next/link';
-import AuthModal from '@/components/auth-modal';
-import { useAuth } from '@/lib/auth-context';
-import Header from '@/components/header';
+import PublicShell from '@/components/public-shell';
 
 export default function TermsPage() {
-  const { authModalOpen, setAuthModalOpen } = useAuth();
-
   return (
-    <div className="page">
-      <Header simple onAuthOpen={() => setAuthModalOpen((v) => !v)} />
+    <PublicShell headerSimple>
+      <div className="page">
 
       <main style={{ maxWidth: 800, margin: '100px auto 40px', padding: '0 20px', color: 'var(--text)' }}>
         <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 24, color: 'var(--text)' }}>Условия использования</h1>
@@ -100,7 +94,7 @@ export default function TermsPage() {
         </div>
       </footer>
 
-      {authModalOpen && <AuthModal />}
     </div>
+    </PublicShell>
   );
 }

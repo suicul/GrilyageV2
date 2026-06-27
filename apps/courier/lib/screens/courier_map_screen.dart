@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -28,17 +30,43 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
   double? _courierLng;
   StreamSubscription<Position>? _positionSubscription;
   bool _locationError = false;
+  Uint8List? _cafeIconBytes;
+  Uint8List? _courierIconBytes;
 
   @override
   void initState() {
     super.initState();
     _startGpsTracking();
+    _loadMarkerIcons();
   }
 
   @override
   void dispose() {
     _positionSubscription?.cancel();
+    _mapController = null;
     super.dispose();
+  }
+
+  Future<Uint8List> _generateColoredCircle(Color color, int size) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.drawCircle(
+      Offset(size / 2, size / 2),
+      size / 2,
+      Paint()..color = color,
+    );
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size, size);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData!.buffer.asUint8List();
+  }
+
+  Future<void> _loadMarkerIcons() async {
+    final cafeBytes = _generateColoredCircle(const Color(0xFFD6B06A), 24);
+    final courierBytes = _generateColoredCircle(const Color(0xFF1565C0), 20);
+    _cafeIconBytes = await cafeBytes;
+    _courierIconBytes = await courierBytes;
+    if (mounted) setState(() {});
   }
 
   Future<void> _startGpsTracking() async {
@@ -197,7 +225,7 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
                     ),
                   ),
                   FilledButton.icon(
-                    onPressed: _openInNavigator,
+                    onPressed: () => _openInNavigator(order),
                     icon: const Icon(Icons.navigation, size: 18),
                     label: const Text('Проложить'),
                     style: FilledButton.styleFrom(
@@ -214,34 +242,34 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
   }
 
   List<MapObject> _buildMapObjects(Order order) {
-    final objects = <MapObject>[
-      // Cafe marker — gold pin
-      PlacemarkMapObject(
-        mapId: _cafeMarkerId,
-        point: Point(latitude: _cafeLat, longitude: _cafeLng),
-        opacity: 1,
-        icon: PlacemarkIcon.single(
-          PlacemarkIconStyle(
-            image: BitmapDescriptor.fromColoredRectangle(
-              width: 24,
-              height: 24,
-              color: const Color(0xFFD6B06A),
+    final objects = <MapObject>[];
+
+    // Cafe marker — gold pin
+    if (_cafeIconBytes != null) {
+      objects.add(
+        PlacemarkMapObject(
+          mapId: _cafeMarkerId,
+          point: Point(latitude: _cafeLat, longitude: _cafeLng),
+          opacity: 1,
+          icon: PlacemarkIcon.single(
+            PlacemarkIconStyle(
+              image: BitmapDescriptor.fromBytes(_cafeIconBytes!),
+              scale: 1,
             ),
-            scale: 1,
+          ),
+          text: const PlacemarkText(
+            text: 'Грильяж',
+            style: PlacemarkTextStyle(
+              size: 14,
+              color: Color(0xFFD6B06A),
+            ),
           ),
         ),
-        text: const PlacemarkText(
-          text: 'Грильяж',
-          style: PlacemarkTextStyle(
-            size: 14,
-            color: Color(0xFFD6B06A),
-          ),
-        ),
-      ),
-    ];
+      );
+    }
 
     // Courier marker (if location available) — blue dot
-    if (_courierLat != null && _courierLng != null) {
+    if (_courierLat != null && _courierLng != null && _courierIconBytes != null) {
       objects.add(
         PlacemarkMapObject(
           mapId: _courierMarkerId,
@@ -249,11 +277,7 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
           opacity: 1,
           icon: PlacemarkIcon.single(
             PlacemarkIconStyle(
-              image: BitmapDescriptor.fromColoredRectangle(
-                width: 20,
-                height: 20,
-                color: const Color(0xFF1565C0),
-              ),
+              image: BitmapDescriptor.fromBytes(_courierIconBytes!),
               scale: 1,
             ),
           ),
@@ -296,7 +320,7 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
     );
   }
 
-  Future<void> _openInNavigator() async {
+  Future<void> _openInNavigator(Order order) async {
     final address = '${order.address.street}, ${order.address.building}';
     final addressEncoded = Uri.encodeComponent(address);
 
@@ -324,11 +348,6 @@ class _CourierMapScreenState extends ConsumerState<CourierMapScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _mapController = null;
-    super.dispose();
-  }
 }
 
 

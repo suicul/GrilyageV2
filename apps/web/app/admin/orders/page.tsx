@@ -34,11 +34,13 @@ export default function AdminOrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const fetchOrders = useCallback(async (status?: string, pageNum = 0) => {
+  const fetchOrders = useCallback(async (status?: string, pageNum = 0, search?: string) => {
     setLoading(true);
     const params = new URLSearchParams();
     if (status) params.set('status', status);
+    if (search) params.set('search', search);
     params.set('skip', String(pageNum * PAGE_SIZE));
     params.set('take', String(PAGE_SIZE));
     try {
@@ -59,7 +61,18 @@ export default function AdminOrdersPage() {
   const goToPage = (p: number) => {
     if (p < 0 || p >= totalPages) return;
     setPage(p);
-    fetchOrders(filterStatus, p);
+    fetchOrders(filterStatus, p, searchQuery);
+  };
+
+  const handleSearch = () => {
+    setPage(0);
+    fetchOrders(filterStatus, 0, searchQuery);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setPage(0);
+    fetchOrders(filterStatus, 0);
   };
 
   const updateStatus = async (orderId: string, newStatus: string) => {
@@ -86,6 +99,31 @@ export default function AdminOrdersPage() {
             {STATUS_LABELS[s]}
           </button>
         ))}
+      </div>
+
+      {/* Search + Export */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Поиск по №, имени или телефону..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+          style={{ flex: 1, maxWidth: 360, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', fontSize: 14 }}
+        />
+        <button className="admin-btn admin-btn-sm" onClick={handleSearch}>Найти</button>
+        {searchQuery && (
+          <button className="admin-btn admin-btn-sm" onClick={clearSearch}>Сбросить</button>
+        )}
+        <span style={{ flex: 1 }} />
+        <a
+          className="admin-btn admin-btn-sm"
+          href={`/api/v1/staff/orders/export?status=${filterStatus}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+          download
+          style={{ textDecoration: 'none' }}
+        >
+          Экспорт CSV
+        </a>
       </div>
 
       {loading ? <p style={{ color: '#888' }}>Загрузка...</p> : (

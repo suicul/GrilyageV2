@@ -13,6 +13,7 @@ import 'features/catalog/product_screen.dart';
 import 'features/promotions/promotions_screen.dart';
 import 'features/cart/cart_screen.dart';
 import 'features/cart/checkout_screen.dart';
+import 'features/cart/providers.dart';
 import 'features/profile/profile_screen.dart';
 import 'features/profile/addresses_screen.dart';
 import 'features/profile/about_screen.dart';
@@ -68,6 +69,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/auth-phone-otp',
         builder: (_, __) => const PhoneOtpScreen(),
+        parentNavigatorKey: _rootNavigatorKey,
+      ),
+      GoRoute(
+        path: '/auth-telegram',
+        builder: (_, __) => const TelegramAuthScreen(),
         parentNavigatorKey: _rootNavigatorKey,
       ),
       GoRoute(

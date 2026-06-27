@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="800" viewBox="0 0 1800 800">
+  <defs>
+    <linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A0F0A;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#3D2419;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2C1810;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glow2" cx="60%" cy="40%" r="50%">
+      <stop offset="0%" style="stop-color:#8B6914;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#8B6914;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1800" height="800" fill="url(#g2)"/>
+  <rect width="1800" height="800" fill="url(#glow2)"/>
+  <!-- Decorative pattern -->
+  <g opacity="0.06">
+    <path d="M0,400 Q300,300 600,400 T1200,400 T1800,400" fill="none" stroke="#FFF" stroke-width="1"/>
+    <path d="M0,450 Q300,350 600,450 T1200,450 T1800,450" fill="none" stroke="#FFF" stroke-width="0.5"/>
+  </g>
+  <!-- Subtle shapes -->
+  <rect x="150" y="550" width="60" height="60" rx="5" fill="#D4A853" opacity="0.08"/>
+  <rect x="1590" y="150" width="40" height="40" rx="20" fill="#D4A853" opacity="0.06"/>
+</svg>
