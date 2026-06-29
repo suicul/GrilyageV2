@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Грильяж использует вашу геолокацию, чтобы показать кафе на карте и проложить маршрут доставки.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Грильяж использует вашу геолокацию для отслеживания курьера и маршрута доставки.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Грильяж запрашивает доступ к камере для загрузки фотографии профиля.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Грильяж использует микрофон для голосовых звонков оператору.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Грильяж запрашивает доступ к галерее для выбора фотографии профиля.</string>
 </dict>
 </plist>

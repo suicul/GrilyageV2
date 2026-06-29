@@ -3,7 +3,7 @@ name: Deploy
 on:
   workflow_run:
     workflows: ["CI"]
-    branches: [main]
+    branches: [main, master]
     types: [completed]
 
 concurrency:
@@ -45,6 +45,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=/tmp/web-image.tar
+          build-args: |
+            NEXT_PUBLIC_VK_CLIENT_ID=${{ secrets.NEXT_PUBLIC_VK_CLIENT_ID }}
+            NEXT_PUBLIC_YANDEX_CLIENT_ID=${{ secrets.NEXT_PUBLIC_YANDEX_CLIENT_ID }}
+            NEXT_PUBLIC_YANDEX_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_YANDEX_MAPS_API_KEY }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
 
       - name: Compress images
         run: |
@@ -79,9 +84,14 @@ jobs:
             # Copy compose file
             cp deploy/docker-compose.prod.yml infra/docker-compose.prod.yml
 
-            # Pull latest env from secrets (already on VPS)
+            # Run database migrations BEFORE restarting services
+            docker compose -f infra/docker-compose.prod.yml run --rm --no-deps api npx prisma migrate deploy
+
             # Restart services
             docker compose -f infra/docker-compose.prod.yml up -d --no-deps --build api web
+
+            # Reload nginx to pick up any config changes
+            docker compose -f infra/docker-compose.prod.yml exec -T nginx nginx -s reload || true
 
             # Cleanup old images
             docker image prune -f
@@ -89,5 +99,8 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 15
-          curl -f --retry 5 --retry-delay 10 https://grillyage.ru/ || exit 1
+          sleep 20
+          # Check API health endpoint (not just the web root)
+          curl -f --retry 6 --retry-delay 10 https://grillyage.ru/health || exit 1
+          # Check that web is up
+          curl -f --retry 3 --retry-delay 5 https://grillyage.ru/ || exit 1

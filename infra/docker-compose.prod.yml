@@ -130,6 +130,8 @@ services:
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
       LIVEKIT_HOST: ${LIVEKIT_HOST:-livekit}
       FCM_CREDENTIALS_PATH: ${FCM_CREDENTIALS_PATH}
+      NEXT_PUBLIC_YANDEX_CLIENT_ID: ${NEXT_PUBLIC_YANDEX_CLIENT_ID}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET}
     volumes:
       - ${FCM_CREDENTIALS_SOURCE:-./firebase-credentials.json}:${FCM_CREDENTIALS_PATH:-/app/firebase-credentials.json}:ro
     ports:
@@ -143,6 +145,8 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
+      args:
+        - NEXT_PUBLIC_YANDEX_CLIENT_ID=${NEXT_PUBLIC_YANDEX_CLIENT_ID}
     restart: unless-stopped
     labels:
       logging: promtail

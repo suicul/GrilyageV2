@@ -112,10 +112,16 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     await room?.localParticipant?.setMicrophoneEnabled(_microphoneEnabled);
   }
 
-  void _toggleSpeaker() {
+  void _toggleSpeaker() async {
     setState(() => _speakerEnabled = !_speakerEnabled);
-    // On mobile, this switches between earpiece and speaker
-    // LiveKit handles this via the audio output route
+    // Switch audio output route via LiveKit: speakerphone vs earpiece
+    final room = ref.read(callProvider).room;
+    await room?.localParticipant?.setMicrophoneEnabled(true);
+    try {
+      await Hardware.instance.setSpeakerphoneOn(_speakerEnabled);
+    } catch (_) {
+      // Fallback: some Android devices ignore the call; LiveKit still routes via default
+    }
   }
 }
 
