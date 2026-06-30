@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { SmsService } from '../sms/sms.service';
 import { validateOtpBackoff } from '../common/otp-backoff';
-import { OtpThrottleService, OtpThrottleException } from '../common/otp-throttle.service';
+import { OtpThrottleService } from '../common/otp-throttle.service';
 import * as crypto from 'crypto';
 
 @Injectable()

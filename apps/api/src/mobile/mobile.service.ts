@@ -10,7 +10,7 @@ import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 import { MobileGateway } from './mobile.gateway';
 import { validateOtpBackoff } from '../common/otp-backoff';
-import { OtpThrottleService, OtpThrottleException } from '../common/otp-throttle.service';
+import { OtpThrottleService } from '../common/otp-throttle.service';
 
 @Injectable()
 export class MobileService {
