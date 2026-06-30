@@ -5,6 +5,8 @@ export interface EnvVars {
 interface RequiredEnv {
   name: string;
   description: string;
+  /** If true, only validated in production (NODE_ENV=production) */
+  prodOnly?: boolean;
 }
 
 const REQUIRED_VARS: RequiredEnv[] = [
@@ -17,16 +19,21 @@ const REQUIRED_VARS: RequiredEnv[] = [
   { name: 'SMTP_USER', description: 'SMTP authentication username' },
   { name: 'SMTP_PASSWORD', description: 'SMTP authentication password' },
   { name: 'MAIL_FROM', description: 'Sender email address' },
-  { name: 'LIVEKIT_API_KEY', description: 'LiveKit API key for WebRTC' },
-  { name: 'LIVEKIT_API_SECRET', description: 'LiveKit API secret for WebRTC' },
-  { name: 'LIVEKIT_HOST', description: 'LiveKit server hostname' },
+  // LiveKit — required only in production (in dev the calls module degrades gracefully)
+  { name: 'LIVEKIT_API_KEY', description: 'LiveKit API key for WebRTC', prodOnly: true },
+  { name: 'LIVEKIT_API_SECRET', description: 'LiveKit API secret for WebRTC', prodOnly: true },
+  { name: 'LIVEKIT_HOST', description: 'LiveKit server hostname', prodOnly: true },
 ];
 
 export function validateEnvironment(env: EnvVars): void {
   const missing: string[] = [];
   const empty: string[] = [];
+  const isProduction = env.NODE_ENV === 'production';
 
   for (const required of REQUIRED_VARS) {
+    // Skip prodOnly vars in development
+    if (required.prodOnly && !isProduction) continue;
+
     const value = env[required.name];
     if (value === undefined) {
       missing.push(required.name);

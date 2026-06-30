@@ -3,17 +3,32 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 import { AppModule } from './app.module';
 import { setupSwagger } from './swagger.setup';
 import { validateEnvironment } from './env-validation';
 import { StructuredLogger } from './logger/logger.service';
 import * as Sentry from '@sentry/node';
 import * as express from 'express';
-import * as path from 'path';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
+
+  // 0. Pre-load .env files before validation (ConfigModule loads them again later for ConfigService)
+  const envFiles = [
+    path.resolve(process.cwd(), '../../.env'), // root workspace .env
+    path.resolve(process.cwd(), '.env'),        // api-specific overrides
+  ];
+  for (const file of envFiles) {
+    const result = dotenv.config({ path: file, override: false });
+    if (result.error) {
+      // ENOENT (file not found) is fine — the file may not exist
+      if (result.error.message?.includes('ENOENT')) continue;
+      logger.warn(`Could not load ${file}: ${result.error.message}`);
+    }
+  }
 
   // 1. Validate environment before anything else
   try {
